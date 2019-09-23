@@ -38,6 +38,7 @@ public static void main(String args[]){
 	
 	System.out.println(coinChangeCount(10,new int[]{2,3,5,6}));
 	System.out.println(coinChangeCount(4,new int[]{1,2,3}));
+	System.out.println(coinChangeCount(1000,new int[]{1,2,5,10}));
 	
 	
 }
