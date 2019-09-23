@@ -41,8 +41,7 @@ public static int gcdSum(int a[],int memo[][],int k,int i,int j)
 		int memo[][]=new int[j+1][j+1];
 		int k=4;
 		for(int i=0;i<j-(k-2);i++)
-		gcdSum(a,memo,k,i,j);
-		
+		gcdSum(a,memo,k,i,j);		
 		Arrays.stream(memo).forEach(x->System.out.println(Arrays.toString(x)));
 		
 		//System.out.println(Arrays.toString(memo));
