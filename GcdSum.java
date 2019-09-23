@@ -15,22 +15,22 @@ public class GcdSum {
 	
 	
 
-public static int gcdSum(int a[],int memo[][],int k,int i,int j)
+public static int gcdSum(int a[],int memo[],int k,int i,int j)
 {
 	if(k<=1)
 		return 0;
-	if(j-i<=k)
+	if(j-i<k)
 		return 0;
-	if(memo[i][j]!=0)
-		return memo[i][j];
+	if(memo[i]!=0)
+		return memo[i];
 	int max=0;
 	 for(int x=i+1;x<j-(k-2);x++){
-		 memo[i][x]=gcd(a[i],a[x]);
+		 int p=gcd(a[i],a[x]);
 		 System.out.println(x);
-	     memo[x+1][j]=gcdSum(a,memo,k-2,x+1,j);
-		 max=Math.max(max,memo[i][x]+memo[x+1][j]);
+	     memo[x+1]=gcdSum(a,memo,k-2,x+1,j);
+		 max=Math.max(max,p+memo[x+1]);
 	 }
-	 memo[i][i]=max;
+	 memo[i]=max;
 	 return max;
 }
 	
@@ -38,12 +38,12 @@ public static int gcdSum(int a[],int memo[][],int k,int i,int j)
 	public static void main(String args[]){
 		int a[]={4,5,3,7,8,10,5,8};
 		int j=a.length-1;
-		int memo[][]=new int[j+1][j+1];
-		int k=4;
-		for(int i=0;i<j-(k-2);i++)
+		int memo[]=new int[a.length];
+		int k=6;
+		for(int i=0;i<j-k;i++)
 		gcdSum(a,memo,k,i,j);		
-		Arrays.stream(memo).forEach(x->System.out.println(Arrays.toString(x)));		
-		//System.out.println(Arrays.toString(memo));
+		//Arrays.stream(memo).forEach(x->System.out.println(Arrays.toString(x)));		
+		System.out.println(Arrays.toString(memo));
 		
 		
 		
