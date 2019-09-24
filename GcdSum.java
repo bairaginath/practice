@@ -64,7 +64,7 @@ public static int gcdSum(int a[],int memo[][],int k,int i,int j)
 		//for(int i=0;i<j-(k-2);i++)
 		//gcdSum(a,memo,k,i,j);		
 		Arrays.stream(memo).forEach(x->System.out.println(Arrays.toString(x)));
-        System.out.println("jump index");		
+        System.out.println("jump index ");		
 		Arrays.stream(jump).forEach(x->System.out.println(Arrays.toString(x)));		
 		//System.out.println(Arrays.toString(memo));
 		
