@@ -746,6 +746,187 @@ If we follow this path then we get the sum 34.
 
 
 
+
+Paths from entry to exit in matrix and maximum path sum
+
+Given a maze which is a N * N grid grid[][]. Every cell of the maze contains either the number 1, 2 or 3 which defines the moves as:
+
+    If grid[i][j] = 1 then the only valid move is grid[i][j + 1].
+    If grid[i][j] = 2 then the only valid move is grid[i + 1][j].
+    If grid[i][j] = 3 then the valid moves are grid[i][j + 1] and grid[i + 1][j].
+
+Now, the task is to find the count of all the paths from grid[0][0] to grid[N – 1][N – 1] and the maximum possible sum among all the paths i.e. when all the values at the visited cells are added to the sum.
+
+
+
+Maximise matrix sum by following the given Path
+
+Given a 2d-matrix mat[][] consisting of positive integers, the task is to find the maximum score we can reach if we have to go to cell mat[0][N – 1] starting from mat[0][0]. We have to cover the matrix in two phases:
+
+    Phase 1: If we are at cell mat[i][j] then we can only go to cells mat[i][j + 1] or mat[i + 1][j] without changing the phase else we can go to cell mat[i – 1][j] and switch to phase 2.
+    Phase 2: If we are at cell mat[i][j] then we can only go to cells mat[i][j + 1] or mat[i – 1][j].
+    We can not go out of bounds and the switching between phases will occur at most once.
+
+Note: We may be able to visit the cells of column in which we switch the phase twice.
+
+Examples:
+
+    Input: mat[][] = {
+    {1, 1, 1},
+    {1, 5, 1},
+    {1, 1, 1}}
+    Output: 15
+    Path: (0, 0) -> (0, 1) -> (1, 1) -> (2, 1) -> (1, 1) -> (0, 1) -> (0, 2)
+    Phase 1: (0, 0) -> (0, 1) -> (1, 1) -> (2, 1)
+    Phase 2: (2, 1) -> (1, 1) -> (0, 1) -> (0, 2)
+    Total score = 1 + 1 + 5 + 1 + 5 + 1 + 1 = 15
+
+    Input: mat[][] = {
+    {1, 1, 1},
+    {1, 1, 1},
+    {1, 1, 1}}
+    Output
+
+
+Find the number of Chicks in a Zoo at Nth day
+
+Given that a zoo has a single chick. A chick gives birth to 2 chicks everyday and the life expectancy of a chick is 6 days. The task is to find the number of chicks on the Nth day.
+
+Examples:
+
+    Input: N = 3
+    Output: 9
+    First day: 1 chick
+    Second day: 1 + 2 = 3
+    Third day: 3 + 6 = 9
+
+    Input: N = 12
+    Output: 173988 
+
+
+Queries to check if string B exists as substring in string A
+
+Given two strings A, B and some queries consisting of an integer i, the task is to check whether the sub-string of A starting from index i and ending at index i + length(B) – 1 equals B or not. If equal then print Yes else print No. Note that i + length(B) will always be smaller than length(A).
+
+Examples:
+
+    Input: A = “abababa”, B = “aba”, q[] = {0, 1, 2, 3}
+    Output:
+    Yes
+    No
+    Yes
+    No
+    a[0-2] = “aba” = b (both are equal)
+    a[1-3] = “bab” != b
+    a[2-4] = “aba” = b
+    a[3-5] = “bab” !=b
+
+    Input: A = “GeeksForGeeks”, B = “Geeks”, q[] = {0, 5, 8}
+    Output:
+    Yes
+    No
+    Yes 
+
+
+Find maximum topics to prepare in order to pass the exam
+
+Given three integer n, h and p where n is the number of topics, h is the time left (in hours) and p is the passing marks. Also given two arrays marks[] and time[] where marks[i] is the marks for the ith topic and time[i] is the time required to learn the ith topic. The task is to find the maximum marks that can be obtained by studying maximum number of topics.
+
+Examples:
+
+    Input: n = 4, h = 10, p = 10, marks[] = {6, 4, 2, 8}, time[] = {4, 6, 2, 7}
+    Output: 10
+    Either the topics with marks marks[2] and marks[3]
+    can be prepared or marks[0] and marks[1] can be prepared
+    Both cases will lead to 10 marks in total
+    which are equal to the passing marks.
+
+    Input: n = 5, h = 40, p = 21, marks[] = {10, 10, 10, 10, 3}, time[] = {12, 16, 20, 24, 8}
+    Output: 36 
+
+
+
+Number of ways to divide an array into K equal sum sub-arrays
+
+Given an integer K and an array arr[] of N integers, the task is to find the number of ways to split the array into K equal sum sub-arrays of non-zero lengths.
+
+Examples:
+
+    Input: arr[] = {0, 0, 0, 0}, K = 3
+    Output: 3
+    All possible ways are:
+    {{0}, {0}, {0, 0}}
+    {{0}, {0, 0}, {0}}
+    {{0, 0}, {0}, {0}}
+
+    Input: arr[] = {1, -1, 1, -1}, K = 2
+    Output: 1 
+
+
+
+Number of subsets with zero sum
+
+Given an array ‘arr’ consisting of integers, the task is to find the number of subsets such that their sum is equal to zero. Empty subset should also be considered.
+
+Examples:
+
+    Input : arr[] = {2, 2, -4}
+    Output : 2
+    All possible subsets:
+    {} = 0
+    {2} = 2
+    {2} = 2
+    {-4} = -4
+    {2, 2} = 4
+    {2, -4} = -2
+    {2, -4} = -4
+    {2, 2, -4} = 0
+    Since, {} and {2, 2, -4} are only possible subsets
+    with sum 0, ans will be 2.
+
+    Input : arr[] = {1, 1, 1, 1}
+    Output : 1
+    {} is the only possible subset with
+    sum 0, thus ans equals 1. 
+
+
+
+Maximum sum in an array such that every element has exactly one adjacent element to it
+
+Given an array arr[] of N integers, you can select some indexes such that every selected index has exactly one other selected index adjacent to it and the sum of elements at the chosen indexes should be maximum.
+
+In other words, the task is to select elements from an array such that a single element alone is not selected and elements at three consecutive indices are not selected and the sum of selected elements should be maximum.
+
+The task is to print the maximized sum.
+
+Examples:
+
+    Input: arr[] = {1, 2, 3, 1, 4}
+    Output: 8
+    arr[0] + arr[1] + arr[3] + arr[4] = 1 + 2 + 1 + 4 = 8
+
+    Input: arr[] = {1, 1, 1, 1}
+    Output: 2 
+
+
+Maximum Sum Subsequence of length k
+
+Given an array sequence [A1, A2 …An], the task is to find the maximum possible sum of increasing subsequence S of length k such that S1<=S2<=S3………<=Sk.
+
+Examples:
+
+    Input :
+    n = 8 k = 3
+    A=[8 5 9 10 5 6 21 8]
+    Output : 40
+    Possible Increasing subsequence of Length 3 with maximum possible sum is 9 10 21
+
+    Input :
+    n = 9 k = 4
+    A=[2 5 3 9 15 33 6 18 20]
+    Output : 62
+    Possible Increasing subsequence of Length 4 with maximum possible sum is 9 15 18 20 
+
 	
 
 
