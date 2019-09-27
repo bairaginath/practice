@@ -396,4 +396,356 @@ Examples:
     the resultant sum 0 but the count of flipped elements is not minimum. 
 
 
+Maximum sub-sequence sum such that indices of any two adjacent elements differs at least by 3
+
+Given an array arr[] of integers, the task is to find the maximum sum of any sub-sequence in the array such that any two adjacent elements in the selected sequence have at least a difference of 3 in their indices in the given array.
+In other words, if you select arr[i] then the next element you can select is arr[i + 3], arr[i + 4], and so on… but you cannot select arr[i + 1] and arr[i + 2].
+
+Examples:
+
+    Input: arr[] = {1, 2, -2, 4, 3}
+    Output: 5
+    {1, 4} and {2, 3} are the only sub-sequences
+    with maximum sum.
+
+    Input: arr[] = {1, 2, 72, 4, 3, 9}
+    Output: 8
+	
+	
+
+Minimum count of elements that sums to a given number
+
+Given infinte number of elements of form 10^n and 25*100^n ( n >= 0 ). The task is to find the minimum count of elements chosen such that there sum is equal to K.
+
+Examples:
+
+    Input : K = 48
+    Output : 6
+    elements chosen are: (1 + 1 + 1 + 10 + 10 + 25)
+
+    Input : 69
+    Output : 9
+    elements chosen are: (1 + 1 + 1 + 1 + 10 + 10 + 10 + 10 + 25) 
+	
+	
+
+Number of ways to get a given sum with n number of m-faced dices
+
+Given n dices each with m faces, numbered from 1 to m, find the number of ways to get a given sum X. X is the summation of values on each face when all the dice are thrown.
+
+Examples:
+
+    Input : faces = 4 throws = 2 sum =4
+    Output : 3
+    Ways to reach sum equal to 4 in 2 throws can be { (1, 3), (2, 2), (3, 1) }
+
+    Input : faces = 6 throws = 3 sum = 12
+    Output : 25
+
+
+
+Total number of odd length palindrome sub-sequence around each centre
+
+Given a string str, the task is to find the number of odd length palindromic sub-sequences around of str with str[i] as centre i.e. every index will be considered as the centre one by one.
+
+Examples:
+
+    Input: str = “xyzx”
+    Output: 1 2 2 1
+    For index 0: There is only a single sub-sequence possible i.e. “x”
+    For index 1: Two sub-sequences are possible i.e. “y” and “xyx”
+    For index 2: “z” and “xzx”
+    For index 3: “x”
+
+    Input: str = “aaaa”
+    Output: 1 3 3 1 
+	
+
+
+Number of sub-sequence such that it has one consecutive element with difference less than or equal to 1
+
+Given an array arr[] of N elements. The task is to find the number of sub-sequences which have at least two consecutive elements such that absolute difference between them is ≤ 1.
+
+Examples:
+
+    Input: arr[] = {1, 6, 2, 1}
+    Output: 6
+    {1, 2}, {1, 2, 1}, {2, 1}, {6, 2, 1}, {1, 1} and {1, 6, 2, 1}
+    are the sub-sequences that have at least one consecutive pair
+    with difference less than or equal to 1.
+
+    Input: arr[] = {1, 6, 2, 1, 9}
+    Output: 12 
+	
+
+Iterative approach to print all permutations of an Array
+
+Given an array arr[] of size N, the task is to generate and print all permutations of the given array.
+
+Examples:
+
+    Input: arr[] = {1, 2}
+    Output:
+    1 2
+    2 1
+
+    Input: {0, 1, 2}
+    Output:
+    0 1 2
+    1 0 2
+    0 2 1
+    2 0 1
+    1 2 0
+    2 1 0 
+
+
+Maximum sum of non-overlapping subarrays of length atmost K
+
+Given an integer array ‘arr’ of length N and an integer ‘k’, select some non-overlapping subarrays such that each sub-array if of length at most ‘k’, no two sub-arrays are adjacent and sum of all the elements of the selected sub-arrays are maximum.
+
+Examples:
+
+Input : arr[] = {-1, 2, -3, 4, 5}, k = 2
+Output : 11
+Sub-arrays that maximizes sum will be {{2}, {4, 5}}.
+Thus, the answer will be 2+4+5 = 11.
+
+Input :arr[] = {1, 1, 1, 1, 1}, k = 1
+Output : 3
+
+
+
+Iterative approach to print all combinations of an Array
+
+Given an array arr[] of size N, the task is to generate and print all possible combinations of R elements in array.
+
+Examples:
+
+    Input: arr[] = {0, 1, 2, 3}, R = 3
+    Output:
+    0 1 2
+    0 1 3
+    0 2 3
+    1 2 3
+
+    Input: arr[] = {1, 3, 4, 5, 6, 7}, R = 5
+    Output:
+    1 3 4 5 6
+    1 3 4 5 7
+    1 3 4 6 7
+    1 3 5 6 7
+    1 4 5 6 7
+    3 4 5 6 7 
+	
+
+
+Longest sub-sequence that satisfies the given conditions
+
+Given an array arr[] of N integers, the task is to find the longest sub-sequence in the given array such that for all pairs from the sub-sequence (arr[i], arr[j]) where i != j either arr[i] divides arr[j] or vice versa. If no such sub-sequence exists then print -1.
+
+Examples:
+
+    Input: arr[] = {2, 4, 6, 1, 3, 11}
+    Output: 3
+    Longest valid sub-sequences are {1, 2, 6} and {1, 3, 6}.
+
+    Input: arr[] = {21, 22, 6, 4, 13, 7, 332}
+    Output: 2 
+	
+
+
+Maximum subset sum such that no two elements in set have same digit in them
+
+Given an array of N elements. Find the subset of elements which has maximum sum such that no two elements in the subset has common digit present in them.
+
+Examples:
+
+    Input : array[] = {22, 132, 4, 45, 12, 223}
+    Output : 268
+    Maximum Sum Subset will be = {45, 223} .
+    All possible digits are present except 1.
+    But to include 1 either 2 or both 2 and 3 have
+    to be removed which result in smaller sum value.
+
+    Input : array[] = {1, 21, 32, 4, 5 }
+    Output : 42 
+	
+
+
+Number of ways to choose elements from the array such that their average is K
+
+Given an array arr[] of N integers and an integer K. The task is to find the number of ways to select one or more elements from the array such that the average of the selected integers is equal to given number K.
+
+Examples:
+
+    Input: arr[] = {7, 9, 8, 9}, K = 8
+    Output: 5
+    {8}, {7, 9}, {7, 9}, {7, 8, 9} and {7, 8, 9}
+
+    Input: arr[] = {3, 6, 2, 8, 7, 6, 5, 9}, K = 5
+    Output: 19
+
+    Input: arr[] = {6, 6, 9}, K = 8
+    Output: 0 
+	
+
+
+
+Probability of getting more heads than tails when N biased coins are tossed
+
+Given an array p[] of odd length N where p[i] denotes the probability of getting a head on the ith coin. As the coins are biased, the probability of getting a head is not always equal to 0.5. The task is to find the probability of getting heads more number of times than tails.
+
+Examples:
+
+    Input: p[] = {0.3, 0.4, 0.7}
+    Output: 0.442
+    Probability for a tail = (1 – Probability for a head)
+    For heads greater than tails, there are 4 possibilities:
+    P({head, head, tail}) = 0.3 x 0.4 x (1 – 0.7) = 0.036
+    P({tail, head, head}) = (1 – 0.3) x 0.4 x 0.7 = 0.196
+    P({head, tail, head}) = 0.3 x (1 – 0.4) x 0.7= 0.126
+    P({head, head, head}) = 0.3 x 0.4 x 0.7 = 0.084
+    Adding the above probabilities
+    0.036 + 0.196 + 0.126 + 0.084 = 0.442
+
+    Input: p[] = {0.3, 0.5, 0.2, 0.6, 0.9}
+    Output: 0.495 
+	
+
+
+Maximize the happiness of the groups on the Trip
+
+A trip to mystical land is going to be organized in ByteLand, the city of Bytes. Unfortunately, there are limited seats say A and there are N number of groups of people. Every group can have old person o, child c, man m and woman w. The organizing committee wants to maximize the happiness value of the trip. Happiness value of the trip is the sum of the happiness value of all the groups that are going. A group will go for the trip if every member can get a seat (Breaking a group is not a good thing).
+
+    The happiness of child c = 4
+    The happiness of woman w = 3
+    The happiness of man m = 2
+    The happiness of the old person o = 1
+
+The happiness of group G, H(G) = (sum of happiness of people in it) * (number of people in the group).
+The happiness of the group (‘coow’) = (4 + 1 + 1 + 3) * 4 = 36.
+
+Given the groups and the total seating capacity, the task is to maximize the happiness and print the maximized happiness of the groups going on the trip.
+
+Examples:
+
+    Input: groups[] = {“mmo”, “oo”, “cmw”, “cc”, “c”}, A = 5
+    Output: 43
+    Pick these groups [‘cmw’, ‘cc’] to get the maximum profit of (4 + 2 + 3) * 3 + (4 + 4) * 2 = 43
+
+    Input: groups[] = {“ccc”, “oo”, “cm”, “mm”, “wwo”}, A = 10
+    Output: 77 
+	
+	
+
+Maximum items that can be filled in K Knapsacks of given Capacity
+
+Given an integer array W[] consisting of weights of items and ‘K’ knapsacks of capacity ‘C’, find maximum weight we can put in the knapsacks if breaking of an item is not allowed.
+
+Examples:
+
+    Input : w[] = {3, 9, 8}, k = 1, c = 11
+    Output : 11
+    The required subset will be {3, 8}
+    where 3+8 = 11
+
+    Input : w[] = {3, 9, 8}, k = 1, c = 10
+    Output : 9 
+	
+
+
+0-1 knapsack queries
+
+Given an integer array W[] consisting of weights of the items and some queries consisting of capacity C of knapsack, for each query find maximum weight we can put in the knapsack. Value of C does’t exceed a certain integer C_MAX.
+
+Examples:
+
+    Input: W[] = {3, 8, 9} q = {11, 10, 4}
+    Output:
+    11
+    9
+    3
+    If C = 11: select 3 + 8 = 11
+    If C = 10: select 9
+    If C = 4: select 3
+
+    Input: W[] = {1, 5, 10} q = {6, 14}
+    Output:
+    6
+    11 
+	
+
+
+Minimize the sum after choosing elements from the given three arrays
+
+Given three arrays A[], B[] and C[] of same size N. The task is to minimize the sum after choosing N elements from these array such that at every index i an element from any one of the array A[i], B[i] or C[i] can be chosen and no two consecutive elements can be chosen from the same array.
+
+Examples:
+
+    Input: A[] = {1, 100, 1}, B[] = {100, 100, 100}, C[] = {100, 100, 100}
+    Output: 102
+    A[0] + B[1] + A[2] = 1 + 100 + 100 = 201
+    A[0] + B[1] + C[2] = 1 + 100 + 100 = 201
+    A[0] + C[1] + B[2] = 1 + 100 + 100 = 201
+    A[0] + C[1] + A[2] = 1 + 100 + 1 = 102
+    B[0] + A[1] + B[2] = 100 + 100 + 100 = 300
+    B[0] + A[1] + C[2] = 100 + 100 + 100 = 300
+    B[0] + C[1] + A[2] = 100 + 100 + 1 = 201
+    B[0] + C[1] + B[2] = 100 + 100 + 100 = 300
+    C[0] + A[1] + B[2] = 100 + 100 + 100 = 300
+    C[0] + A[1] + C[2] = 100 + 100 + 100 = 300
+    C[0] + B[1] + A[2] = 100 + 100 + 1 = 201
+    C[0] + B[1] + C[2] = 100 + 100 + 100 = 300
+
+    Input: A[] = {1, 1, 1}, B[] = {1, 1, 1}, C[] = {1, 1, 1}
+    Output: 3 
+	
+	
+
+Maximise array sum after taking non-overlapping sub-arrays of length K
+
+Given an integer array arr[] of length N and an integer K, the task is to select some non-overlapping sub-arrays such that each sub-array is exactly of length K, no two sub-arrays are adjacent and sum of all the elements of the selected sub-arrays is maximum.
+
+Examples:
+
+    Input: arr[] = {1, 2, 3, 4, 5}, K = 2
+    Output: 12
+    Sub-arrays that maximizes sum will be {{1, 2}, {4, 5}}.
+    Thus, the answer will be 12.
+
+    Input: arr[] = {1, 1, 1, 1, 1}, K = 1
+    Output: 3 
+	
+
+
+
+Find maximum path sum in a 2D matrix when exactly two left moves are allowed
+
+
+Given a 2D matrix arr[][] of dimensions N * M where N is number of rows and M is number of columns.The task is to find maximum path sum in this matrix satisfying some condition which are as follows :
+
+    We can only start with arr[i][M] where 0 <= i <= N.
+    We end the path on the same side, such that we can take exactly 2 left turns.
+	
+nput : N = 3, M = 3
+        arr[][] = {{1, 2, 3},
+                   {3, 3, 1},
+                   {4, 1, 6}}
+Output : 20
+Explanation : 
+If we follow this path then we get the sum 20.
+
+Input : N = 3, M = 3
+        arr[][] = {{3, 7, 4},
+                   {1, 9, 6},
+                   {1, 7, 7}}
+Output : 34
+Explanation : 
+If we follow this path then we get the sum 34.
+
+
+
+
+	
+
 
