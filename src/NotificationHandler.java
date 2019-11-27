@@ -5,8 +5,8 @@ import java.util.*;
 public class NotificationHandler {
 
     static List<Task> listTask=new ArrayList<>();
-    static ExecutorService es= Executors.newFixedThreadPool(10);
-    static CyclicBarrier barrier=new CyclicBarrier(1);
+    static ExecutorService es= Executors.newFixedThreadPool(3);
+    static CyclicBarrier barrier=new CyclicBarrier(3);
 
 class Producer implements Runnable
 {
@@ -25,7 +25,7 @@ class Producer implements Runnable
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
                 }
-                System.out.println("inserting at producer");
+                //System.out.println("inserting at producer");
                 queue.add(i);
             }
 
@@ -87,15 +87,18 @@ class EmailTask implements Task  {
                     for (int i = 0; i < 5; i++){
                         try {
                             Integer value=aq.take();
-                            System.out.println("========"+value+"========"+barrier.getNumberWaiting());
+                            //System.out.println("========"+value+"========"+barrier.getNumberWaiting());
                            listTask.stream().forEach(task ->{
                                es.submit(()-> {
                                   // System.out.println("******"+value+"*******"+Thread.currentThread().getName()+"  "+barrier.getNumberWaiting());
 
                                    task.doExecute(value);
                                    try {
+                                      // System.out.println(Thread.currentThread().getName() + " waiting at barrier");
                                            barrier.await();
+                                           //System.out.println("ALL threads meet barrier");
                                        } catch (InterruptedException | BrokenBarrierException bbe) {
+                                       bbe.printStackTrace();
                                        }
 
 
@@ -125,8 +128,11 @@ class EmailTask implements Task  {
         NotificationHandler.Producer p=nh.new Producer(queue);
         NotificationHandler.Consumer c=nh.new Consumer(queue);
         System.out.println("Main method");
-        es.submit(p);
-        es.submit(c);
+		new Thread(p).start();
+		new Thread(c).start();
+		
+        //es.submit(p);
+        //es.submit(c);
 
     }
 }
