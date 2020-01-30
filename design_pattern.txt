@@ -1,0 +1,311 @@
+Creational Design Pattern
+=========================
+Creational Design Patterns are concerned with the way in which objects are created. They reduce complexities and instability by creating objects in a controlled manner. 
+ 
+    Singleton – Ensures that at most only one instance of an object exists throughout application
+    Factory Method – Creates objects of several related classes without specifying the exact object to be created
+    Abstract Factory – Creates families of related dependent objects
+    Builder – Constructs complex objects using step-by-step approach
+
+Singleton Design Pattern
+-------------------------
+use case
+    For resources that are expensive to create (like database connection objects)
+    It's good practice to keep all loggers as Singletons which increases performance
+    Classes which provide access to configuration settings for the application
+    Classes that contain resources that are accessed in shared mode
+	
+
+
+
+
+
+
+
+How to Replace Many if Statements in Java
+Switch case
+Factory class
+Use of Enum
+Command Pattern
+Rule Engine
+
+Prototype Pattern
+-------------------
+The Prototype pattern is generally used when we have an instance of the class (prototype) and we'd like to create new objects by just copying the prototype.
+we may create the instances with the appropriate state beforehand and then clone them whenever we want.
+
+
+
+
+
+flyweight pattern
+------------------
+ flyweight pattern is based on a factory which recycles created objects by storing them after creation. Each time an object is requested, the factory looks up the object in order to check if it's already been created. If it has, the existing object is returned – otherwise, a new one is created, stored and then returned.
+ 
+ use case :
+ The goal of the flyweight pattern is to reduce memory usage by sharing as much data as possible, hence, 
+ Data Caching
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ Builder Design pattern
+ ---------------------- 
+ When the complexity of creating object increases, the Builder pattern can separate out the instantiation process by using another object (a builder) to construct the object. 
+
+ usecase  
+    When the process involved in creating an object is extremely complex, with lots of mandatory and optional parameters
+    When an increase in the number of constructor parameters leads to a large list of constructors
+    When client expects different representations for the object that's constructed
+
+ 
+ 
+
+
+
+Factory Design pattern
+-----------------------
+//Write your own code for factory Design pattern and avoid if condition
+According to GoF, this pattern “defines an interface for creating an object, but let subclasses decide which class to instantiate. The Factory method lets a class defer instantiation to subclasses”.
+
+usecase
+    When the implementation of an interface or an abstract class is expected to change frequently
+    When the current implementation cannot comfortably accommodate new change
+    When the initialization process is relatively simple, and the constructor only requires a handful of parameters
+
+
+
+
+
+
+Abstract Factory Design Pattern
+--------------------------------
+the Abstract Factory Design Pattern is used to create families of related or dependent objects. It's also sometimes called a factory of factories
+
+usecase
+    The client is independent of how we create and compose the objects in the system
+    The system consists of multiple families of objects, and these families are designed to be used together
+    We need a run-time value to construct a particular dependency
+
+
+
+
+
+
+
+
+Structural Desgin pattern
+==========================
+Structural Patterns deal with the composition of classes and objects. They provide different ways of using object composition and inheritance to create some abstraction.
+
+Decorator pattern
+------------------
+A Decorator pattern can be used to attach additional responsibilities to an object either statically or dynamically.
+
+use cases:
+    When we wish to add, enhance or even remove the behavior or state of objects
+    When we just want to modify the functionality of a single object of class and leave others unchanged
+
+
+
+
+
+
+Adapter Pattern
+----------------
+An Adapter pattern acts as a connector between two incompatible interfaces that otherwise cannot be connected directly. An Adapter wraps an existing class with a new interface so that it becomes compatible with the client’s interface.
+The main motive behind using this pattern is to convert an existing interface into another interface that the client expects. It's usually implemented once the application is designed.
+
+use case :
+    When an outside component provides captivating functionality that we'd like to reuse, but it's incompatible with our current application. A suitable Adapter can be developed to make them compatible with each other
+    When our application is not compatible with the interface that our client is expecting
+    When we want to reuse legacy code in our application without making any modification in the original code
+
+
+
+
+
+Bridge Pattern
+---------------
+decouple an abstraction from its implementation so that the two can vary independently.
+This means to create a bridge interface that uses OOP principles to separate out responsibilities into different abstract classes.
+use case :
+    When we want a parent abstract class to define the set of basic rules, and the concrete classes to add additional rules
+    When we have an abstract class that has a reference to the objects, and it has abstract methods that will be defined in each of the concrete classes
+
+
+
+
+
+Proxy Pattern:
+----------------
+The Proxy pattern allows us to create an intermediary that acts as an interface to another resource, while also hiding the underlying complexity of the component.
+use cases:
+    When we want a simplified version of a complex or heavy object. In this case, we may represent it with a skeleton object which loads the original object on demand, also called as lazy initialization. This is known as the Virtual Proxy
+    When the original object is present in different address space, and we want to represent it locally. We can create a proxy which does all the necessary boilerplate stuff like creating and maintaining the connection, encoding, decoding, etc., while the client accesses it as it was present in their local address space. This is called the Remote Proxy
+    When we want to add a layer of security to the original underlying object to provide controlled access based on access rights of the client. This is called Protection Proxy
+
+
+
+
+
+
+
+Composite Design pattern
+-------------------------
+The composite pattern is meant to allow treating individual objects and compositions of objects, or “composites” in the same way.
+It can be viewed as a tree structure made up of types that inherit a base type, and it can represent a single part or a whole hierarchy of objects. 
+
+
+
+
+
+
+Facade pattern
+---------------
+It hides much of the complexity and makes the subsystem easy to use.
+It decouples a client implementation from the complex subsystem.
+
+
+
+
+
+Behavior Design Pattern
+========================
+
+
+
+
+
+Observer Pattern
+-----------------
+ It specifies communication between objects: observable(producer) and observers(consumers). An observable is an object which notifies observers about the changes in its state.
+ 
+ 
+ 
+ 
+ 
+ 
+ Visitor Design Pattern
+ ----------------------   
+The purpose of a Visitor pattern is to define a new operation without introducing the modifications to an existing object structure.
+we'll make good use of the Open/Closed principle as we won't modify the code, but we'll still be able to extend the functionality by providing a new Visitor implementation.
+Downsides
+As each design pattern, even the Visitor has its downsides, particularly, its usage makes it more difficult to maintain the code if we need to add new elements to the object's structure.
+For example, if we add new YamlElement, then we need to update all existing visitors with the new method desired for processing this element. Following this further, if we have ten or more concrete visitors, that might be cumbersome to update all of them.
+Other than this, when using this pattern, the business logic related to one particular object gets spread over all visitor implementations.
+
+
+
+
+
+State Design Pattern
+---------------------
+The main idea of State pattern is to allow the object for changing its behavior without changing its class. Also, by implementing it, the code should remain cleaner without many if/else statements.
+Downsides
+State pattern drawback is the payoff when implementing transition between the states. That makes the state hardcoded, which is a bad practice in general.
+
+
+
+
+
+
+Interpreter Design Pattern
+---------------------------
+it defines the grammar of a particular language in an object-oriented way which can be evaluated by the interpreter itself.
+Downsides
+When the grammar is getting more complex, it becomes harder to maintain
+Finally, you can find this pattern usage in JDK, particularly, in java.util.Pattern, java.text.Format or java.text.Normalizer.
+
+
+
+
+
+Template Method Pattern
+------------------------
+It makes it easier to implement complex algorithms by encapsulating logic in a single method.
+The template method pattern promotes code reuse and decoupling, but at the expense of using inheritance.
+
+
+
+
+
+Chain of Responsibility Design pattern
+---------------------------------------
+Chain of Responsibility as a design pattern consisting of “a source of command objects and a series of processing objects.
+Each processing object in the chain is responsible for a certain type of command, and the processing is done, it forwards the command to the next processor in the chain
+The Chain of Responsibility pattern is handy for:
+    Decoupling a sender and receiver of a command
+    Picking a processing strategy at processing-time
+Implementation Principles
+Each processor in the chain will have its implementation for processing a command
+Each processor is responsible for delegating to the next processor so beware of dropped commands
+Processors should not form a recursive cycle
+Only one processor in the chain handles a given command
+
+Usage in the Real World- class CustomFilter implements Filter
+Disadvantages
+    Mostly, it can get broken easily:
+        if a processor fails to call the next processor, the command gets dropped
+        if a processor calls the wrong processor, it can lead to a cycle
+    It can create deep stack traces, which can affect performance
+    It can lead to duplicate code across processors, increasing maintenance
+see example on baeldung
+
+
+
+
+
+
+
+Command Pattern
+----------------
+the pattern intends to encapsulate in an object all the data required for performing a given action (command), including what method to call, the method's arguments, and the object to which the method belongs.
+This model allows us to decouple objects that produce the commands from their consumers, so that's why the pattern is commonly known as the producer-consumer pattern.
+
+
+
+
+
+
+
+Mediator Pattern
+-----------------
+The intent of the Mediator Pattern is to reduce the complexity and dependencies between tightly coupled objects communicating directly with one another.
+
+This is achieved by creating a mediator object that takes care of the interaction between dependent objects. Consequently, all the communication goes through the mediator.
+When to Use the Mediator Pattern
+The Mediator Pattern is a good choice if we have to deal with a set of objects that are tightly coupled and hard to maintain
+
+
+
+
+
+
+Null Object Pattern
+--------------------
+The intent of the Null Object Pattern is to minimize that kind of null check.
+We should use the Null Object Pattern when a Client would otherwise check for null just to skip execution or perform a default action
+Most of the developers would return Collections.emptyList() from findByNameAndLastname() in case none of the customers matches the provided search criteria. This is a very good example of following the Null Object Pattern.
+Example : handle null at factory method as a Default operation
+
+
+
+
+
+
+
+
+functional Design Pattern
+==========================
+Currying in Java
+
+
+
+
+
+
+

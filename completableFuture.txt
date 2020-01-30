@@ -1,0 +1,81 @@
+CompletableFuture<String> completableFuture = new CompletableFuture<>();
+completableFuture.complete("Hello");
+completableFuture.get()
+
+Future<String> completableFuture = CompletableFuture.completedFuture("Hello");
+completableFuture.get();
+
+
+CompletableFuture<String> completableFuture = new CompletableFuture<>();
+completableFuture.cancel(false); 
+completableFuture.get()// throws CancellationException
+
+
+CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> "Hello");
+assertEquals("Hello", future.get());
+
+
+CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> "Hello");
+CompletableFuture<Void> future = completableFuture.thenAccept(s -> LOG.debug("Computation returned: " + s));
+future.get();
+
+CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> "Hello");
+CompletableFuture<Void> future = completableFuture.thenRun(() -> LOG.debug("Computation finished."));
+future.get();
+
+CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> "Hello");
+CompletableFuture<String> future = completableFuture.thenApply(s -> s + " World");
+assertEquals("Hello World", future.get());
+
+CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> "Hello")
+.thenCompose(s -> CompletableFuture.supplyAsync(() -> s + " World"));
+assertEquals("Hello World", completableFuture.get());
+
+CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> "Hello")
+.thenCombine(CompletableFuture.supplyAsync(() -> " World"), (s1, s2) -> s1 + s2);
+assertEquals("Hello World", completableFuture.get());
+
+CompletableFuture.supplyAsync(() -> "Hello")
+.thenAcceptBoth(CompletableFuture.supplyAsync(() -> " World"), (s1, s2) -> LOG.debug(s1 + s2));
+
+
+CompletableFuture<String> future1 = CompletableFuture.supplyAsync(() -> "Hello");
+CompletableFuture<String> future2 = CompletableFuture.supplyAsync(() -> "Beautiful");
+CompletableFuture<String> future3 = CompletableFuture.supplyAsync(() -> "World");
+CompletableFuture<Void> combinedFuture = CompletableFuture.allOf(future1, future2, future3);
+combinedFuture.get();
+
+
+String name = null;
+CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> {
+             if (name == null) {
+                 throw new RuntimeException("Computation error!");
+             }
+             return "Hello, " + name;
+         })
+             .handle((s, t) -> s != null ? s : "Hello, Stranger!");
+			 
+assertEquals("Hello, Stranger!", completableFuture.get());
+
+
+
+CompletableFuture<String> completableFuture = new CompletableFuture<>();
+completableFuture.completeExceptionally(new RuntimeException("Calculation failed!"));
+completableFuture.get(); // Throws run time exception
+
+
+CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> "Hello");
+CompletableFuture<String> future = completableFuture.thenApplyAsync(s -> s + " World");
+assertEquals("Hello World", future.get());
+
+
+CompletableFuture<Integer> finalResult=CompletableFuture.supplyAsync(() -> 10).thenApply(s -> s + 1);
+assertTrue(finalResult.get() == 11);
+
+
+CompletableFuture<Integer> finalResult =CompletableFuture.supplyAsync(() -> 10)
+    			 .thenCompose(i->CompletableFuture.supplyAsync(() -> 10 + i));
+assertTrue(finalResult.get() == 20);   	
+
+
+
