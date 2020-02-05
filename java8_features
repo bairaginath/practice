@@ -1,0 +1,466 @@
+Static Method
+--------------
+In side Interface 
+
+
+ Default Method
+ --------------
+ Default methods are declared using the new default keyword. These are accessible through the instance of the implementing class and can be overridden.
+
+ 
+
+ Method References
+-------------------
+Method reference can be used as a shorter and more readable alternative for a lambda expression which only calls an existing method
+
+Reference to a Static Method
+----------
+boolean isReal = list.stream().anyMatch(u -> User.isRealUser(u));
+boolean isReal = list.stream().anyMatch(User::isRealUser);
+
+Reference to an Instance Method
+----------
+User user = new User();
+boolean isLegalName = list.stream().anyMatch(user::isLegalName);
+
+best example is 
+String str="bairagi";
+Function<String,Boolean> instanceRef=str::equalsIgnoreCase;
+System.out.println(instanceRef.apply("nath"));
+System.out.println(instanceRef.apply("bairaGi"));
+
+
+Reference to an Instance Method of an Object of a Particular Type
+--------
+long c=list.stream().filter(x->x.isEmpty()).count();
+written as
+long count = list.stream().filter(String::isEmpty).count();
+best example is
+Function<String,Integer> similaryTypeRef=String::length;
+System.out.println(similaryTypeRef.apply("jamesbond"));
+
+
+Reference to a Constructor
+-------
+Stream<String> st=list.stream().map(x->x);
+Stream<String> stream = list.stream().map(String::new);
+
+Optional<T>
+------------
+Java 8 Optional<T> class can help to handle situations where there is a possibility of getting the NPE. It works as a container for the object of type T. It can return a value of this object if this value is not a null. When the value inside this container is null it allows doing some predefined actions instead of throwing NPE.
+
+Optional<String> optionalEmpty = Optional.empty();
+        assertFalse(optionalEmpty.isPresent());
+
+String str = "value";
+Optional<String> optional = Optional.of(str);
+assertEquals(optional.get(), "value");
+
+Optional<String> optionalNullable = Optional.ofNullable(str);
+Optional<String> optionalNull = Optional.ofNullable(null);
+assertEquals(optionalNullable.get(), "value");
+assertFalse(optionalNull.isPresent());
+
+List<String> listOpt = Optional.of(list).orElse(new ArrayList<>());
+List<String> listNull = null;
+List<String> listOptNull = Optional.ofNullable(listNull).orElse(new ArrayList<>());
+assertTrue(listOpt == list);
+assertTrue(listOptNull.isEmpty());
+
+
+private User getUser() {
+        User user = new User();
+        Address address = new Address();
+        address.setStreet("1st Avenue");
+        user.setAddress(address);
+        return user;
+    }
+
+Optional<User> user = Optional.ofNullable(getUser());
+String result = user.map(User::getAddress).map(Address::getStreet).orElse("not specified");
+assertEquals(result, "1st Avenue");
+
+map() method to convert results of calling the getAdress() to the Optional<Address> and getStreet() to Optional<String>. If any of these methods returned null the map() method would return an empty Optional.
+
+magine that our getters return Optional<T>. So, we should use the flatMap() method instead of the map():
+
+String value = null;
+Optional<String> valueOpt = Optional.ofNullable(value);
+String result = valueOpt.orElseThrow(CustomException::new).toUpperCase();
+
+
+Optional<String> optional2 = Optional.ofNullable(null);
+System.out.println(optional2.orElse("bairagi"));// it will print "bairagi"
+
+
+Functional Interfaces and Lambda Expression
+---------------------------------------------
+A lambda is an anonymous function that can be handled as a first-class language citizen, for instance passed to or returned from a method.
+
+Any interface with a SAM(Single Abstract Method) is a functional interface, and its implementation may be treated as lambda expressions.
+
+uninary function example
+Function<T,R> r=T t->{R r;return r;};
+Function<String,Integer> stringToIntFun=(s)-> s.length();
+
+no parameter no return example
+Runnable r=()->System.out.println("run method"); new Thread(r).start();
+
+no parameter with return type
+interface NoParameterWithReturnType<R>
+{
+	R getValue();
+}
+NoParameterWithReturnType<Integer> npwr=()->Integer.MAX_VALUE;
+      System.out.println(npwr.getValue());
+
+with parameter and no return
+interface WithParameterNoReturnType<T>
+{
+	void setValue(T t);
+}
+
+WithParameterNoReturnType<Integer> npwr=(i)->System.out.println(i);;
+      npwr.setValue(32);
+
+
+binary function example
+BiFunction<String,String,Integer> fun=(name,surname)->name.length()+surname.length()+1;
+
+
+Suppliers
+----------
+The Supplier functional interface is yet another Function specialization that does not take any arguments. It is typically used for lazy generation of values,
+in side jdk defined as below
+@FunctionalInterface
+public interface Supplier<T> {
+    T get();
+}
+
+Function<Supplier<Double>,Double> fun=(supplier)->Math.pow(supplier.get(), 2);
+ System.out.println(fun.apply(()->34334.34334));
+
+ This allows us to lazily generate the argument for invocation of this function using a Supplier implementation. 
+
+Consumer
+---------
+@FunctionalInterface
+public interface Consumer<T> {
+    void accept(T t);
+
+As opposed to the Supplier, the Consumer accepts a generified argument and returns nothing.
+
+Predicate 
+---------
+The Predicate functional interface is a specialization of a Function that receives a generified value and returns a boolean.
+
+@FunctionalInterface
+public interface Predicate<T> {    
+    boolean test(T t);
+}
+
+Operator 
+--------
+Operator interfaces are special cases of a function that receive and return the same value type. The UnaryOperator interface receives a single argument.
+@FunctionalInterface
+public interface UnaryOperator<T> extends Function<T, T> {
+
+    static <T> UnaryOperator<T> identity() {
+        return t -> t;
+    }
+}
+
+
+Lambda Expressions and Functional Interfaces: Tips and Best Practices
+-------------------------------------
+1)Prefer Standard Functional Interfaces- better to use standard functional interface instead of creat new custom funcational inteface.
+
+2)Use the @FunctionalInterface Annotation-
+ using the @FunctionalInterface annotation, the compiler will trigger an error in response to any attempt to break the predefined structure of a functional interface. It is also a very handy tool to make your application architecture easier to understand for other developers.
+
+
+ 3)Don't Overuse Default Methods in Functional Interfaces
+ --------------
+ You can easily add default methods to the functional interface. This is acceptable to the functional interface contract as long as there is only one abstract method declaration:
+@FunctionalInterface
+public interface Foo {
+    String method();
+    default void defaultMethod() {}
+}
+Functional interfaces can be extended by other functional interfaces if their abstract methods have the same signature. For example:
+@FunctionalInterface
+public interface FooExtended extends Baz, Bar {}
+     
+@FunctionalInterface
+public interface Baz {  
+    String method();    
+    default void defaultBaz() {}        
+}
+     
+@FunctionalInterface
+public interface Bar {  
+    String method();    
+    default void defaultBar() {}    
+}
+Just as with regular interfaces, extending different functional interfaces with the same default method can be problematic. For example, assume that interfaces Bar and Baz both have a default method defaultCommon(). In this case, you will get a compile-time error:
+interface FooExtended inherits unrelated defaults for defaultCommon() from types Baz and Bar...
+
+ fix this, defaultCommon() method should be overridden in the FooExtended interface. You can, of course, provide a custom implementation of this method. But if you want to use one of the parent interfaces' implementations (for example, from the Baz interface), add following line of code to the defaultCommon() method's body:
+Baz.super.defaultCommon();
+
+But be careful. Adding too many default methods to the interface is not a very good architectural decision. It is should be viewed as a compromise, only to be used when required, for upgrading existing interfaces without breaking backward compatibility.
+
+4)Instantiate Functional Interfaces with Lambda Expressions
+Foo foo = parameter -> parameter + " from Foo";
+
+
+5)Avoid Overloading Methods with Functional Interfaces as Parameters
+-----------
+public interface Processor {
+    String process(Callable<String> c) throws Exception;
+    String process(Supplier<String> s);
+}
+ 
+public class ProcessorImpl implements Processor {
+    @Override
+    public String process(Callable<String> c) throws Exception {
+        // implementation details
+    }
+     @Override
+    public String process(Supplier<String> s) {
+        // implementation details
+    }
+}
+At first glance, this seems reasonable. But any attempt to execute either of the ProcessorImpl‘s methods:
+String result = processor.process(() -> "abc");
+ends with an error with the following message:
+reference to process is ambiguous
+both method process(java.util.concurrent.Callable<java.lang.String>) 
+
+To solve this problem, we have two options. The first is to use methods with different names:
+String processWithCallable(Callable<String> c) throws Exception;
+ String processWithSupplier(Supplier<String> s);
+The second is to perform casting manually. This is not preferred.
+String result = processor.process((Supplier<String>) () -> "abc");
+
+
+6) Don’t Treat Lambda Expressions as Inner Classes
+----------
+Despite our previous example, where we essentially substituted inner class by a lambda expression, the two concepts are different in an important way: scope.
+
+When you use an inner class, it creates a new scope. You can hide local variables from the enclosing scope by instantiating new local variables with the same names. You can also use the keyword this inside your inner class as a reference to its instance.
+
+However, lambda expressions work with enclosing scope. You can’t hide variables from the enclosing scope inside the lambda’s body. In this case, the keyword this is a reference to an enclosing instance.
+
+For example, in the class UseFoo you have an instance variable value:
+private String value = "Enclosing scope value";
+Then in some method of this class place the following code and execute this method.
+
+public String scopeExperiment() {
+    Foo fooIC = new Foo() {
+        String value = "Inner class value";
+ 
+        @Override
+        public String method(String string) {
+            return this.value;
+        }
+    };
+    String resultIC = fooIC.method("");
+ 
+    Foo fooLambda = parameter -> {
+        String value = "Lambda value";
+        return this.value;
+    };
+    String resultLambda = fooLambda.method("");
+ 
+    return "Results: resultIC = " + resultIC + 
+      ", resultLambda = " + resultLambda;
+}
+If you execute the scopeExperiment() method, you will get the following result: Results: resultIC = Inner class value, resultLambda = Enclosing scope value
+
+
+7) Keep Lambda Expressions Short And Self-explanatory
+------------------
+a) Avoid Blocks of Code in Lambda's Body
+So, do this:
+Foo foo = parameter -> buildString(parameter);
+private String buildString(String parameter) {
+    String result = "Something " + parameter;
+    //many lines of code
+    return result;
+}
+instead of all code in side lambda expression
+
+b) Avoid Specifying Parameter Types
+So, do this:
+(a, b) -> a.toLowerCase() + b.toLowerCase();
+instead of this:1
+(String a, String b) -> a.toLowerCase() + b.toLowerCase();
+
+c)Avoid Parentheses Around a Single Parameter
+So, do this:
+a -> a.toLowerCase();
+instead of this:
+(a) -> a.toLowerCase();
+
+d) Avoid Return Statement and Braces
+Do this:
+a -> a.toLowerCase();
+instead of this:
+a -> {return a.toLowerCase()};
+
+e)Use Method References
+So, the lambda expression:
+a -> a.toLowerCase();
+could be substituted by:
+String::toLowerCase;
+
+8) Use “Effectively Final” Variables
+public void method() {
+    String localVariable = "Local";
+    Foo foo = parameter -> {
+        String localVariable = parameter;
+        return localVariable;
+    };
+}
+The compiler will inform you that:
+Variable 'localVariable' is already defined in the scope.
+This approach should simplify the process of making lambda execution thread-safe.
+
+
+
+Powerful Comparison with Lambdas
+--------------------------------
+( Human h1,  Human h2) -> h1.getName().compareTo(h2.getName());
+
+(h1, h2) -> h1.getName().compareTo(h2.getName())
+
+public static int compareByNameThenAge(Human lhs, Human rhs) {
+    if (lhs.name.equals(rhs.name)) {
+        return lhs.age - rhs.age;
+    } else {
+        return lhs.name.compareTo(rhs.name);
+    }
+}
+humans.sort(Human::compareByNameThenAge);
+
+by using Comparator comparing method
+Collections.sort(
+      humans, Comparator.comparing(Human::getName));
+Reverse compare
+-----
+Comparator<Human> comparator
+      = (h1, h2) -> h1.getName().compareTo(h2.getName());
+humans.sort(comparator.reversed());
+
+Sort with Multiple Conditions – Composition
+----------
+humans.sort(
+      Comparator.comparing(Human::getName).thenComparing(Human::getAge)
+    );
+
+ Sorting a List with Stream.sorted()
+ --------------
+ List<String> letters = Lists.newArrayList("B", "A", "C");
+ List<String> sortedLetters = letters.stream().sorted().collect(Collectors.toList());
+ 
+ Comparator<Human> nameComparator = (h1, h2) -> h1.getName().compareTo(h2.getName());
+List<Human> sortedHumans = 
+      humans.stream().sorted(nameComparator).collect(Collectors.toList());
+or simplify as below
+List<Human> sortedHumans = humans.stream()
+      .sorted(Comparator.comparing(Human::getName))
+      .collect(Collectors.toList());
+
+Reverse order sorting as below
+List<Human> reverseSortedHumans = humans.stream()
+      .sorted(Comparator.comparing(Human::getName, Comparator.reverseOrder()))
+      .collect(Collectors.toList());
+
+signature of comparing method
+static <T,U extends Comparable<? super U>> Comparator<T> comparing(
+   Function<? super T,? extends U> keyExtractor)
+
+static <T,U> Comparator<T> comparing(
+Function<? super T,? extends U> keyExtractor,
+    Comparator<? super U> keyComparator)
+
+Considering Null Last
+---------
+Comparator<Employee> employeeNameComparator
+      = Comparator.comparing(Employee::getName);
+Comparator<Employee> employeeNameComparator_nullLast
+      = Comparator.nullsLast(employeeNameComparator);
+
+Java 8 forEach
+--------------
+
+Iterating over a Map – using Map's forEach
+-----------
+namesMap.forEach((key, value) -> System.out.println(key + " " + value));
+
+The main difference between the two of them is that they are different iterators – the enhanced for-loop is an external iterator whereas the new forEach method is an internal one.
+
+Spliterator in Java
+--------------------
+The Spliterator interface, introduced in Java 8, can be used for traversing and partitioning sequences.
+
+Spliterator forEachRemaining() example
+ArrayList<String> list = new ArrayList<>();
+list.add("A");
+list.add("B");
+list.add("C");
+list.add("D");
+ Spliterator<String> spliterator = list.spliterator();
+ spliterator.forEachRemaining(System.out::println);
+
+Spliterator trySplit() example
+Spliterator<String> spliterator2 = spliterator1.trySplit();
+spliterator1.forEachRemaining(System.out::println);
+System.out.println("========");
+spliterator2.forEachRemaining(System.out::println);
+
+int counter=0;
+while(spli.tryAdvance(s->System.out.println(s)))
+counter++;
+
+Max/Min in Array :
+-------------------
+Car porsche = new Car("Porsche 959", 319);
+Car ferrari = new Car("Ferrari 288 GTO", 303);
+Car bugatti = new Car("Bugatti Veyron 16.4 Super Sport", 415);
+Car mcLaren = new Car("McLaren F1", 355);
+Car[] fastCars = { porsche, ferrari, bugatti, mcLaren };
+
+Car maxBySpeed = Arrays.stream(fastCars)
+  .max(Comparator.comparing(Car::getTopSpeed))
+  .orElseThrow(NoSuchElementException::new);
+
+Internationalization and Localization in Java 8 (new feature on Java 8)
+
+group by example
+-----------------
+Map<String,Long> map1=map.entrySet().stream().sorted(Map.Entry.<String,Long>comparingByKey())
+       .collect(Collectors.toMap(Entry::getKey, Entry::getValue,(oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+
+Generalized Target-Type Inference in Java
+------------------------------------------
+before java 8
+
+Map<String, Map<String, String>> mapOfMaps = new HashMap<String, Map<String, String>>();
+List<String> strList = Collections.<String>emptyList();
+List<Integer> intList = Collections.<Integer>emptyList()
+
+after java 8
+
+
+
+
+
+
+
+
+
+
+

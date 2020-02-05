@@ -292,6 +292,13 @@ We should use the Null Object Pattern when a Client would otherwise check for nu
 Most of the developers would return Collections.emptyList() from findByNameAndLastname() in case none of the customers matches the provided search criteria. This is a very good example of following the Null Object Pattern.
 Example : handle null at factory method as a Default operation
 
+Strategy Design Pattern
+------------------------
+the strategy pattern allows us to change the behavior of an algorithm at runtime.
+
+Discount Example
+
+
 
 
 
@@ -302,6 +309,59 @@ Example : handle null at factory method as a Default operation
 functional Design Pattern
 ==========================
 Currying in Java
+
+
+
+SOLID Principles
+=================
+Single Responsibility
+----------------------
+a class should only have one responsibility. Furthermore, it should only have one reason to change.
+Let's see a few of its benefits.
+Testing – A class with one responsibility will have far fewer test cases
+Lower coupling – Less functionality in a single class will have fewer dependencies
+Organization – Smaller, well-organized classes are easier to search than monolithic ones
+
+see the example baeldung
+
+
+
+
+Open for Extension, Closed for Modification
+-------------------------------------------
+also know as open-closed principle
+example : hair plantation(add new hair without removing existing hair)
+
+see the baeldung example
+
+
+
+
+Liskov Substitution
+--------------------
+imply put, if class A is a subtype of class B, then we should be able to replace B with A without disrupting the behavior of our program.
+see the baeldung example
+
+
+
+
+Interface Segregation
+----------------------
+ it simply means that larger interfaces should be split into smaller ones. By doing so, we can ensure that implementing classes only need to be concerned about the methods that are of interest to them.
+example by own 
+
+
+
+
+Dependency Inversion
+--------------------
+The principle of Dependency Inversion refers to the decoupling of software modules. This way, instead of high-level modules depending on low-level modules, both will depend on abstractions.
+
+
+
+
+
+
 
 
 

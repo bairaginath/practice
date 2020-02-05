@@ -1,3 +1,5 @@
+import java.util.*;
+
 interface Discounter {
 	
 	int apply(int amount);
@@ -34,6 +36,13 @@ public class StrategyDesign {
 		System.out.println(Discounter.newyear().apply(100));
 		System.out.println(Discounter.diwali().combineAfter(Discounter.christmas()).apply(190));
 		System.out.println(Discounter.diwali().combineBefore(Discounter.christmas()).apply(190));
+		
+		List<Discounter> list=new ArrayList<>();
+		list.add(Discounter.diwali());
+		list.add(Discounter.christmas());
+		list.add(Discounter.newyear());
+		Discounter discount=list.stream().reduce((x,y)->x.combineAfter(y)).get();
+		System.out.println(discount.apply(100));
 		
 	}
 
