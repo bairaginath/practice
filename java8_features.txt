@@ -454,6 +454,215 @@ List<Integer> intList = Collections.<Integer>emptyList()
 
 after java 8
 
+Map<String, Map<String, String>> mapOfMaps = new HashMap<>();
+List<String> strList = Collections.emptyList();
+List<Integer> intList = Collections.emptyList()
+
+
+
+
+
+Exception handling
+==================
+Handling Unchecked Exceptions
+List<Integer> integers = Arrays.asList(3, 9, 7, 0, 10, 20);
+integers.forEach(i -> System.out.println(50 / i)); // may be throws ArithmeticException: / by zero
+
+best way to 
+static <T, E extends Exception> Consumer<T>
+  consumerWrapper(Consumer<T> consumer, Class<E> clazz) {
+  
+    return i -> {
+        try {
+            consumer.accept(i);
+        } catch (Exception ex) {
+            try {
+                E exCast = clazz.cast(ex);
+                System.err.println(
+                  "Exception occured : " + exCast.getMessage());
+            } catch (ClassCastException ccEx) {
+                throw ex;
+            }
+        }
+    };
+}
+
+List<Integer> integers = Arrays.asList(3, 9, 7, 0, 10, 20);
+integers.forEach(
+  consumerWrapper(
+    i -> System.out.println(50 / i), 
+    ArithmeticException.class));
+	
+Handling Checked Exceptions
+
+static void writeToFile(Integer integer) throws IOException {
+    // logic to write to file which throws IOException
+}
+List<Integer> integers = Arrays.asList(3, 9, 7, 0, 10, 20);
+integers.forEach(i -> writeToFile(i));
+
+best way to write as below
+@FunctionalInterface
+public interface ThrowingConsumer<T, E extends Exception> {
+    void accept(T t) throws E;
+}
+static <T> Consumer<T> throwingConsumerWrapper(
+  ThrowingConsumer<T, Exception> throwingConsumer) {
+  
+    return i -> {
+        try {
+            throwingConsumer.accept(i);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    };
+}
+
+List<Integer> integers = Arrays.asList(3, 9, 7, 0, 10, 20);
+integers.forEach(throwingConsumerWrapper(i -> writeToFile(i)));
+
+Java API provides Functional 
+
+static <T, E extends Exception> Consumer<T> handlingConsumerWrapper(
+  ThrowingConsumer<T, E> throwingConsumer, Class<E> exceptionClass) {
+  
+    return i -> {
+        try {
+            throwingConsumer.accept(i);
+        } catch (Exception ex) {
+            try {
+                E exCast = exceptionClass.cast(ex);
+                System.err.println(
+                  "Exception occured : " + exCast.getMessage());
+            } catch (ClassCastException ccEx) {
+                throw new RuntimeException(ex);
+            }
+        }
+    };
+	}
+	
+List<Integer> integers = Arrays.asList(3, 9, 7, 0, 10, 20);
+integers.forEach(handlingConsumerWrapper(
+  i -> writeToFile(i), IOException.class));
+  
+  
+ The Double Colon Operator in Java 8
+ ------------------------------------
+ Comparator c = (Computer c1, Computer c2) -> c1.getAge().compareTo(c2.getAge());
+ Comparator c = (c1, c2) -> c1.getAge().compareTo(c2.getAge());
+ Comparator c = Comparator.comparing(Computer::getAge);
+ 
+ import java.util.Arrays;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+class User {
+
+	String name;
+
+	User(String name) {
+		this.name = name;
+	}
+
+	static int staticMethodNoParameter() {
+		return 55;
+	}
+
+	static int staticMethodWithParameter(String str) {
+		return str == null ? 0 : str.length();
+
+	}
+
+	int instanceMethodNoParam() {
+		System.out.println(this.name);
+		return this.name == null ? 0 : this.name.length();
+
+	}
+
+	int instanceMethodWithParameter(String str) {
+		return str == null ? 0 : str.length();
+	}
+
+	int lengthSort(User user) {
+		System.out.println(user.name);
+		return user.name.length();
+	}
+
+	public Double calculateValue(Double initialValue) {
+		System.out.println("parent method");
+		return initialValue / 1.50;
+	}
+
+}
+
+class ChildUser extends User {
+
+	ChildUser(String name) {
+		super(name);
+	}
+
+	@Override
+	public Double calculateValue(Double initialValue) {
+		Function<Double, Double> function = super::calculateValue;
+		Double pcValue = function.apply(initialValue);
+		System.out.println("child method");
+		return pcValue + (initialValue / 10);
+	}
+
+}
+
+@FunctionalInterface
+interface InterfaceUser {
+    User create(String name);
+}
+
+public class DoubleColonOrMethodReferance {
+
+	public static void main(String[] args) {
+		User user = new User("bairaginath");
+		User user1 = new User("behera");
+		Supplier<Integer> s = User::staticMethodNoParameter;
+		System.out.println(s.get());
+		Function<String, Integer> fn = User::staticMethodWithParameter;
+		System.out.println(fn.apply("bairagi"));
+
+		Supplier<Integer> sp = user::instanceMethodNoParam;
+		System.out.println(sp.get());
+
+		Function<String, Integer> fn1 = user::instanceMethodWithParameter;
+		System.out.println(fn1.apply("james"));
+
+		// Supplier<Integer> sp2=User::instanceMethodNoParam;
+		Arrays.asList(user, user1).stream().forEach(User::instanceMethodNoParam);
+
+		// it will work simillary to comparable mehtod
+		Arrays.asList(user, user1).stream().sorted(User::lengthSort);
+
+		// A Super Method of a Particular Object
+		User uu=new ChildUser("child");
+		uu.calculateValue(300.33);
+		
+		
+		//Constructor References
+		InterfaceUser c = User::new;
+		User user2 = c.create("india");
+		System.out.println(user2.name);
+		
+		Function<String,User> con=User::new;
+		System.out.println(con.apply("function").name);
+		
+		// create user array with length 5
+		Function <Integer, User[]> userCreator = User[]::new;
+		User[] userArray = userCreator.apply(5);
+		System.out.println(userArray.length);
+		
+
+	}
+
+}
+
+
+
 
 
 
