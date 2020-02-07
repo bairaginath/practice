@@ -1,0 +1,442 @@
+LinkedList
+============
+public class LinkedList<E>
+    extends AbstractSequentialList<E>
+    implements List<E>, Deque<E>, Cloneable, java.io.Serializable
+	
+ a LinkedList stores its data as a list of elements and every element is linked to its previous and next element. In this case, the search operation for an item has execution time equal to O(n).
+
+The insertion, addition and removal operations of an item are faster in a LinkedList because there is no need to resize an array or update the index when an element is added to some arbitrary position inside the collection.
+
+A LinkedList consumes more memory than an ArrayList because of every node in a LinkedList stores two references, one for its previous element and one for its next element, whereas ArrayList holds only data and its index.
+
+LinkedList implements List and Deque interface.(add() and addAll() from list while addFirst(), addLast(),removeFirst() and removeLast() from Deque).
+removeFirstOccurence()
+removeLastOccurence()
+
+Queue operations
+linkedList.poll(); // throw NoSuchElementException() on 
+linkedList.pop(); // return null if list is empty
+linkedList.push(Object o); //inserts the element as the head of the collection.
+
+
+
+
+
+
+
+
+
+
+ArrayList
+==========
+public class ArrayList<E> extends AbstractList<E>
+        implements List<E>, RandomAccess, Cloneable, java.io.Serializable
+		
+An ArrayList is an index based data structure backed by an Array. It provides random access to its elements with a performance equal to O(1).
+able to dynamically grow and shrink as you add/remove elements.
+Random access takes O(1) time
+Adding element takes amortized constant time O(1)
+Inserting/Deleting takes O(n) time
+Searching takes O(n) time for unsorted array and O(log n) for a sorted one
+
+indexOf() or lastIndexOf()  - return index of Object 
+
+If you have a sorted array, then you may use a binary search algorithm which works faster than linear search
+Collections.sort(list);
+int index = Collections.binarySearch(list, "f");
+
+list.remove(0); // it will remove index 0  element
+list.remove(Integer.valueOf(0)); // it will remove element 0, not index 0 element
+
+By using Itertor we can remove element
+Iterator<String> it = stringsToSearch.iterator();
+while (it.hasNext()) {
+    if (matchingStrings.contains(it.next())) {
+        it.remove();
+    }
+}
+
+
+
+
+Immutable ArrayList
+====================
+List<String> unmodifiableList = Collections.unmodifiableList(list);
+    unmodifiableList.add("four");// will throw UnsupportedOperationException.class
+
+
+Multi Dimensional ArrayList
+===========================
+ArrayList<ArrayList<Integer>> graph = new ArrayList<>();
+ArrayList<ArrayList<ArrayList<String>>> space = new ArrayList<>();
+
+
+
+Converting Iterator to List
+===========================
+Iterator<Integer> iterator = Arrays.asList(1, 2, 3).iterator();
+List<Integer> actualList = new ArrayList<Integer>();
+while (iterator.hasNext()) {
+    actualList.add(iterator.next());
+}
+
+List<Integer> actualList = new ArrayList<Integer>();
+iterator.forEachRemaining(actualList::add); // java 8
+
+Iterable<Integer> iterable = () -> iterator;
+List<Integer> actualList = StreamSupport
+  .stream(iterable.spliterator(), false)
+  .collect(Collectors.toList()); // using java 8 streaming 
+  
+ Duplicate remove on list
+ List<Integer> listWithoutDuplicates = listWithDuplicates.stream()
+     .distinct()
+     .collect(Collectors.toList());
+	 
+
+Check If Two Lists are Equal in Java
+
+List<String> list1 = Arrays.asList("1", "2", "3", "4");
+List<String> list2 = Arrays.asList("1", "2", "3", "4");
+Assert.assertEquals(list1, list2);
+
+
+How to Find an Element in a List with Java
+    The contains method
+    The indexOf method
+    An ad-hoc for loop, and
+    The Stream API
+	
+Java List UnsupportedOperationException
+========================================
+A frequent way in which this error occurs is when we use asList() method from java.util.Arrays:
+public static List asList(T... a)
+It returns:
+    a fixed-size List as of size of a given array
+    an element of the same type as the one in the original array and it must be an Object
+    elements in the same order as in original array
+    a list that is serializable and implements RandomAccess
+Since T is a varargs, we can pass an array or the items directly as parameters, and the method will create a fixed-size initialized list:
+List<String> flowers = Arrays.asList("Ageratum", "Allium", "Poppy", "Catmint");
+String[] flowers = { "Ageratum", "Allium", "Poppy", "Catmint" };
+List<String> flowerList = Arrays.asList(flowers);
+Since the returned List is a fixed-size List, we can’t add/remove elements.
+An attempt to add more elements would cause UnsupportedOperationException:
+String[] flowers = { "Ageratum", "Allium", "Poppy", "Catmint" }; 
+List<String> flowerList = Arrays.asList(flowers); 
+flowerList.add("Celosia");
+
+The root of this Exception is that the returned object doesn't implement the add() operation since it isn't the same as java.util.ArrayList.
+
+It's an ArrayList, from java.util.Arrays.(This ArrayList internally use that array which is final variable ,so we can't modify that array ,as like inside string internally use final charcter array)
+
+Another way to obtain the same exception is by trying to remove an element from the obtained list.
+
+On the other hand, there are ways to obtain a mutable List in case we need it.
+
+String[] flowers = { "Ageratum", "Allium", "Poppy", "Catmint" }; 
+List<String> flowerList = new ArrayList<>(Arrays.asList(flowers));
+
+Copy a List to Another List in Java
+====================================
+Constructor
+-----------
+A simple way to copy a List is by using the constructor that takes a collection as its argument:
+List<Plant> copy = new ArrayList<>(list);
+Due to the fact that we're copying reference here and not cloning the objects,  every amends made in one element will affect both lists.
+For that reason, using the constructor is good to copy immutable objects:
+List<Integer> copy = new ArrayList<>(list);
+Integer is an immutable class, its value is set when the instance is created and can never change.
+An Integer reference can thus be shared by multiple lists and threads and there's no way anybody can change its value.
+List ConcurrentAccessException
+----------------------------------
+A common problem working with lists is the ConcurrentAccessException. This could mean that we're modifying the list while we're trying to copy it, most likely in another thread.
+
+To fix this issue we have to either:
+    Use a designed for concurrent access collection ( in this case use CopyOnWhiteArrayList)
+    Lock the collection appropriately to iterate over it . ( in this case use ReentrantReadWriteLock.)
+    Find a way to avoid needing to copy the original collection
+
+AddAll
+--------
+List<Integer> copy = new ArrayList<>();
+copy.addAll(list)
+In this case also,contents of both lists will reference the same objects
+
+Collections.copy
+-----------------
+List<Integer> source = Arrays.asList(1, 2, 3);
+		List<Integer> dest = Arrays.asList(5, 6, 7, 8, 9, 10);
+		Collections.copy(dest, source);
+Just the three first items were overwritten while the rest of the elements in the list are conserved.
+
+List<String> copy = list.stream()
+  .collect(Collectors.toList()); // using java 8 
+  
+Remove All Occurrences of a Specific Value from a List
+======================================================
+Using a while Loop
+Removing Until the List Changes .//  while (list.remove(element));
+Using an Iterator
+using stream. // list.stream().filter(e -> !Objects.equals(e, element))    .collect(Collectors.toList());
+using removeIf // list.removeIf(n -> Objects.equals(n, element));
+
+ListIterator
+-------------
+A ListIterator allows us to traverse a list of elements in either forward or backward order.
+ListIterator<String> listIterator = countries.listIterator();
+
+Intersection of Two Lists of Strings
+------
+Set<String> result = list.stream()
+  .distinct()
+  .filter(otherList::contains)
+  .collect(Collectors.toSet());
+  
+  
+
+
+
+
+
+HashSet
+=======
+public class HashSet<E>
+    extends AbstractSet<E>
+    implements Set<E>, Cloneable, java.io.Serializable
+
+    It stores unique elements and permits nulls
+    It's backed by a HashMap
+    It doesn't maintain insertion order
+    It's not thread-safe
+
+When we put an object into a HashSet, it uses the object's hashcode value to determine if an element is not in the set already.
+Each hash code value corresponds to a certain bucket location which can contain various elements, for which the calculated hash value is the same. But two objects with the same hashCode might not be equal.
+So, objects within the same bucket will be compared using the equals() method.
+
+The performance of a HashSet is affected mainly by two parameters – its Initial Capacity and the Load Factor.
+The expected time complexity of adding an element to a set is O(1) which can drop to O(n) in the worst case scenario (only one bucket present) – therefore, it's essential to maintain the right HashSet's capacity.
+
+A low initial capacity reduces space complexity but increases the frequency of rehashing which is an expensive process.
+On the other hand, a high initial capacity increases the cost of iteration and the initial memory consumption.
+
+As a rule of thumb:
+    A high initial capacity is good for a large number of entries coupled with little to no iteration
+    A low initial capacity is good for few entries with a lot of iteration
+
+
+
+
+
+
+TreeSet
+=======
+public class HashSet<E>
+    extends AbstractSet<E>
+    implements Set<E>, Cloneable, java.io.Serializable
+
+
+    It stores unique elements
+    It doesn't preserve the insertion order of the elements
+    It sorts the elements in ascending order
+    It's not thread-safe
+
+The TreeSet uses a self-balancing binary search tree, more specifically a Red-Black tree.
+
+Set<String> treeSet = new TreeSet<>(Comparator.comparing(String::length));
+
+The add() method, as expected, can be used for adding elements to a TreeSet. If an element was added, the method returns true, otherwise – false.
+The contract of the method states that an element will be added only when the same isn't already present in the Set.
+
+methods
+-------
+first()
+last()
+subSet() //return the elements ranging from fromElement to toElement. Note that fromElement is inclusive and toElement is exclusive
+headSet() //return elements of TreeSet which are smaller than the specified element
+tailSet()//return the elements of a TreeSet which are greater than or equal to the specified element
+
+Before Java 7, it was possible to add null elements to an empty TreeSet.
+However, that was considered a bug. Therefore, TreeSet no longer supports the addition of null.
+(beacuse while adding element to treeset, it internally use comparator or comparable method ,if it is null object, will throw NPE.)
+
+ Operations like add, remove and search take O(log n) time while operations like printing n elements in sorted order require O(n) time.
+ 
+ A TreeSet should be our primary choice if we want to keep our entries sorted as a TreeSet may be accessed and traversed in either ascending or descending order
+ 
+ 
+ 
+ 
+ 
+ 
+ HashMap
+=========
+public class HashMap<K,V> extends AbstractMap<K,V>
+    implements Map<K,V>, Cloneable, Serializable
+	
+HashMap also allows us to have null as a key
+We can use any class as the key in our HashMap. However, for the map to work properly, we need to provide an implementation for equals() and hashCode().
+
+map.forEach((k,v)-> System.out.println(k+""+v));
+productsByName.getOrDefault("horse carriage", chocolate); 
+productsByName.putIfAbsent("E-Bike", chocolate);
+merge()-with merge(), we can modify the value for a given key if a mapping exists, or add a new value otherwise
+
+compute()- With the compute() method, we can compute the value for a given key:
+
+HashMap stores elements in so-called buckets and the number of buckets is called capacity. When we want to put a value in the map, HashMap calculates the bucket based on the key and stores the value in that bucket. To retrieve the value, HashMap calculates the bucket in exactly the same way.
+
+For this to work correctly, equal keys must have the same hash, however, different keys can have the same hash. If two different keys have the same hash, the two values belonging to them will be stored in the same bucket. Inside a bucket, values are stored in a list and retrieved by looping over all elements. The cost of this is O(n).
+As of Java 8 (see JEP 180), the data structure in which the values inside one bucket are stored is changed from a list to a balanced tree if a bucket contains 8 or more values, and it's changed back to a list if, at some point, only 6 values are left in the bucket. This improves the performance to be O(log n).
+
+Differences Between HashMap and Hashtable
+------------------------------------------
+Neither class maintains the insertion order of the elements. In other words, the first item added may not be the first item when we iterate over the values.
+
+Null as key
+Synchronization
+faster 
+memory - hashmap take less memory
+Iteration Over Elements(HashMap uses Iterator to iterate over values, whereas Hashtable has Enumerator for the same. )
+ Iterator has a remove() method to remove elements from underlying collections, on cass Enumerator we can't remove.
+ 
+ Iterator<String> iterator = map.keySet().iterator();
+		while(iterator.hasNext()){ 
+		    String key=iterator.next();
+		    //map.put("key4", "value4"); // will throw ConcurrentModificationException
+		    if("key1".equals(key))
+		       iterator.remove(); // it will remove the entry from map
+		}
+
+
+
+ LinkedHashMap 
+ ==============
+ public class LinkedHashMap<K,V>
+    extends HashMap<K,V>
+    implements Map<K,V>
+	
+the linked hash map is based on both hash table and linked list to enhance the functionality of hash map.
+It maintains a doubly-linked list running through all its entries in addition to an underlying array of default size 16.
+
+To maintain the order of elements, the linked hashmap modifies the Map.Entry class of HashMap by adding pointers to the next and previous entries
+
+static class Entry<K,V> extends HashMap.Node<K,V> {
+        Entry<K,V> before, after;
+        Entry(int hash, K key, V value, Node<K,V> next) {
+            super(hash, key, value, next);
+        }
+    }
+Notice that the Entry class simply adds two pointers; before and after which enable it to hook itself to the linked list. it maintaining insertion order.
+
+LinkedHashMap<Integer, String> map = new LinkedHashMap<>(16, .75f, false);
+
+The first parameter is the initial capacity, followed by the load factor and the last param is the ordering mode.(default ordering mode is insertion order).
+
+the order of elements in the key set is transformed as we perform access operations on the map.
+
+if you pass accessOrder=true , then it follow LRU (Least Recently Use )
+Map<Integer,String> map=new LinkedHashMap<>(16, .75f, true);
+
+
+Set<Integer> keys = map.keySet();
+assertEquals("[1, 2, 3, 4, 5]", keys.toString());
+map.get(4);
+assertEquals("[1, 2, 3, 5, 4]", keys.toString());
+map.get(1);
+assertEquals("[2, 3, 5, 4, 1]", keys.toString());
+map.get(3);
+assertEquals("[2, 5, 4, 1, 3]", keys.toString());
+
+RemoveEldestEntry
+-----------------
+public class MyLinkedHashMap<K, V> extends LinkedHashMap<K, V> {
+ 
+    private static final int MAX_ENTRIES = 5;
+ 
+    public MyLinkedHashMap(
+      int initialCapacity, float loadFactor, boolean accessOrder) {
+        super(initialCapacity, loadFactor, accessOrder);
+    }
+ 
+    @Override
+    protected boolean removeEldestEntry(Map.Entry eldest) {
+        return size() > MAX_ENTRIES;
+    }
+}
+
+LinkedHashMap<Integer, String> map
+      = new MyLinkedHashMap<>(16, .75f, true);
+map.put(1, null);
+map.put(2, null);
+map.put(3, null);
+map.put(4, null);
+map.put(5, null);
+Set<Integer> keys = map.keySet();
+assertEquals("[1, 2, 3, 4, 5]", keys.toString());
+
+map.put(6, null);
+assertEquals("[2, 3, 4, 5, 6]", keys.toString());
+
+map.put(7, null);
+assertEquals("[3, 4, 5, 6, 7]", keys.toString());
+
+map.put(8, null);
+assertEquals("[4, 5, 6, 7, 8]", keys.toString());
+
+Just like HashMap, LinkedHashMap performs the basic Map operations of add, remove and contains in constant-time, as long as the hash function is well-dimensioned. It also accepts a null key as well as null values.
+
+
+
+
+
+
+
+
+
+
+
+
+
+TreeMap
+========
+public class TreeMap<K,V> extends AbstractMap<K,V>
+  implements NavigableMap<K,V>, Cloneable, java.io.Serializable
+  
+TreeMap is a map implementation that keeps its entries sorted according to the natural ordering of its keys or better still using a comparator if provided by the user at construction time.
+
+TreeMap, unlike a hash map and linked hash map, does not employ the hashing principle anywhere since it does not use an array to store its entries.
+
+Integer highestKey = map.lastKey(); 
+Integer lowestKey = map.firstKey();
+map.headMap(3)
+map.tailMap(3)
+
+it is based on Red-Black tree principle
+Red-black tree is a self-balancing binary search tree
+operations like search, get, put and remove take logarithmic time O(log n).
+ tree map is not synchronized 
+ 
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
