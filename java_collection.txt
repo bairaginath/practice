@@ -267,9 +267,25 @@ However, that was considered a bug. Therefore, TreeSet no longer supports the ad
  
  
  
+ HashTable
+ =========
+ Hashtable is the oldest implementation of a hash table data structure in Java.
+ public class Hashtable<K,V>
+    extends Dictionary<K,V>
+    implements Map<K,V>, Cloneable, java.io.Serializable
+
  
  
  
+
+
+
+
+
+
+
+
+
  HashMap
 =========
 public class HashMap<K,V> extends AbstractMap<K,V>
@@ -307,6 +323,7 @@ Iteration Over Elements(HashMap uses Iterator to iterate over values, whereas Ha
 		    //map.put("key4", "value4"); // will throw ConcurrentModificationException
 		    if("key1".equals(key))
 		       iterator.remove(); // it will remove the entry from map
+               map.remove(key); //also throw ConcurrentModificationException
 		}
 
 
@@ -320,7 +337,7 @@ Iteration Over Elements(HashMap uses Iterator to iterate over values, whereas Ha
 the linked hash map is based on both hash table and linked list to enhance the functionality of hash map.
 It maintains a doubly-linked list running through all its entries in addition to an underlying array of default size 16.
 
-To maintain the order of elements, the linked hashmap modifies the Map.Entry class of HashMap by adding pointers to the next and previous entries
+To maintain the order of elements, the linked hashmap modifies the Map.Entry class of HashMap by adding pointers to the after and before entries
 
 static class Entry<K,V> extends HashMap.Node<K,V> {
         Entry<K,V> before, after;
@@ -417,26 +434,375 @@ it is based on Red-Black tree principle
 Red-black tree is a self-balancing binary search tree
 operations like search, get, put and remove take logarithmic time O(log n).
  tree map is not synchronized 
+
+
+
+ WeakHashMap
+ ===========
+ public class WeakHashMap<K,V>
+    extends AbstractMap<K,V>
+    implements Map<K,V> {
+ WeakHashMap is a hashtable-based implementation of the Map interface, with keys that are of a WeakReference type.
+ An entry in a WeakHashMap will automatically be removed when its key is no longer in ordinary use, meaning that there is no single Reference that point to that key. When the garbage collection (GC) process discards a key, its entry is effectively removed from the map, so this class behaves somewhat differently from other Map implementations.
+
+ Strong References
+ ----------------
+ Integer prime = 1;
+ Any object which has a strong reference pointing to it is not eligible for GC.
+Soft References
+--------------
+ Integer prime = 1;  
+SoftReference<Integer> soft = new SoftReference<Integer>(prime); 
+prime = null;
+we are wrapping prime strong reference into a soft reference. After making that strong reference null, a prime object is eligible for GC but will be collected only when JVM absolutely needs memory.
+Weak References
+------------
+The objects that are referenced only by weak references are garbage collected eagerly; the GC won't wait until it needs memory in that case.
+Integer prime = 1;  
+WeakReference<Integer> soft = new WeakReference<Integer>(prime); 
+prime = null;
+When we made a prime reference null, the prime object will be garbage collected in the next GC cycle
+
+WeakHashMap<UniqueImageName, BigImage> map = new WeakHashMap<>();
+BigImage bigImage = new BigImage("image_id");
+UniqueImageName imageName = new UniqueImageName("name_of_big_image");
  
-
+map.put(imageName, bigImage);
+assertTrue(map.containsKey(imageName));
  
+imageName = null;
+System.gc();
+ 
+await().atMost(10, TimeUnit.SECONDS).until(map::isEmpty)
+
+
+ EnumMap
+ =======
+ public class EnumMap<K extends Enum<K>, V> extends AbstractMap<K, V>
+    implements java.io.Serializable, Cloneable
+
+ EnumMap is a Map implementation that exclusively takes Enum as its keys.
+public enum DayOfWeek {
+    MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY
+} 
+
+ EnumMap<DayOfWeek, String> activityMap = new EnumMap<>(DayOfWeek.class);
+activityMap.put(DayOfWeek.MONDAY, "Soccer");
+
+ EnumMap requires the key type in the constructor.
+
+convert non-enum map to enumMap
+Map<DayOfWeek, String> ordinaryMap = new HashMap();
+ordinaryMap.put(DayOfWeek.MONDAY, "Soccer");
+ 
+EnumMap enumMap = new EnumMap(ordinaryMap);
+assertThat(enumMap.size()).isEqualTo(1);
+Note that the map must be non-empty so that EnumMap can determine the key type from an existing entry.
+
+EnumMap is an ordered map . it depend up on which order you  define enum constants.
+Collection Views
+-----
+Collection values = dayMap.values();
+Set keys = dayMap.keySet();
+dayMap.entrySet()
+
+remember that any changes we make in the original activity map will be reflected in any of its views:
+Collection values = dayMap.values();
+activityMap.put(DayOfWeek.TUESDAY, "Basketball");
+assertThat(values)
+    .containsExactly("Soccer", "Basketball", "Hiking", "Karate");
+
+Using Enum as key makes it possible to do some extra performance optimization, like a quicker hash computation since all possible keys are known in advance.
+EnumMap is an ordered map, in that its views will iterate in enum order.
+
+Immutable Map
+=============
+An Unmodifiable Map is just a wrapper over a modifiable map and it doesn't allow modifications to it directly
+Map<String, String> mutableMap = new HashMap<>();
+mutableMap.put("USA", "North America");
+ 
+Map<String, String> unmodifiableMap = Collections.unmodifiableMap(mutableMap);
+assertThrows(UnsupportedOperationException.class,
+  () -> unmodifiableMap.put("Canada", "North America"));
+
+But the underlying mutable map can still be changed and the modifications are reflected in the Unmodifiable map as well:
+
+mutableMap.remove("USA");
+assertFalse(unmodifiableMap.containsKey("USA"));
+         
+mutableMap.put("Mexico", "North America");
+assertTrue(unmodifiableMap.containsKey("Mexico"));
+
+
+Map Initalization
+-------
+Collections.singletonMap("username1", "password1")
+this map is immutable, if we try to add more entries, it'll throw java.lang.UnsupportedOperationException.
+create an immutable empty map 
+Map<String, String> emptyMap = Collections.emptyMap();
+
+Map<String, String> map = Stream.of(new String[][] {
+  { "Hello", "World" }, 
+  { "John", "Doe" }, 
+}).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+
+Map<String, Integer> map = Stream.of(
+  new AbstractMap.SimpleEntry<>("idea", 1), 
+  new AbstractMap.SimpleEntry<>("mobile", 2))
+  .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+
+Map Merge
+---------
+Map<String,String> map1=new HashMap<>();
+        map1.put("jame1","india1");
+        map1.put("bond1","england1");
+        map1.put("key1","value1");
+        Map<String,String> map2=new HashMap<>();
+        map2.put("jame1","india2");
+        map2.put("bond1","england2");       
+        BiFunction<String,String, String> fun=(e1,e2)->e1+e2;
+        map2.forEach((k,v)->map1.merge(k,v,fun));
+        map1.forEach((k,v)->System.out.println(k+" "+v));
+        String demo=map1.merge("key1","demo",(v1,v2)->v1+v2);
+        System.out.println(demo); // it will print value1demo
+
+Map<String,String> combine=Stream.concat(map1.entrySet().stream(),map2.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey,Map.Entry::getValue,(v1,v2)->v1+v2));
+        combine.forEach((k,v)->System.out.println(k+"  "+v));
+
+
+Map<String, String> map3 = Stream.of(map1, map2)
+  .flatMap(map -> map.entrySet().stream())
+  .collect(Collectors.toMap(
+    Map.Entry::getKey,
+    Map.Entry::getValue,
+    (v1, v2) -> v1+v2));
+
+Map<String,String> map3 = map2.entrySet()
+  .stream()
+  .collect(Collectors.toMap(
+    Map.Entry::getKey,
+    Map.Entry::getValue,
+    (v1, v2) -> v1+v2,
+  () -> new HashMap<>(map1)));
 
 
 
+Sort on HashMap
+----------------
+a)Using a TreeMap
+TreeMap<String, Employee> sorted = new TreeMap<>(map); or
+TreeMap<String, Employee> sorted = new TreeMap<>();
+sorted.putAll(map);
+
+b)Using Lambdas And Streams
+map.entrySet()
+  .stream()
+  .sorted(Map.Entry.<String, Employee>comparingByKey())
+  .forEach(System.out::println);
+
+comparing by value and create new map
+Map<String, Employee> result = map.entrySet()
+  .stream()
+  .sorted(Map.Entry.comparingByValue())
+  .collect(Collectors.toMap(
+    Map.Entry::getKey, 
+    Map.Entry::getValue, 
+    (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
 
 
+Queue
+=======
+offer() – Inserts a new element onto the Queue
+poll() – Removes an element from the front of the Queue
+peek() – Inspects the element at the front of the Queue, without removing it
 
+for design customize queue then extends AbstractQueue 
+public class CustomBaeldungQueue<T> extends AbstractQueue<T> {
+ 
+    private LinkedList<T> elements;
+ 
+    public CustomBaeldungQueue() {
+      this.elements = new LinkedList<T>();
+    }
+ 
+}
+Java offers ConcurrentLinkedQueue, ArrayBlockingQueue, and ConcurrentLinkedDeque which are thread-safe and perfect for multi-threaded programs.
 
+ArrayDeque
+===========
+Array Double Ended Queue
+special kind of a growable array that allows us to add or remove an element from both sides.
+An ArrayDeque implementation can be used as a Stack (Last-In-First-Out) or a Queue(First-In-First-Out).
+The first group consists of methods that throw exception if the operation fails. The other group returns a status or a value:
 
+Operation   Method  Method throwing Exception
+Insertion from Head offerFirst(e)   addFirst(e)
+Removal from Head   pollFirst() removeFirst()
+Retrieval from Head peekFirst() getFirst()
+Insertion from Tail offerLast(e)    addLast(e)
+Removal from Tail   pollLast()  removeLast()
+Retrieval from Tail peekLast()  getLast()
 
+Using ArrayDeque as a Stack
+---------
+Deque<String> stack = new ArrayDeque<>();
+    stack.push("first");
+    stack.push("second");  
+    assertEquals("second", stack.getFirst()); 
+or 
+ Deque<String> stack = new ArrayDeque<>();
+    stack.push("first");
+    stack.push("second");
+    assertEquals("second", stack.pop()) 
+Using ArrayDeque as a Queue
+----------
+Deque<String> queue = new ArrayDeque<>();
+    queue.offer("first");
+    queue.offer("second");
+assertEquals("second", queue.getLast());
+or
+Deque<String> queue = new ArrayDeque<>();
+    queue.offer("first");
+    queue.offer("second");
+    assertEquals("first", queue.poll());
 
+Think own way, how internal ArrayDeque is working as both stack and queue.( hint: inital tail and head are started from middle index of array )
+ 
+It's not thread-safe
+Null elements are not accepted
+Works significantly faster than the synchronized Stack
+Is a faster queue than LinkedList due to the better locality of reference
+Most operations have amortized constant time complexity
+An Iterator returned by an ArrayDeque is fail-fast
+ArrayDeque automatically doubles the size of an array when head and tail pointer meets each other while adding an element
 
+Convert List to Array (Vice versa)
+---------------------------------
+List<Integer> sourceList = Arrays.asList(0, 1, 2, 3, 4, 5);
+    Integer[] targetArray = sourceList.toArray(new Integer[sourceList.size()]);
 
+Convert Set to Array (Vice versa)
+---------------------------------
+Integer[] sourceArray = { 0, 1, 2, 3, 4, 5 };
+Set<Integer> targetSet = new HashSet<Integer>(Arrays.asList(sourceArray));
+Alternatively,
+ Set<Integer> targetSet = new HashSet<Integer>();
+Collections.addAll(targetSet, sourceArray);
+converting an existing Set to an array
+Integer[] targetArray = sourceSet.toArray(new Integer[sourceSet.size()]);
 
+Convert Set to List (Vice versa)
+---------------------------------
+List<Integer> sourceList = Arrays.asList(0, 1, 2, 3, 4, 5);
+    Set<Integer> targetSet = new HashSet<>(sourceList);
+List<Integer> targetList = new ArrayList<>(sourceSet);
 
+Convert a Map to an Array, List or Set
+---------------------------------------
+Map<Integer, String> sourceMap = createMap();
+     Collection<String> values = sourceMap.values();
+    String[] targetArray = values.toArray(new String[values.size()]);
 
+Map<Integer, String> sourceMap = createMap();
+     List<String> targetList = new ArrayList<>(sourceMap.values());
 
+Map<Integer, String> sourceMap = createMap();
+     Set<String> targetSet = new HashSet<>(sourceMap.values());
 
+Convert List to Map
+--------------------
+Map<Integer, Animal> map = list.stream()
+      .collect(Collectors.toMap(Animal::getId, animal -> animal));
 
+Convert a Map to a String
+-------------------------
+String mapAsString = map.keySet().stream()
+      .map(key -> key + "=" + map.get(key))
+      .collect(Collectors.joining(", ", "{", "}"));
 
+The Difference Between Collection.stream().forEach() and Collection.forEach()
+-------------------------------
+processing order of the items is defined. In contrast, the processing order of Collection.stream().forEach() is undefined.
+list.forEach(System.out::print);//insertion order
+list.parallelStream().forEach(System.out::print);//random order
+
+forEach() uuses the custom iterator, while stream().forEach() simply takes elements one by one from the list, ignoring the iterator.
+
+Consumer<String> removeElement = s -> {
+    System.out.println(s + " " + list.size());
+    if (s != null && s.equals("A")) {
+        list.remove("D");
+    }
+};
+
+list.forEach(removeElement); // will throw ConcurrentModificationException middle fo the loop ,due to fail-fast
+list.stream().forEach(removeElement);
+// wiil throw ConcurrentModificationException  end of the loop
+
+Sorting in Java
+----------------
+Arrays.sort(arrayToSort);
+Arrays.sort(toSort,fromIndex,toIndex);//partial sort
+Arrays.parallelSort(toSort);
+
+Collections.sort(toSortList);
+
+List<Integer> list = new ArrayList<Integer>(integersSet);
+Collections.sort(list;
+integersSet = new LinkedHashSet<>(list);
+
+Shuffling Collections
+---------------------
+List<String> students = Arrays.asList("Foo", "Bar", "Baz", "Qux");
+Collections.shuffle(students);
+
+List<Map.Entry<Integer, String>> shuffledStudentEntries
+ = new ArrayList<>(studentsById.entrySet());
+Collections.shuffle(shuffledStudentEntries);
+Map<Integer,String> aftershuffle=shuffledStudentEntries.stream()
+        .collect(Collectors.toMap(Map.Entry::getKey,Map.Entry::getValue,(v1,v2)->v1,
+                ()->new LinkedHashMap<>()));
+aftershuffle.entrySet().forEach(System.out::println);
+
+Zipping 
+-------
+IntStream
+  .range(0, Math.min(names.size(), ages.size()))
+  .mapToObj(i -> names.get(i) + ":" + ages.get(i))
+Java Stream to an Immutable Collection
+-------------
+List<String> givenList = Arrays.asList("a", "b", "c");
+    List<String> result = givenList.stream()
+      .collect(collectingAndThen(toList(), ImmutableList::copyOf));
+Size of an Iterable
+-------------------
+if (data instanceof Collection) {
+    return ((Collection<?>) data).size();
+}
+using stream
+return StreamSupport.stream(data.spliterator(), false).count();
+
+Removing Elements from Java Collections
+---------------------------------------
+Iterator<String> i = names.iterator();
+ while(i.hasNext()) {
+    String e = i.next();
+    if (e.startsWith("A")) {
+        i.remove();
+    }
+}
+using stream , names.removeIf(e -> e.startsWith("A"));
+
+Collection<String> filteredCollection = names
+  .stream()
+  .filter(e -> !e.startsWith("A"))
+  .collect(Collectors.toList());
+
+alternatively
+Map<Boolean, List<String>> classifiedElements = names
+    .stream()
+    .collect(Collectors.partitioningBy((String e) -> 
+      !e.startsWith("A")));

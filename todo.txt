@@ -20,5 +20,18 @@ https://github.com/eugenp/tutorials/tree/master/java-collections-maps
 
 https://www.baeldung.com/java-collections
 
+https://github.com/eugenp/tutorials/tree/master/java-collections-maps-2
 
+https://github.com/eugenp/tutorials/tree/master/core-java-modules/core-java-collections
+
+https://www.baeldung.com/java-transfer-queue
+
+https://github.com/eugenp/tutorials/tree/master/core-java-modules/core-java-concurrency-collections
+
+https://www.baeldung.com/java-delay-queue
+
+please check new concurrency collection from following link
+https://www.baeldung.com/java-collections
+
+ https://github.com/eugenp/tutorials/tree/master/core-java-modules/core-java-collections-2
 
