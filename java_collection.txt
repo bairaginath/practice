@@ -806,3 +806,159 @@ Map<Boolean, List<String>> classifiedElements = names
     .stream()
     .collect(Collectors.partitioningBy((String e) -> 
       !e.startsWith("A")));
+
+
+
+
+===================================================================================================
+String[] strArray = new String[] { "John", "Snow" };
+ArrayList<String> strList = (ArrayList<String>) Arrays.asList(strArray);
+System.out.println("String list: " + strList);
+he reason is that although the static method Arrays.asList() returns a List, we don't know until runtime exactly what implementation is returned. So at compile time the compiler can't know either and allows the cast.
+When the code runs, the actual implementation is checked which finds that Arrays.asList() returns an Arrays$List thus causing a ClassCastException.
+
+public static List asList(T... a)
+
+    a fixed-size List as of size of a given array
+    an element of the same type as the one in the original array and it must be an Object
+    elements in the same order as in original array
+    a list that is serializable and implements RandomAccess
+Since the returned List is a fixed-size List, we can’t add/remove elements.
+An attempt to add more elements would cause UnsupportedOperationException
+
+Collections.emptyList() returns a list (java.util.Collections.EmptyList) that can't be modified and An attempt to add more elements would cause UnsupportedOperationException.
+
+Collections.frequency(list,"james") //This method returns the number of elements in a Collection c matching an Object o.
+
+ String result = intList.stream()
+      .map(n -> String.valueOf(n))
+      .collect(Collectors.joining("-", "{", "}"));
+
+Converting Iterable to Collection
+----------------------------
+Iterable<String> iterable = Arrays.asList("john", "tom", "jane");
+List<String> result = 
+  StreamSupport.stream(iterable.spliterator(), false)
+    .collect(Collectors.toList());
+
+Converting Iterator to Collection
+----------------------------
+List<String> result = 
+  StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false)
+    .collect(Collectors.toList());
+	
+List<Integer> actualList = StreamSupport
+  .stream(iterable.spliterator(), false)
+  .collect(Collectors.toList());
+ 
+Array to String Conversions
+----------------------
+String[] strArray = { "one", "two", "three" };
+String joinedString = Arrays.toString(strArray);
+String joinedString = String.join("", new String[]{ "Convert", "With", "Java", "Streams" });
+String joinedString = Arrays
+    .stream(new String[]{ "Convert", "With", "Java", "Streams" })
+    .collect(Collectors.joining());
+
+Set operations
+--------------
+Set<Integer> intersectSet = new HashSet<>(setA);
+intersectSet.retainAll(setB); // it will return intersection between setA and setB
+Set<Integer> unionSet = new HashSet<>(setA);
+unionSet.addAll(setB); // return union between setA and setB
+Set<Integer> differenceSet = new HashSet<>(setA);
+differenceSet.removeAll(setB); return A-B
+using stream
+Set<Integer> intersectSet = setA.stream()
+    .filter(setB::contains)
+    .collect(Collectors.toSet()); // A instersection Bar
+
+Set<Integer> unionSet = Stream.concat(setA.stream(), setB.stream())
+    .collect(Collectors.toSet()); // A union Bar
+Set<Integer> differenceSet = setA.stream()
+    .filter(val -> !setB.contains(val))
+    .collect(Collectors.toSet()); // return A-B
+
+HashSet and TreeSet Comparison
+-------------------------------
+HashSet stores the objects in random order, whereas TreeSet applies the natural order of the elements.
+HashSet can store null objects, while TreeSet does not allow them:
+HashSet provides constant-time performance for most operations like add(), remove() and contains(), versus the log(n) time offered by the TreeSet. 
+
+TreeSet is rich in functionalities, implementing additional methods like:
+pollFirst() – to return the first element, or null if Set is empty
+    pollLast() – to retrieve and remove the last element, or return null if Set is empty
+    first() – to return the first item
+    last() – to return the last item
+    ceiling() – to return the least element greater than or equal to the given element, or null if there is no such element
+    lower() – to return the largest element strictly less than the given element, or null if there is no such element
+
+If we want to keep our entries sorted, we need to go for the TreeSet
+If we cpu performance more than memory consumption, we should go for the HashSet
+If we are short on memory, we should go for the TreeSet
+HashSet‘s performance can be tuned using the initialCapacity and loadFactor, which is not possible for the TreeSet
+
+create HashSet using stream
+----------
+Set<String> set = Stream.of("a", "b", "c")
+  .collect(Collectors.toCollection(HashSet::new));
+
+Arrays.sort(Object[]) needs to compare one object against another, it needs to call each element's compareTo method.
+Arrays.sort(int[]) can simply use primitive relational operators like < and >, which are single bytecode instructions.
+
+key differences of ArrayList and Vector.
+---------------------------------------
+    synchronization – The first major difference between these two. Vector is synchronized and ArrayList isn't.
+    size growth – Another difference between the two is the way they resize while reaching their capacity. The Vector doubles its size. In contrast, ArrayList increases only by half of its length
+    iteration – And Vector can use Iterator and Enumeration to traverse over the elements. On the other hand, ArrayList can only use Iterator.
+    performance – Largely due to synchronization, Vector operations are slower when compared to ArrayList
+    framework – Also, ArrayList is a part of the Collections framework and was introduced in JDK 1.2. Meanwhile, Vector is present in the earlier versions of Java as a legacy class.
+Differences Between Hashtable and HashMap
+-----------------------------------------
+Synchronization
+ Hashtable doesn't allow null at all
+ Hashtable<String, String> table = new Hashtable<String, String>();
+table.put("key", null); will throw NullPointerException.
+table.put(null, "value"); will throw NullPointerException
+HashMap uses Iterator, whereas Hashtable has Enumerator for the same.
+since JDK 1.8, Hashtable has been deprecated. However, ConcurrentHashMap is a great Hashtable replacement
+Differences Between Collection.clear() and Collection.removeAll()
+----------------------------------------------
+Collection<Integer> collection = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
+collection.clear();
+assertTrue(collection.isEmpty()); 
+Collection<Integer> secondCollection = new ArrayList<>(
+      Arrays.asList(3, 4, 5, 6, 7));
+collection.removeAll(secondCollection); // it wiill remove 3,4,5
+
+Performance of contains() in a HashSet vs ArrayList
+--------------------------------------------------
+the contains() of HashSet runs in O(1) time. Getting the object's bucket location is a constant time operation. Taking into account possible collisions, the lookup time may rise to log(n) because the internal bucket structure is a TreeMap.
+Internally, ArrayList uses the indexOf(object) method to check if the object is in the list. The indexOf(object) method iterates the entire array and compares each element with the equals(object) method.
+
+Fail-Safe Iterator vs Fail-Fast Iterator
+------------------------------------------
+Fail-Fast systems abort operation as-fast-as-possible exposing failures immediately and stopping the whole operation.
+Fail-Safe systems don't abort an operation in the case of a failure. Such systems try to avoid raising failures as much as possible.
+Default iterators for Collections from java.util package such as ArrayList, HashMap, etc. are Fail-Fast.
+Iterator<Integer> iterator = numbers.iterator();
+while (iterator.hasNext()) {
+    Integer number = iterator.next();
+    numbers.add(50);// will throw throw ConcurrentModificationException 
+	iterator.remove(); //  an item is removed using Iterator‘s remove() method, that's entirely safe and doesn't throw an exception.
+}
+In case of Fail-Safe Iterators, Those iterators create a clone of the actual Collection and iterate over it. If any modification happens after the iterator is created, the copy still remains untouched. Hence, these Iterators continue looping over the Collection even if it's modified.
+One disadvantage is that the Iterator isn't guaranteed to return updated data from the Collection, as it's working on the clone instead of the actual Collection.Another disadvantage is the overhead of creating a copy of the Collection, both regarding time and memory.
+Iterators on Collections from java.util.concurrent package such as ConcurrentHashMap, CopyOnWriteArrayList, etc. are Fail-Safe in nature.
+
+Copying a HashMap
+------------------
+A shallow copy of a HashMap is a new HashMap with mappings to the same key and value objects as the original HashMap.
+HashMap<String, Employee> shallowCopy =(HashMap<String, Employee>) originalMap.clone()
+HashMap<String, Employee> shallowCopy = new HashMap<String, Employee>(originalMap);
+create a shallow copy of a HashMap using stream API
+HashMap<String, Employee> shallowCopy=originalMap.entrySet().stream()
+  .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+ because this is a shallow copy, if we change an Employee instance's properties, it will affect both the original map and its shallow copy.
+
+A deep copy of a HashMap is a new HashMap that deeply copies all the mappings. Therefore, it creates new objects for all keys, values, and mappings. explicitly modifying the mappings (key-values) will not affect the deep copy.
