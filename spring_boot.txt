@@ -1,0 +1,257 @@
+Spring-boot
+============
+@SpringBootApplication
+
+Spring MVC
+@Controller
+public class SimpleController {
+    @Value("${spring.application.name}")
+    String appName;
+ 
+    @GetMapping("/")
+    public String homePage(Model model) {
+        model.addAttribute("appName", appName);
+        return "home";
+    }
+}
+
+for JPA persistance
+====================
+@EnableJpaRepositories("org.baeldung.persistence.repo") 
+@EntityScan("org.baeldung.persistence.model")
+@SpringBootApplication
+public class Application {
+   ...
+}
+
+Error Handling
+===============
+@ControllerAdvice
+public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+ 
+    @ExceptionHandler({ BookNotFoundException.class })
+    protected ResponseEntity<Object> handleNotFound(
+      Exception ex, WebRequest request) {
+        return handleExceptionInternal(ex, "Book not found", 
+          new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+    }
+ 
+    @ExceptionHandler({ BookIdMismatchException.class, 
+      ConstraintViolationException.class, 
+      DataIntegrityViolationException.class })
+    public ResponseEntity<Object> handleBadRequest(
+      Exception ex, WebRequest request) {
+        return handleExceptionInternal(ex, ex.getLocalizedMessage(), 
+          new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+}
+
+Spring Boot Annotations
+=======================
+@EnableAutoConfiguration : by default Auto configuration is enable.
+if you want to bean creation by own or some condition , exclude that bean as below
+@EnableAutoConfiguration(exclude={MySQLAutoconfiguration.class})
+
+Conditions 
+==========
+class condition : 
+-----------------
+@Configuration
+@ConditionalOnClass(DataSource.class)
+public class MySQLAutoconfiguration {}
+
+bean condition :
+-----------------
+@Bean
+@ConditionalOnBean(name = "dataSource")
+@ConditionalOnMissingBean
+public LocalContainerEntityManagerFactoryBean entityManagerFactory() {}
+
+Properties conditions :
+-------------------------
+@Bean
+@ConditionalOnProperty(
+  name = "usemysql", 
+  havingValue = "local")
+@ConditionalOnMissingBean
+public DataSource dataSource() {}
+
+Resource Condition :
+---------------------
+@ConditionalOnResource(  resources = "classpath:mysql.properties")
+
+Custom Conditions :
+===================
+static class HibernateCondition extends SpringBootCondition { 
+    @Override
+    public ConditionOutcome getMatchOutcome(ConditionContext context, 
+      AnnotatedTypeMetadata metadata) { } 
+	}
+	
+used as below
+@Conditional(HibernateCondition.class)
+Properties additionalProperties() {}
+
+Application Conditions : We can also specify that the configuration can be loaded only inside/outside a web context, by adding the @ConditionalOnWebApplication or @ConditionalOnNotWebApplication annotation.
+
+The Web Starter
+===============
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+This dependency will works for developing the REST service; we can use libraries like Spring MVC, Tomcat and Jackson – a lot of dependencies for a single application.
+
+The Test Starter
+================
+Spring Test, JUnit, Hamcrest, and Mockito.
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-test</artifactId>
+    <scope>test</scope>
+</dependency>
+example 
+-------
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringApplicationConfiguration(classes = Application.class)
+@WebAppConfiguration
+public class SpringBootApplicationIntegrationTest {
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+    private MockMvc mockMvc;
+ 
+    @Before
+    public void setupMockMvc() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    }
+ 
+    @Test
+    public void givenRequestHasBeenMade_whenMeetsAllOfGivenConditions_thenCorrect()
+      throws Exception { } 
+}
+
+Priority Order of Configurations
+=================================
+    Java Config
+    Command Line Arguments
+    Java System Properties
+    OS Environment Variables
+    application.properties in Current Directory
+    application.properties in the classpath (src/main/resources or the packaged jar file)
+
+@ConfigurationProperties in Spring Boot
+=======================================
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.1.3.RELEASE</version>
+    <relativePath/> <!-- lookup parent from repository -->
+</parent>
+
+@Configuration
+@PropertySource("classpath:configprops.properties")
+@ConfigurationProperties(prefix = "mail")
+public class ConfigProperties {
+     
+    private String hostName;
+    private int port;
+    private String from;
+ 
+    // standard getters and setters
+}
+
+@SpringBootApplication
+@EnableConfigurationProperties(ConfigProperties.class)
+public class DemoApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(DemoApplication.class, args);
+    }
+}
+
+Developing with Spring Boot brings several advantages:
+
+    simpler dependency management
+    default auto-configuration
+    embedded web server
+    application metrics and health checks
+    advanced externalized configuration
+
+
+Filter
+======
+Defining Filters and the Invocation Order
+@Component
+@Order(1)
+public class TransactionFilter implements Filter {
+ 
+    @Override
+    public void doFilter(
+      ServletRequest request, 
+      ServletResponse response, 
+      FilterChain chain) throws IOException, ServletException { }
+}
+
+@Component
+@Order(2)
+public class RequestResponseLoggingFilter implements Filter {
+ 
+    @Override
+    public void doFilter(
+      ServletRequest request, 
+      ServletResponse response, 
+      FilterChain chain) throws IOException, ServletException { }
+}
+
+output :
+TransactionFilter - request
+RequestResponseLoggingFilter - request
+RequestResponseLoggingFilter -respoonse
+TransactionFilter - response 
+
+SpringBootServletInitializer
+==============================
+This class binds Servlet, Filter and ServletContextInitializer beans from the application context to the server.
+
+@SpringBootApplication
+public class WarInitializerApplication extends SpringBootServletInitializer {
+ 
+    @Override
+    protected SpringApplicationBuilder configure(
+      SpringApplicationBuilder builder) {
+        return builder.sources(WarInitializerApplication.class);
+    }
+ 
+    public static void main(String[] args) {
+        SpringApplication sa = new SpringApplication(
+          WarInitializerApplication.class);
+        sa.run(args);
+    }     
+}
+
+Now, if we package our application as a WAR, we’ll be able to deploy it on any web container in a traditional way,
+
+Spring Boot Exit Codes
+======================
+@SpringBootApplication
+public class DemoApplication implements ExitCodeGenerator {
+ 
+    public static void main(String[] args) {
+        System.exit(SpringApplication
+          .exit(SpringApplication.run(DemoApplication.class, args)));
+    }
+  
+    @Override
+    public int getExitCode() {
+        return 42;
+    }
+}
+
+
+Shutdown a Spring Boot Application
+curl -X POST localhost:port/actuator/shutdown
+
+Spring Boot Actuator
+=====================
+
+	  
