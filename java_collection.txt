@@ -962,3 +962,18 @@ HashMap<String, Employee> shallowCopy=originalMap.entrySet().stream()
  because this is a shallow copy, if we change an Employee instance's properties, it will affect both the original map and its shallow copy.
 
 A deep copy of a HashMap is a new HashMap that deeply copies all the mappings. Therefore, it creates new objects for all keys, values, and mappings. explicitly modifying the mappings (key-values) will not affect the deep copy.
+
+Arrays.stream(char[]) is not allow
+-----------------------------------
+There are only 3 types of primitive streams - IntStream, LongStream and DoubleStream.
+
+As a result, Arrays has methods that convert int[], long[] and double[] to the corresponding primitive streams.
+
+There are no corresponding methods for boolean[], byte[], short[], char[] and float[], since these primitive types have no corresponding primitive streams.
+
+public Map<String, Long> countChars(String input) {
+    Map<String, Long> frequentChars = Arrays.stream(input.toLowerCase().split(""))
+            .collect(Collectors.groupingBy(c -> c, Collectors.counting()));
+    frequentChars.forEach((k, v) -> System.out.println(k + ":" + v));
+    return frequentChars;
+}

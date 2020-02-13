@@ -13,4 +13,5 @@ https://github.com/eugenp/tutorials/tree/master/algorithms-sorting
 
 https://codingbat.com/prob/p169506
 
+https://cleanprogrammer.net/mapping-between-domain-data-transfer-objects-with-mapstruct/
 
