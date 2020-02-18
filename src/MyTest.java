@@ -1,46 +1,78 @@
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;import com.sun.org.apache.xerces.internal.util.SynchronizedSymbolTable;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import javafx.util.converter.CharacterStringConverter;
 
-public class MyTest {
-
-	static String findLongestPalindrome(String str) {
-		
-		String s[] = new String[str.length()];
-		for (int i = 0; i < str.length(); i++) {
-			s[i] = String.valueOf(str.charAt(i));
-		}
-		Map<String, Long> map = Arrays.stream(s)
-				.collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-
-		String beg = "", mid = "", end = "";
-
-		for (String x : map.keySet()) {
-			if (map.get(x) % 2 == 1) {
-				mid = x;
-				map.put(x, map.get(x) - 1);
-			} else{
-				
-				for (int i = 0; i < map.get(x) / 2; i++)
-					beg += x;
-			}
-			System.out.println("mid="+mid+" beg="+beg);
-		}
-		end = beg;
-
-		end = new String(new StringBuilder(beg).reverse());
-		return beg + mid + end;
-
+class Person {
+	String name;
+	String age;
+	Person(String name,String age){
+		this.name=name;
+		this.age=age;
 	}
+	
+	public String getAge() {
+		return age;
+	}
+	
+public String getName() {
+	return name;
+}
+}
+public class MyTest {
+	
+	static String parse(Person p){
+		return p.age;
+	}
+	
+
+	
 
 	public static void main(String args[]) {
-		System.out.println(findLongestPalindrome("abbaccd"));
-		Arrays.stream(new int[]{1,2,3,4});
-		"bairagi".chars().boxed().forEach(System.out::println);;
+		List<Person> list=new ArrayList<>();
+		list.add(new Person("bairagi1","30"));
+		list.add(new Person("bairagi2","31"));
+		list.add(new Person("bairagi3","30"));
+		list.add(new Person("bairagi4","32"));
+		
+		Stream<String> strS=Stream.of("bairagi","nath","behera");
+		List<String> slist=strS.collect(LinkedList::new,LinkedList::add,LinkedList::addAll);
+		System.out.println(slist);
+		
+		
+		
+		Map<String,String> map=
+				list.stream().collect(Collectors
+				.groupingBy(Person::getAge,Collectors.mapping(Person::getName,Collectors.joining(",","[","]"))));
+		
+		System.out.println(map);
+		
+		
+		Map<String,Set<Person>> map1=
+				list.stream().collect(Collectors
+				.groupingBy(Person::getAge,TreeMap::new,Collectors.toSet()));
+		
+		System.out.println(map1);
+				
+			
+		
+
+//		 String output=map.entrySet().stream().map(e->
+//		 {
+//			 String combine=e.getValue().stream().map(Person::getName)
+//	 .collect(Collectors.joining(",", "[", "]"));
+//			 return e.getKey()+"="+combine;
+//		 
+//		 }).collect(Collectors.joining(",","",""));
+		 
+		// System.out.println(map);
+
 
 	}
 

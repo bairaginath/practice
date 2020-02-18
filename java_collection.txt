@@ -977,3 +977,59 @@ public Map<String, Long> countChars(String input) {
     frequentChars.forEach((k, v) -> System.out.println(k + ":" + v));
     return frequentChars;
 }
+
+
+
+groupingBy Collector
+=====================
+static <T,K> Collector<T,?,Map<K,List<T>>> 
+  groupingBy(Function<? super T,? extends K> classifier) // by default it return Map<K,List<T>>
+--------------
+Map<BlogPostType, List<BlogPost>> postsPerType = posts.stream()
+  .collect(groupingBy(BlogPost::getType));
+  
+ Grouping by Multiple Fields
+Map<String, Map<BlogPostType, List>> map = posts.stream()
+  .collect(groupingBy(BlogPost::getAuthor, groupingBy(BlogPost::getType)));
+
+
+ 
+  
+static <T,K,A,D> Collector<T,?,Map<K,D>>
+  groupingBy(Function<? super T,? extends K> classifier, 
+    Collector<? super T,A,D> downstream) //return Map<K,List<T> or Set<T> or Long or aggration result or averagingInt or averagingInt or maxBy or summarizingInt
+-----------------------
+Map<BlogPostType, Set<BlogPost>> postsPerType = posts.stream()
+  .collect(groupingBy(BlogPost::getType, toSet()));	
+ 
+ Map<String,String> map=list.stream().collect(Collectors				.groupingBy(Person::getAge,Collectors.mapping(Person::getName,Collectors.joining(",","[","]"))));
+System.out.println(map); //{30=[bairagi1,bairagi3], 31=[bairagi2], 32=[bairagi4]}
+
+
+
+static <T,K,D,A,M extends Map<K,D>> Collector<T,?,M>
+  groupingBy(Function<? super T,? extends K> classifier, 
+    Supplier<M> mapFactory, Collector<? super T,A,D> downstream)
+----------------------------
+Map<String,Set<Person>> map1=
+				list.stream().collect(Collectors
+				.groupingBy(Person::getAge,TreeMap::new,Collectors.toSet()));	
+				
+
+collect() method on java stream
+===============================
+<R, A> R collect(Collector<? super T, A, R> collector)
+----------------------
+Stream<String> strS=Stream.of("bairagi","nath","behera");
+List<String> slist=strS.collect(Collectors.toList());
+System.out.println(slist); //[bairagi, nath, behera]
+
+
+<R> R collect(Supplier<R> supplier,BiConsumer<R, ? super T> accumulator, BiConsumer<R, R>combiner)
+------------------
+List<String> slist=strS.collect(LinkedList::new,LinkedList::add,LinkedList::addAll);
+System.out.println(slist); //[bairagi, nath, behera]
+
+The combiner is used when your Stream is parallel, since in that case several threads collect elements of the Stream into sub-lists of the final output ArrayList, and these sub-lists have to be combined to produce the final ArrayList
+	
+	
