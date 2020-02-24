@@ -1033,3 +1033,306 @@ System.out.println(slist); //[bairagi, nath, behera]
 The combiner is used when your Stream is parallel, since in that case several threads collect elements of the Stream into sub-lists of the final output ArrayList, and these sub-lists have to be combined to produce the final ArrayList
 	
 	
+	
+	
+	
+java.util.Arrays APIs
+======================
+String[] intro = new String[] { "once", "upon", "a", "time" };
+String[] abridgement = Arrays.copyOfRange(storyIntro, 0, 3); //beginning index (inclusive) and end index (exclusive) 
+String[] revised = Arrays.copyOf(intro, 3); //// take intro and a target array size and we'd get back a new array of that length:
+
+String[] expanded = Arrays.copyOf(intro, 5);//copyOf pads the array with nulls if our target size is bigger than the original size.
+
+String[] stutter = new String[3];
+Arrays.fill(stutter, "once"); //ill, which is useful when we want an array where all elements are the same . Note : ill, which is useful when we want an array where all elements are the same
+
+equals and deepEquals
+----------------------
+assertTrue(
+  Arrays.equals(new String[] { "once", "upon", "a", "time" }, intro));
+assertFalse(
+  Arrays.equals(new String[] { "once", "upon", "a", null }, intro));
+  
+we can use deepEquals to not only check the top-level elements but also perform the check recursively
+Object[] story = new Object[] 
+  { intro, new String[] { "chapter one", "chapter two" }, end };
+Object[] copy = new Object[] 
+  { intro, new String[] { "chapter one", "chapter two" }, end };
+ 
+assertTrue(Arrays.deepEquals(story, copy));
+assertFalse(Arrays.equals(story, copy));
+
+This is because deepEquals ultimately calls itself each time it encounters an array, while equals will simply compare sub-arrays' references.
+Also, this makes it dangerous to call on an array with a self-reference!
+
+hashCode and deepHashCode
+--------------------------
+Object[] looping = new Object[]{ intro, intro }; 
+int hashBefore = Arrays.hashCode(looping);
+int deepHashBefore = Arrays.deepHashCode(looping);
+intro[3] = null;
+int hashAfter = Arrays.hashCode(looping);
+int deepHashAfter = Arrays.deepHashCode(looping);
+assertEquals(hashAfter, hashBefore);
+assertNotEquals(deepHashAfter, deepHashBefore);
+deepHashCode is the underlying calculation used when we are working with data structures like HashMap and HashSet on arrays.
+Sort
+-----
+If our elements are either primitives or they implement Comparable, we can use sort to perform an in-line sort.
+Arrays.sort(sorted);
+sort will use a different algorithm for different array element types. Primitive types use a dual-pivot quicksort and Object types use Timsort. Both have the average case of O(n log(n)) for a randomly-sorted array.As of Java 8, parallelSort is available for a parallel sort-merge.  It offers a concurrent sorting method using several Arrays.sort tasks.
+
+binarySearch
+-------------
+int firstIndex = Arrays.binarySearch(sorted, "time");
+int firstIndexWithCase = Arrays.binarySearch(sorted, "TiMe", String::compareToIgnoreCase);//If we don't provide a Comparator as a third parameter, then binarySearch counts on our element type being of type Comparable.
+
+Stream 
+-------
+Arrays.stream(intro, startInclusive,endExclus).count(); // will Throws ArrayIndexOutOfBound exception if index are not in the range.
+
+toString and deepToString
+-------------------------
+assertEquals("[once, upon, a, time]", Arrays.toString(storyIntro));
+
+assertEquals(
+  "[[once, upon, a, time], [chapter one, chapter two], [the, end]]",
+  Arrays.deepToString(story)); // we can direct covert 2d array to String by using deepToString
+ 
+ asList
+ -------
+ List<String> rets = Arrays.asList(storyIntro);
+ However, the returned List will be a fixed length so we won't be able to add or remove elements.Note also that, curiously, java.util.Arrays has its own ArrayList subclass, which asList returns. This can be very deceptive when debugging!
+ 
+ setAll
+ -------
+  String[] longAgo = new String[4];
+    Arrays.setAll(longAgo, i -> String.valueOf(i+1)); 
+    System.out.println(Arrays.toString(longAgo));
+
+parallelPrefix on java 8
+------------------------
+int[] arr = new int[] { 1, 2, 3, 4};
+Arrays.parallelPrefix(arr, (left, right) -> left + right); // as like reduce method
+assertThat(arr, is(new int[] { 1, 3, 6, 10}));
+Arrays.parallelPrefix(arri, 1, 4, (left, right) -> left + right); // you can apply on sub array also
+the method is performed in parallel, so the cumulative operation should be side-effect-free and associative. // we should write to code in such way that that make data consistancy.
+
+Join Two Arrays
+----------------
+String[] result = Stream.concat(
+      Arrays.stream(animals1), Arrays.stream(animals2)).toArray(String[]::new);
+	  
+	 
+System arraycopy
+----------------
+public static native void arraycopy(Object src,  int  srcPos,
+                                        Object dest, int destPos,
+                                        int length);
+										
+										
+String APIs
+============
+join method introduced on java 8
+String newLine = System.getProperty("line.separator");
+		String names[]={"bairagi","nath","behera"};
+		String out=String.join(newLine,names);
+		System.out.println(out);
+		out=String.join("|",names);
+		System.out.println(out);
+		
+StringWriter is another method that we can utilize to create a multi-line string. We don't need newLine here, because we use PrintWriter. The println function automatically adds new lines:
+
+public String stringWriter() {
+    StringWriter stringWriter = new StringWriter();
+    PrintWriter printWriter = new PrintWriter(stringWriter);
+    printWriter.println("Get busy living");
+    printWriter.println("or");
+    printWriter.println("get busy dying.");
+    printWriter.println("--Stephen King");
+    return stringWriter.toString();
+}
+Both String#isEmpty and String#length can be used to check for empty strings.
+trim()- trim space on both ends
+
+String[] splitted = "192.168.1.178".split("\\.") // split by "."
+
+String[] splitted = "b a, e, l.d u, n g-to".split("[,.-]");
+or
+String[] splitted = "b a, e, l.d u, n g".split("\\s+|,\\s*|\\.\\s*"));
+
+CharSequence vs. String in Java
+--------------------------------
+CharSequence is an interface that represents a sequence of characters.both mutable and immutable classes implement this interface. ex; Stinrg class implemented as immutable and StringBuilder,StringBuffer are implemented as mutable.
+
+an interface can't be instantiated directly
+CharSequence charSequence new String("bairagi"); // we can't instantion with String new Operator
+CharSequence charSequence1="bairagi";
+CharSequence charSequence1 = new StringBuffer("baeldung");
+CharSequence charSequence2 = new StringBuilder("baeldung");
+
+This  interface does not imply a built-in comparison strategy, whereas the String class implements the Comparable<String> interface.
+
+StringJoiner fruitJoiner = new StringJoiner(", ");( java 8 introduced  on java.util package)
+fruitJoiner.add("Apples");
+fruitJoiner.add("Oranges");
+fruitJoiner.add("Bananas"); 
+assertEquals("Apples, Oranges, Bananas", fruitJoiner.toString());
+
+member variables are initialized with a default value when the class is constructed, null in String‘s case. But, we have to initialize local variables ourselves.
+
+Convert char to String 
+-----------------------
+String.valueOf()
+Character's Constructor //String result = new Character(givenChar).toString();
+Implicit Cast to String Type //String result = givenChar + "";
+String.format() //String result = String.format("%c", givenChar);
+
+StringTokenizer
+-----------------
+public StringTokenizer(String str, String delim, boolean returnDelims){}
+The StringTokenizer class helps us split Strings into multiple tokens
+StringTokenizer st=new StringTokenizer("bairagi,nath,behera",",",false); // true means then StringTokenizer considers the delimiter itself as a token and add it to its internal pool of tokens.
+		while(st.hasMoreTokens())
+			System.out.println(st.nextToken());
+		
+StringTokenizer also comes with an overloaded nextToken() method which takes a string fragment as input. 
+tokenizer.nextToken("e") // it will override next token with "e"
+
+
+Convert Hex to ASCII vice versa
+-------------------------------
+private static String asciiToHex(String asciiStr) {
+    char[] chars = asciiStr.toCharArray();
+    StringBuilder hex = new StringBuilder();
+    for (char ch : chars) {
+        hex.append(Integer.toHexString((int) ch));
+    }
+ 
+    return hex.toString();
+}
+
+
+private static String hexToAscii(String hexStr) {
+    StringBuilder output = new StringBuilder("");
+     
+    for (int i = 0; i < hexStr.length(); i += 2) {
+        String str = hexStr.substring(i, i + 2);
+        output.append((char) Integer.parseInt(str, 16));
+    }
+     
+    return output.toString();
+}
+
+String APIs
+-----------
+Java String.String() Available Signatures
+------------------------
+public String()
+public String(byte[] bytes)
+public String(byte[] bytes, Charset charset)
+public String(byte[] bytes, int offset, int length)
+public String(byte[] bytes, int offset, int length, Charset charset)
+public String(byte[] bytes, int offset, int length, String charsetName)
+public String(byte[] bytes, String charsetName)
+public String(char[] value)
+public String(char[] value, int offset, int count)
+public String(int[] codePoints, int offset, int count)
+public String(String original)
+public String(StringBuffer buffer)
+public String(StringBuilder builder)
+
+Java String.codePointCountthe number of Unicode code points in the specified range //the number of Unicode code points in the specified range
+
+Java String.codePointAt(int index) //returns the code point at the specified index
+Java String.concat()
+Java String.contains(CharSequence s) //checks if a String contains another String
+Java String.copyValueOf()
+------
+public static String copyValueOf(char[] data)
+public static String copyValueOf(char[] data, int offset, int count)
+char[] array = new char[] { 'a', 'b', 'c', 'd' };     
+assertEquals("abcd", String.copyValueOf(array));
+
+Java String.endsWith()
+Java String.format()
+Java String.getBytes()
+----
+    byte[] byteArray1 = "abcd".getBytes();
+    byte[] byteArray2 = "efgh".getBytes(StandardCharsets.US_ASCII);
+    byte[] byteArray3 = "ijkl".getBytes("UTF-8");
+    byte[] expected1 = new byte[] { 97, 98, 99, 100 };
+    byte[] expected2 = new byte[] { 101, 102, 103, 104 };
+    byte[] expected3 = new byte[] { 105, 106, 107, 108 };     
+    assertArrayEquals(expected1, byteArray1);
+    assertArrayEquals(expected2, byteArray2);
+    assertArrayEquals(expected3, byteArray3);
+	
+Java String.indexOf() //returns the first occurrence index of a character or a String in another String.
+-----
+public int indexOf(int ch)
+public int indexOf(int ch, int fromIndex)
+public int indexOf(String str)
+public int indexOf(String str, int fromIndex)
+
+Java String.intern()
+Java String.isEmpty()
+Java String.lastIndexOf()//returns the index of the last occurrence of a String in another String.
+-----
+public int lastIndexOf(int ch)
+public int lastIndexOf(int ch, int fromIndex)
+public int lastIndexOf(String str)
+
+
+Java String.regionMatches() //checks if two String regions are equal.
+-------
+boolean regionMatches(int toffset, String other, int ooffset, int len)
+boolean regionMatches(boolean ignoreCase, int toffset, String other, int ooffset, int len)
+
+Java String.replace()
+public String replace(CharSequence target, CharSequence replacement)
+Java String.replaceAll() //replaces all occurrences of a String in another String.
+------
+public String replaceAll(String regex, String replacement)
+Java String.split()
+------
+public String[] split(String regex, int limit)
+public String[] split(String regex)
+
+Java String.startsWith()
+Java String.subSequence()
+----
+public CharSequence subSequence(int beginIndex, int endIndex)
+same as substring().The only difference is that it returns a CharSequence instead of a String.
+
+Java String.substring()
+---
+public String substring(int beginIndex)
+public String substring(int beginIndex, int endIndex)
+
+Java String.toLowerCase()
+Java String.toUpperCase()
+Java String.trim() //The method trim() removes any whitespace at the beginning and at the end of a String. If the String contains only spaces, then the method returns an empty String.
+
+Java String.valueOf()
+------
+public static String valueOf(boolean b)
+public static String valueOf(char c)
+public static String valueOf(char[] data)
+public static String valueOf(char[] data, int offset, int count) //
+    offset – the index of the character to start converting from
+    count – the number of characters to convert
+public static String valueOf(double d)
+public static String valueOf(float f)
+public static String valueOf(int i)
+public static String valueOf(long l)
+public static String valueOf(Object obj)
+
+
+
+		
+
+
+
+

@@ -1,79 +1,57 @@
-
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.PriorityQueue;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.stream.IntStream;
 
-
-class Person {
-	String name;
-	String age;
-	Person(String name,String age){
-		this.name=name;
-		this.age=age;
-	}
-	
-	public String getAge() {
-		return age;
-	}
-	
-public String getName() {
-	return name;
-}
-}
 public class MyTest {
 	
-	static String parse(Person p){
-		return p.age;
-	}
-	
+	static int activityNotifications(int[] expenditure, int d) {
+		ArrayList<Integer> list=new ArrayList<>();
+		IntStream.range(0,d).forEach(i->list.add(expenditure[i]));
+		PriorityBlockingQueue<Integer> queue=new PriorityBlockingQueue<>(list);	
+		list.clear();
+		int median;
+		int result=0;
+		for(int i=d;i<expenditure.length;i++){
+			
+			queue.drainTo(list);
+			list.forEach(e->System.out.println("priority data"+e));
+		if(d%2==1)
+		{  median=list.stream().skip(d/2).findFirst().get(); median*=2;}
+		else
+			median=list.stream().skip(d/2-1).limit(2).reduce((x,y)->x+y).get();
+		  System.out.println(median);
+		  if(median<=expenditure[i])
+			  result++;
+		  System.out.println(list);
+		  list.remove(Integer.valueOf(expenditure[i-d]));
+		  
+		  list.add(expenditure[i]);
+		  queue=new PriorityBlockingQueue<>(list);
+		  list.clear();
+		}
 
-	
+
+		return result;
+    }
 
 	public static void main(String args[]) {
-		List<Person> list=new ArrayList<>();
-		list.add(new Person("bairagi1","30"));
-		list.add(new Person("bairagi2","31"));
-		list.add(new Person("bairagi3","30"));
-		list.add(new Person("bairagi4","32"));
 		
-		Stream<String> strS=Stream.of("bairagi","nath","behera");
-		List<String> slist=strS.collect(LinkedList::new,LinkedList::add,LinkedList::addAll);
-		System.out.println(slist);
+		int ex[]={2,3,4,2,3,6,8,4,5};
+		int d=5;
+//		System.out.println(activityNotifications(ex, d));
 		
-		
-		
-		Map<String,String> map=
-				list.stream().collect(Collectors
-				.groupingBy(Person::getAge,Collectors.mapping(Person::getName,Collectors.joining(",","[","]"))));
-		
-		System.out.println(map);
+		PriorityQueue<Integer> numbers = new PriorityQueue<>();
+        numbers.add(750);
+        numbers.add(300);
+        numbers.add(500);
+        numbers.add(900);
+        numbers.add(100);
+        numbers.forEach(System.out::println);
+        System.out.println(numbers.stream().skip(2).findFirst());
 		
 		
-		Map<String,Set<Person>> map1=
-				list.stream().collect(Collectors
-				.groupingBy(Person::getAge,TreeMap::new,Collectors.toSet()));
 		
-		System.out.println(map1);
-				
-			
-		
-
-//		 String output=map.entrySet().stream().map(e->
-//		 {
-//			 String combine=e.getValue().stream().map(Person::getName)
-//	 .collect(Collectors.joining(",", "[", "]"));
-//			 return e.getKey()+"="+combine;
-//		 
-//		 }).collect(Collectors.joining(",","",""));
-		 
-		// System.out.println(map);
-
 
 	}
-
 }

@@ -15,3 +15,7 @@ https://codingbat.com/prob/p169506
 
 https://cleanprogrammer.net/mapping-between-domain-data-transfer-objects-with-mapstruct/
 
+https://www.baeldung.com/java-full-text-search-algorithms
+
+https://www.hackerrank.com/challenges/fraudulent-activity-notifications/problem		
+
