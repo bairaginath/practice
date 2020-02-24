@@ -1,0 +1,84 @@
+String Literal vs String Object
+===============================
+When we create a String object using the new() operator, it always creates a new object in heap memory. On the other hand, if we create an object using String literal syntax e.g. “Baeldung”, it may return an existing object from the String pool, if it already exists. Otherwise, it will create a new String object and put in the string pool for future re-use.
+
+At a high level, both are the String objects, but the main difference comes from the point that new() operator always creates a new String object. Also, when we create a String using literal – it is interned.
+
+String constantString = "interned Baeldung";
+String newString = new String("interned Baeldung");
+ 
+assertThat(constantString).isNotSameAs(newString);
+ 
+String internedString = newString.intern();
+ 
+assertThat(constantString)
+  .isSameAs(internedString);
+
+Before Java 7, the JVM placed the Java String Pool in the PermGen space, which has a fixed size — it can't be expanded at runtime and is not eligible for garbage collection.
+
+The risk of interning Strings in the PermGen (instead of the Heap) is that we can get an OutOfMemory error from the JVM if we intern too many Strings.
+
+From Java 7 onwards, the Java String Pool is stored in the Heap space, which is garbage collected by the JVM. The advantage of this approach is the reduced risk of OutOfMemory error because unreferenced Strings will be removed from the pool, thereby releasing memory.
+
+When we create a String variable and assign a value to it, the JVM searches the pool for a String of equal value.
+If found, the Java compiler will simply return a reference to its memory address, without allocating additional memory.
+In this way,JVM can optimize the amount of memory allocated for them by storing only one copy of each literal String in the pool. This process is called interning.
+
+features that immutability provides, such as caching, security, easy reuse without replication, etc.
+An immutable object is an object whose internal state remains constant after it has been entirely created. 
+
+Why String is immutable 
+------------------------
+The key benefits of keeping String class as immutable are caching, security, synchronization, and performance.
+string pool (caching)
+------
+Java String Pool is the special memory region where Strings are stored by the JVM. Since Strings are immutable in Java, the JVM optimizes the amount of memory allocated for them by storing only one copy of each literal String in the pool. This process is called interning:
+String s1 = "Hello World";
+String s2 = "Hello World";
+assertThat(s1 == s2).isTrue();
+Because of the presence of the String pool in the preceding example, two different variables are pointing to same String object from the pool, thus saving crucial memory resource.
+Security
+-----
+The String is widely used in Java applications to store sensitive pieces of information like usernames, passwords, connection URLs, network connections, etc. It's also used extensively by JVM class loaders while loading classes.
+void criticalMethod(String userName) {
+    // perform security checks
+    if (!isAlphaNumeric(userName)) {
+        throw new SecurityException(); 
+    }
+     
+    // do some secondary tasks
+    initializeDatabase();
+     
+    // critical task
+    connection.executeUpdate("UPDATE Customers SET Status = 'Active' " +
+      " WHERE UserName = '" + userName + "'");
+}
+In the above code snippet, let's say that we received a String object from an untrustworthy source. We're doing all necessary security checks initially to check if the String is only alphanumeric, followed by some more operations.
+
+Remember that our unreliable source caller method still has reference to this userName object.
+
+If Strings were mutable, then by the time we execute the update, we can't be sure that the String we received, even after performing security checks, would be safe. The untrustworthy caller method still has the reference and can change the String between integrity checks. Thus making our query prone to SQL injections in this case. So mutable Strings could lead to degradation of security over time.
+
+It could also happen that the String userName is visible to another thread, which could then change its value after the integrity check.
+
+In general, immutability comes to our rescue in this case because it's easier to operate with sensitive code when values don't change because there are fewer interleavings of operations that might affect the result.
+Synchronization
+-----
+Being immutable automatically makes the String thread safe since they won't be changed when accessed from multiple threads.
+
+Hence immutable objects, in general, can be shared across multiple threads running simultaneously. They're also thread-safe because if a thread changes the value, then instead of modifying the same, a new String would be created in the String pool. Hence, Strings are safe for multi-threading.
+ Hashcode Caching
+ ----------------
+Since String objects are abundantly used as a data structure, they are also widely used in hash implementations like HashMap, HashTable, HashSet, etc. When operating upon these hash implementations, hashCode() method is called quite frequently for bucketing.
+
+The immutability guarantees Strings that their value won’t change. So the hashCode() method is overridden in String class to facilitate caching, such that the hash is calculated and cached during the first hashCode() call and the same value is returned ever since.
+
+This, in turn, improves the performance of collections that uses hash implementations when operated with String objects.
+
+On the other hand, mutable Strings would produce two different hashcodes at the time of insertion and retrieval if contents of String was modified after the operation, potentially losing the value object in the Map.
+
+Performance
+-------
+As we saw previously, String pool exists because Strings are immutable. In turn, it enhances the performance by saving heap memory and faster access of hash implementations when operated with Strings.
+
+Since String is the most widely used data structure, improving the performance of String have a considerable effect on improving the performance of the whole application in general.

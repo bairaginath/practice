@@ -1,34 +1,35 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.PriorityQueue;
 import java.util.concurrent.PriorityBlockingQueue;
-import java.util.stream.IntStream;
 
 public class MyTest {
 	
 	static int activityNotifications(int[] expenditure, int d) {
-		ArrayList<Integer> list=new ArrayList<>();
-		IntStream.range(0,d).forEach(i->list.add(expenditure[i]));
-		PriorityBlockingQueue<Integer> queue=new PriorityBlockingQueue<>(list);	
-		list.clear();
+		LinkedList<Integer> list=Arrays.stream(expenditure,0,d).sorted().boxed().
+		collect(LinkedList::new,LinkedList::add,LinkedList::addAll);
 		int median;
 		int result=0;
-		for(int i=d;i<expenditure.length;i++){
+		for(int i=d;i<expenditure.length;i++){			
 			
-			queue.drainTo(list);
-			list.forEach(e->System.out.println("priority data"+e));
 		if(d%2==1)
 		{  median=list.stream().skip(d/2).findFirst().get(); median*=2;}
 		else
 			median=list.stream().skip(d/2-1).limit(2).reduce((x,y)->x+y).get();
-		  System.out.println(median);
+		  //System.out.println(median);
 		  if(median<=expenditure[i])
 			  result++;
-		  System.out.println(list);
 		  list.remove(Integer.valueOf(expenditure[i-d]));
+		  for(int j=0;j<d-1;j++){
+			 // System.out.println(list.get(j)+" add "+expenditure[i]);
+			  if(list.get(j)>=expenditure[i])
+			  {  list.add(j,expenditure[i]); break; }
+		  }
+		  if(list.size()==d-1)
+			  list.add(expenditure[i]);
+		  System.out.println(list);
 		  
-		  list.add(expenditure[i]);
-		  queue=new PriorityBlockingQueue<>(list);
-		  list.clear();
 		}
 
 
@@ -39,16 +40,9 @@ public class MyTest {
 		
 		int ex[]={2,3,4,2,3,6,8,4,5};
 		int d=5;
-//		System.out.println(activityNotifications(ex, d));
+		System.out.println(activityNotifications(ex, d));
 		
-		PriorityQueue<Integer> numbers = new PriorityQueue<>();
-        numbers.add(750);
-        numbers.add(300);
-        numbers.add(500);
-        numbers.add(900);
-        numbers.add(100);
-        numbers.forEach(System.out::println);
-        System.out.println(numbers.stream().skip(2).findFirst());
+		
 		
 		
 		
