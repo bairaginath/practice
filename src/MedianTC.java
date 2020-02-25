@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class MyTest {
+public class MedianTC {
 
 	static int activityNotifications(int[] expenditure, int d) {
 		
