@@ -1,0 +1,146 @@
+Yang Module(Yet Another Next Generation)
+========================================
+The data modeling language can be used to model both configuration data as well as state data of network elements. Furthermore, YANG can be used to define the format of event notifications emitted by network elements and it allows data modelers to define the signature of remote procedure calls that can be invoked on network elements via the NETCONF protocol. The language, being protocol independent, can then be converted into any encoding format, e.g. XML or JSON
+module
+namespace
+prefix - shortest notation of namespace
+Yang is xml schema defination language 
+
+import and include  - 
+import is import the defination of another yang module .Imported fragements are just referanced not included.An import statement is used to access definitions from a foreign namespace (another module), while an include statement introduces a mechanism that allows a single namespace (single module) to be logically split into several files, conveniently named module and submodules
+
+
+
+
+data type:
+---
+base type : int.float,string (there is 20 type base type)
+Derive type : may be typedef or grouping(structures) 
+----------
+typedef percent { type uint8 {range “0 .. 100”;    }}
+we can use this typedef on leaf as ( leaf completed { type percent; } )
+Union (either or ) ( ex: address may be ipv4 or ipv6 )
+------
+typedef ip-address { type union {type ipv4-address; type ipv6-addr;} }
+
+grouping (and ) (ex : endpoint is combine of ip-address and port)
+-------
+grouping endpoint { leaf address {type ip-address;} leaf port { type port-number;} }
+
+we can use this as ( container peer { container { destination {use endpoint;} }} )
+
+refine (redefine or set value on grouping)
+-------
+ex : container server { container http { use endpoint { refine port { default 80; } } } }
+
+leaf : (single value of particular type ) (leaf is terminal node of the tree )
+-------------
+leat hostname { type string;config true;mandary : true; }
+
+Container
+---------
+first orignation of yang statement. originat leaf as heriacy . it is orignation the tree.
+
+leftlist (multple  value of particular type)
+-------
+hold multiple data item of same type 
+leaflist domain-search { type string;orderBy user; }
+
+List : 
+-------
+table defination . 
+key - primary key ( it can be multple column ) 
+listuser {key “username”; leaf username {typestring;} leaf full-name { type string;      }}
+here you can define min-element,max-element,ordered-by (user or system)
+xpath -Access list as matrix (/user{row}/column ex : /user{bairagi}/full-name
+unique attribute on list
+listuser {key “username”; unique uid; leaf username {typestring;} leaf uid {type uint8 } leaf full-name { type string;      }} 
+
+leafRef ( it is like foreign key concept)
+--------
+The leafref built-in type is used to reference a particular leaf instance in the data tree.
+
+module example-sports {
+  namespace "http://example.com/example-sports";
+  prefix sports;
+  import ietf-yang-types { prefix yang; }
+  typedef season {
+    type string;    
+  }
+
+  container sports {
+    config true;
+    list person {
+      key name;
+      leaf name { type string; }
+      leaf birthday { type yang:date-and-time; mandatory true; }
+    }
+
+    list team {
+      key name;
+      leaf name { type string; }
+      list player {
+        key "name season";
+        unique number;
+        leaf name { type leafref { path "/sports/person/name"; }  }
+        leaf season { type season; }
+        leaf number { type uint16; mandatory true; }
+        leaf scores { type uint16; default 0; }
+      }
+    }
+  }
+} 
+
+
+we can define multiple leafref ( ex : path :/client[/ip=current()/vip]/port" // current vip's port number 
+
+deref() method same as multiple leafref
+
+RPC (Action)
+-------------
+rpc login { input { leaf username { type string;} leaf password {type type string;} } output { leaf token { type string } } }
+
+notifications
+---------------
+notification change-config {  leaf operator-name { type string } leaflist elements { type string }
+
+
+Most Statement ( checking for condtion or validation while initial variable }
+--------------
+
+Augment 
+--------
+this concept add extra column on list 
+when - some condition have add extra column to list
+
+Choise (any of the one choise) 
+--------
+Choise allows one of serveral alterative
+case - based condtions
+
+Identity 
+--------
+enum or constants
+
+Feature 
+--------
+define feature method
+if-feature - it check  if feature is there , do something . simillary to 'if-def in c programming"
+
+Deviation :
+------------
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
