@@ -1,0 +1,270 @@
+java8-Stream
+=============
+
+Stream.empty()
+Cction.stream();
+Stream<String> streamOfArray = Stream.of("a", "b", "c");
+Stream<String> streamOfArrayFull = Arrays.stream(arr);
+Stream<String> streamBuilder = Stream.<String>builder().add("a").add("b").add("c").build();
+Stream<String> streamGenerated =  Stream.generate(() -> "element").limit(10);
+
+
+Path path = Paths.get("C:\\file.txt");
+Stream<String> streamOfStrings = Files.lines(path);
+
+Stream<String> stream = Stream.of("a", "b", "c").filter(element -> element.contains("b"));
+String> firstElement = stream.findFirst();
+
+To perform a sequence of operations over the elements of the data source and aggregate their results, three parts are needed – the source, intermediate operation(s) and a terminal operation.
+
+
+Lazy Invocation
+================
+List<String> list = Arrays.asList(“abc1”, “abc2”, “abc3”);
+Optional<String> stream = list.stream().filter(element -> {
+    log.info("filter() was called");
+    return element.contains("2");
+}).map(element -> {
+    log.info("map() was called");
+    return element.toUpperCase();
+}).findFirst();
+The findFirst() operation satisfies by just one element. So, in this particular example the lazy invocation allowed to avoid two method calls – one for the filter() and one for the map()
+
+Order of Execution
+===================
+intermediate operations which reduce the size of the stream should be placed before operations which are applying to each element. 
+
+OptionalInt reduced =  IntStream.range(1, 4).reduce((a, b) -> a + b);
+
+int reducedParallel = Arrays.asList(1, 2, 3).parallelStream()
+    .reduce(10, (a, b) -> a + b, (a, b) -> {
+       log.info("combiner was called");
+       return a + b;
+    });  
+     (10 + 1 = 11; 10 + 2 = 12; 10 + 3 = 13;) - 36
+
+
+Methodcollect()
+===============
+collect(Collectors.toList())
+ .collect(Collectors.joining(", ", "[", "]"))
+.collect(Collectors.averagingInt(Product::getPrice));
+.collect(Collectors.summarizingInt(Product::getPrice));
+.collect(Collectors.groupingBy(Product::getPrice));
+Map<Boolean, List<Product>> mapPartioned = productList.stream() 
+ .collect(Collectors.partitioningBy(element -> element.getPrice() > 15));  
+ Set<Product> unmodifiableSet = productList.stream()  .collect(Collectors.collectingAndThen(Collectors.toSet(),  Collections::unmodifiableSet));
+
+
+Parallel stream
+===============
+long count=IntStream.range(1,10000).parallel().filter(n -> checkPrime(n)==true)      .count();
+
+Stream Operations
+=================
+list.stream().distinct().count();
+list.stream().anyMatch(element -> element.contains("a"));
+list.stream().filter(element -> element.contains("d"));
+list.stream().map(e->e*2));
+Stream<String> stream  = details.stream().flatMap(detail -> detail.getParts().stream());
+In this example, we have a list of elements of type The class contains a field which is a With the help of the method every element from field will be extracted and added to the new resulting stream. After that, the initial will be lostDetail. DetailPARTS,List<String>.flatMap() PARTSStream<Detail>.
+
+booleanisValid = list.stream().anyMatch(element -> element.contains("h")); // true
+booleanisValidOne = list.stream().allMatch(element -> element.contains("h")); // false
+booleanisValidTwo = list.stream().noneMatch(element -> element.contains("h")); // false
+
+Integer reduced = integers.stream().reduce(23, (a, b) -> a + b);
+
+list.stream().map(element -> element.toUpperCase()).collect(Collectors.toList());
+
+Intermediate Operations  
+======================
+  filter()    map()    flatMap()    distinct()    sorted()    peek()    limit()    skip()
+  Terminal Operations
+  ===================
+      forEach()    forEachOrdered()    toArray()    reduce()    collect()    min()    max()    count()    anyMatch()    allMatch()    noneMatch()    findFirst()    findAny()
+
+  Infinite Streams
+  ================
+  Stream<Integer> infiniteStream = Stream.iterate(0, i -> i + 2);
+  Stream<UUID> infiniteStreamOfRandomUUID = Stream.generate(randomUUIDSupplier);
+
+  You can use steam twices,get exception as below
+  IllegalStateException: stream has already been operated upon or closed.
+
+  Converting Iterable to Stream
+===============================
+  Iterable<String> iterable = Arrays.asList("Testing", "Iterable", "conversion", "to", "Stream");
+
+  List<String> result = StreamSupport.stream(iterable.spliterator(), false)      .map(String::toUpperCase).collect(Collectors.toList());      
+  
+  Boxing
+  ======
+  List<Integer> evenInts = IntStream.rangeClosed(1, 10).filter(i -> i % 2 =- 0)  .boxed()  .collect(Collectors.toList());  
+
+  peek()
+  =======
+   Javadoc page says: “This method exists mainly to support debugging, where you want to see the elements as they flow past a certain point in a pipeline“.
+
+  Retrieving a Match using filter and map
+=========================================
+  Optional<String> optionalIsbn = books.entrySet().stream()  .filter(e -> "Effective Java".equals(e.getValue()))  .map(Map.Entry::getKey)  .findFirst();
+
+  Collectors
+  ==========
+  Collectors.toList()
+  Collectors.toSet()
+  Collectors.toCollection() : 
+   List<String> result = givenList.stream().collect(toCollection(LinkedList::new))
+   Map<String, Integer> result = givenList.stream()  .collect(toMap(Function.identity(), String::length))
+   Map<String, Integer> result = givenList.stream()  .collect(toMap(Function.identity(), String::length, (item, identicalItem) -> item));    
+   List<String> result = givenList.stream()  .collect(collectingAndThen(toList(), ImmutableList::copyOf))   
+   String result = givenList.stream()  .collect(joining(" ", "PRE-", "-POST"));    Collectors.counting()    
+
+  Collectors.summarizingDouble/Long/Int()  =======================================  SummarizingDouble/Long/Int is a collector that returns a special class containing statistical information about numerical data in a Stream of extracted elements.   
+
+   DoubleSummaryStatistics result = givenList.stream()  .collect(summarizingDouble(String::length));  
+
+   assertThat(result.getAverage()).isEqualTo(2);assertThat(result.getCount()).isEqualTo(4);assertThat(result.getMax()).isEqualTo(3);assertThat(result.getMin()).isEqualTo(1);assertThat(result.getSum()).isEqualTo(8);Collectors.averagingDoubleC
+
+   ollectors.summingDoubleMaxBy/MinBy collectors return the biggest/the smallest element of a Stream according to a provided Comparator instance.Optional<String> result = givenList.stream()  .collect(maxBy(Comparator.naturalOrder()));   
+
+   groupingBy 
+   ========== 
+   Map<String, Long> result = list.stream()             .collect(Collectors.groupingBy(Function.identity(),Collectors.counting()));               
+
+   partitioningBy
+   ==============
+   partitioningBy will always return a map with two entries, one for where the predicate is true and one for where it is false. It is possible that both entries will have empty lists, but they will exist. 
+
+   Map<Boolean,List<String>> result1=list.stream()          .collect(Collectors.partitioningBy(s -> s.length()>5));   
+
+
+
+String arr[]={"1","3","2"};
+OptionalInt x=Arrays.stream(arr).mapToInt(e->Integer.parseInt(e)).min();
+		System.out.println(x.getAsInt());                             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
