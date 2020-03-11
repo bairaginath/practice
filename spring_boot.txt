@@ -214,17 +214,17 @@ SpringBootServletInitializer
 This class binds Servlet, Filter and ServletContextInitializer beans from the application context to the server.
 
 @SpringBootApplication
-public class WarInitializerApplication extends SpringBootServletInitializer {
+public class DemoApplication extends SpringBootServletInitializer {
  
     @Override
     protected SpringApplicationBuilder configure(
       SpringApplicationBuilder builder) {
-        return builder.sources(WarInitializerApplication.class);
+        return builder.sources(DemoApplication.class);
     }
  
     public static void main(String[] args) {
         SpringApplication sa = new SpringApplication(
-          WarInitializerApplication.class);
+          DemoApplication.class);
         sa.run(args);
     }     
 }
@@ -318,4 +318,188 @@ class NewEndpoint {
 }
 
 
-	  
+Customize Configure a Spring Boot Web Application
+==================================================
+@Component
+public class CustomizationBean implements
+  WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
+  
+    @Override
+    public void customize(ConfigurableServletWebServerFactory container) {
+        container.setPort(8083);
+		container.setContextPath("/springbootapp");
+		container.addErrorPages(new ErrorPage(HttpStatus.BAD_REQUEST, "/400"));
+        container.addErrorPages(new ErrorPage("/errorHaven"));
+    }
+}
+
+for custmize jetty server
+--------------------------
+@Bean
+public JettyEmbeddedServletContainerFactory  jettyEmbeddedServletContainerFactory() {
+    JettyEmbeddedServletContainerFactory jettyContainer = 
+      new JettyEmbeddedServletContainerFactory();     
+    jettyContainer.setPort(9000);
+    jettyContainer.setContextPath("/springbootapp");
+    return jettyContainer;
+}
+
+configurations priority order
+==============================
+1)embedded server configuration
+----------------------------------
+@Component
+public class ServerPortCustomizer 
+  implements WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
+  
+    @Override
+    public void customize(ConfigurableWebServerFactory factory) {
+        factory.setPort(8086);
+    }
+}
+
+2)command line arguments
+-------------------------
+java -jar spring-5.jar --server.port=8083 or java -jar -Dserver.port=8083 spring-5.jar
+3)property files
+-----------------
+server.port=8081
+4)main @SpringBootApplication configuration
+--------------------------------------------
+SpringApplication app = new SpringApplication(CustomApplication.class);
+app.setDefaultProperties(Collections.singletonMap("server.port", "8083"));
+app.run(args);
+
+
+Spring Boot: Way of Configuring a Main Class
+============================================
+Manifest file configuration
+-------------------
+Manifest-Version: 1.0
+Start-Class: org.baeldung.DemoApplication
+Main-Class: org.springframework.boot.loader.JarLauncher
+
+Maven configurtion
+--------------------
+Note that this property will only be evaluated if we also add the spring-boot-starter-parent as <parent> in our pom.xml.
+<properties>
+      <!-- The main class to start by executing "java -jar" -->
+      <start-class>org.baeldung.DemoApplication</start-class>
+</properties>
+alternatively,
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>             
+            <configuration>    
+                <mainClass>org.baeldung.DemoApplication</mainClass>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+
+Cli-command
+------------
+java -cp bootApp.jar -Dloader.main=org.baeldung.DemoApplication org.springframework.boot.loader.PropertiesLauncher
+
+Migrating from Spring to Spring Boot
+====================================
+Developing with Spring Boot brings several advantages:
+    simpler dependency management
+    default auto-configuration
+    embedded web server
+    application metrics and health checks
+    advanced externalized configuration
+
+Spring Boot Starters
+---------------------
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>1.5.6.RELEASE</version>
+</parent>
+for web application 
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+Application Entry Point
+-----------------------
+@SpringBootApplication
+public class Application {
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+}
+The @SpringBootApplication annotation adds the following annotations:
+    @Configuration – which marks the class as a source of bean definitions
+    @EnableAutoConfiguration – which tells the framework to add beans based on the dependencies on the classpath automatically
+    @ComponentScan – which scans for other configurations and beans in the same package as the Application class or below
+Migrate Application Resources
+------------------------------
+spring.resources.static-locations=classpath:/images/,classpath:/jsp/
+
+SpringBootServletInitializer
+=============================
+normal configuration
+--------------------
+@SpringBootApplication
+public class DemoApplication {
+  public static void main(String[] args) {
+    SpringApplication.run(DemoApplication.class, args);
+  }
+}
+
+using ServletInitializer
+------------------------
+we can use it to run Spring Boot applications from a classical WAR archive
+@SpringBootApplication
+public class DemoApplication extends SpringBootServletInitializer { 
+    @Override
+    protected SpringApplicationBuilder configure(
+      SpringApplicationBuilder builder) {
+        return builder.sources(DemoApplication.class);
+    } 
+    public static void main(String[] args) {
+        SpringApplication sa = new SpringApplication(
+          DemoApplication.class);
+        sa.run(args);
+    }
+}
+This class binds Servlet, Filter and ServletContextInitializer beans from the application context to the server.
+Extending the SpringBootServletInitializer class also allows us to configure our application when it's run by the servlet container, by overriding the configure() method.
+
+
+Spring Boot Dependency Management with a Custom Parent
+======================================================
+If we don't make use of the parent POM, we can still benefit from dependency management by adding the spring-boot-dependencies artifact with scope=import:
+<dependencyManagement>
+     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>1.5.6.RELEASE</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+Next, we can start simply start adding Spring dependencies and making use of Spring Boot features
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+        </plugin>
+    </plugins>
+</build>
+
+
+
