@@ -1,0 +1,51 @@
+continuous availability with no single point of failure and gives the ability to handle large amounts of data 
+This database uses a ring design instead of using a master-slave architecture. In the ring design, there is no master node – all participating nodes are identical and communicate with each other as peers.
+This makes Cassandra a horizontally scalable system by allowing for the incremental addition of nodes without needing reconfiguration.
+
+
+Cassandra stores data on different nodes with a peer to peer distributed fashion architecture. 
+
+All the nodes exchange information with each other using Gossip protocol. Gossip is a protocol in Cassandra by which nodes can communicate with each other. 
+
+Cluster – a collection of nodes or Data Centers arranged in a ring architecture. A name must be assigned to every cluster, which will subsequently be used by the participating nodes
+
+Keyspace-The keyspace is the outermost container for data in Cassandra. The main attributes to set per keyspace are the Replication Factor, the Replica Placement Strategy and the Column Families
+
+CREATE KEYSPACE “KeySpace Name”
+WITH replication = {'class': ‘Strategy name’, 'replication_factor' : ‘No.Of  replicas’}
+
+AND durable_writes = ‘Boolean value’;
+
+CREATE KEYSPACE dpfmdatastore WITH replication = {'class': 'NetworkTopologyStrategy', 'instance1': '3'}  AND durable_writes = true;
+
+
+"replication_factor" name can be change accordingly your cluster name . ex : "instance1"
+
+The CREATE KEYSPACE statement has two properties: replication and durable_writes.
+Strategy name 	Description
+Simple Strategy' 	Specifies a simple replication factor for the cluster.
+Network Topology Strategy 	Using this option, you can set the replication factor for each data-center independently.
+Old Network Topology Strategy 	This is a legacy replication strategy.
+
+By default, the durable_writes properties of a table is set to true, however it can be set to false. You cannot set this property to simplex strategy.
+Durable Writes provides a means to instruct Cassandra whether to use "commitlog" for updates on the current KeySpace or not. This option is not mandatory. The default value for durable writes is TRUE.
+
+
+Node :Node is the place where data is stored. It is the basic component of Cassandra.
+Data Center :A collection of nodes are called data center. Many nodes are categorized as a data center.
+Cluster :The cluster is the collection of many data centers.
+Commit Log : Every write operation is written to Commit Log. Commit log is used for crash recovery.
+Mem-table :After data written in Commit log, data is written in Mem-table. Data is written in Mem-table temporarily.
+SSTable : When Mem-table reaches a certain threshold, data is flushed to an SSTable disk file. 
+
+SimpleStrategy is used when you have just one data center. SimpleStrategy places the first replica on the node selected by the partitioner. After that, remaining replicas are placed in clockwise direction in the Node ring.
+
+NetworkTopologyStrategy is used when you have more than two data centers.In NetworkTopologyStrategy, 
+replicas are set for each data center separately. 
+NetworkTopologyStrategy places replicas in the clockwise direction in the ring until reaches the first node
+ in another rack. ex : 1<-4<-3<-2<-1->7->8->5->6->7 .heere two data center (1 2 3 4 ) and ( 5 6 7 8 ) .first data will
+ came to node 1 , then replicate with 2 and 7 first . 2->3->4->1 (clock wise ) and parallel 7->8->5->6->7 (clockwise)
+
+This strategy tries to place replicas on different racks in the same data center. This is due to the reason
+ that sometimes failure or problem can occur in the rack. Then replicas on other nodes can provide data.
+
