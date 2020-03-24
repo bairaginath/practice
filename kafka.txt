@@ -1,0 +1,404 @@
+https://www.youtube.com/watch?v=r4c0whAOCGI
+
+Apache Kafka is publish-subscribe based fault tolerant messaging system. It is fast, scalable and distributed by design.
+Kafka has better throughput, built-in partitioning, replication and inherent fault-tolerance, which makes it a good fit for large-scale message processing applications.
+Point to Point Messaging System
+------
+n a point-to-point system, messages are persisted in a queue. One or more consumers can consume the messages in the queue, but a particular message can be consumed by a maximum of one consumer only.
+Publish-Subscribe Messaging System
+------
+n the publish-subscribe system, messages are persisted in a topic. Unlike point-to-point system, consumers can subscribe to one or more topic and consume all the messages in that topic. In the Publish-Subscribe system, message producers are called publishers and message consumers are called subscribers. 
+Kafka messages are persisted on the disk and replicated within the cluster to prevent data loss. Kafka is built on top of the ZooKeeper synchronization service. It integrates very well with Apache Storm and Spark for real-time streaming data analysis.
+
+Benefit
+----
+Reliability − Kafka is distributed, partitioned, replicated and fault tolerance.
+Scalability − Kafka messaging system scales easily without down time..
+Durability − Kafka uses "Distributed commit log" which means messages persists on disk as fast as possible, hence it is durable..
+Performance − Kafka has high throughput for both publishing and subscribing messages. It maintains stable performance even many TB of messages are stored.
+Use Cases :Metrics,Log Aggregation Solution,Stream Processing
+
+bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 3 --partitions 1 --topic my-replicated-topic
+bin/kafka-topics.sh --describe --bootstrap-server localhost:9092 --topic my-replicated-topic
+Topic:my-replicated-topic   PartitionCount:1    ReplicationFactor:3 Configs:
+Topic: my-replicated-topic  Partition: 0    Leader: 1   Replicas: 1,2,0 Isr: 1,2,0
+
+Here is an explanation of output. The first line gives a summary of all the partitions, each additional line gives information about one partition. Since we have only one partition for this topic there is only one line.
+
+    "leader" is the node responsible for all reads and writes for the given partition. Each node will be the leader for a randomly selected portion of the partitions.
+    "replicas" is the list of nodes that replicate the log for this partition regardless of whether they are the leader or even if they are currently alive.
+    "isr" is the set of "in-sync" replicas. This is the subset of the replicas list that is currently alive and caught-up to the leader. 
+
+Topics
+------
+A stream of messages belonging to a particular category is called a topic. Data is stored in topics.Topics are split into partitions. For each topic, Kafka keeps a minimum of one partition. Each such partition contains messages in an immutable ordered sequence. A partition is implemented as a set of segment files of equal sizes.
+Partition
+---------
+Topics may have many partitions, so it can handle an arbitrary amount of data.
+Partition offset
+----------------
+Each partitioned message has a unique sequence id called as "offset".
+Replicas of partition
+---------------------
+Replicas are nothing but "backups" of a partition. Replicas are never read or write data. They are used to prevent data loss.
+Brokers
+-------
+Brokers are simple system responsible for maintaining the pub-lished data. Each broker may have zero or more partitions per topic. 
+Assume, if there are N partitions in a topic and N number of brokers, each broker will have one partition.
+Assume if there are N partitions in a topic and more than N brokers (n + m), the first N broker will have one partition and the next M broker will not have any partition for that particular topic.
+Assume if there are N partitions in a topic and less than N brokers (n-m), each broker will have one or more partition sharing among them. This scenario is not recommended due to unequal load distribution among the broker.
+Kafka Cluster
+------------
+Kafka’s having more than one broker are called as Kafka cluster. A Kafka cluster can be expanded without downtime. These clusters are used to manage the persistence and replication of message data.
+Producers
+---------
+Producers are the publisher of messages to one or more Kafka topics. Producers send data to Kafka brokers. Every time a producer pub-lishes a message to a broker, the broker simply appends the message to the last segment file. Actually, the message will be appended to a partition. Producer can also send messages to a partition of their choice.
+Consumers
+---------
+Consumers read data from brokers. Consumers subscribes to one or more topics and consume published messages by pulling data from the brokers.
+Leader
+------
+"Leader" is the node responsible for all reads and writes for the given partition. Every partition has one server acting as a leader.
+Follower
+--------
+Node which follows leader instructions are called as follower. If the leader fails, one of the follower will automatically become the new leader. A follower acts as normal consumer, pulls messages and up-dates its own data store.
+
+
+Work Flow
+==========
+Broker
+------
+Kafka cluster typically consists of multiple brokers to maintain load balance. Kafka brokers are stateless, so they use ZooKeeper for maintaining their cluster state. One Kafka broker instance can handle hundreds of thousands of reads and writes per second and each broker can handle TB of messages without performance impact. Kafka broker leader election can be done by ZooKeeper.
+ZooKeeper
+----------
+ZooKeeper is used for managing and coordinating Kafka broker. ZooKeeper service is mainly used to notify producer and consumer about the presence of any new broker in the Kafka system or failure of the broker in the Kafka system. As per the notification received by the Zookeeper regarding presence or failure of the broker then pro-ducer and consumer takes decision and starts coordinating their task with some other broker.
+Producers
+---------
+Producers push data to brokers. When the new broker is started, all the producers search it and automatically sends a message to that new broker. Kafka producer doesn’t wait for acknowledgements from the broker and sends messages as fast as the broker can handle.
+Consumers
+----------   
+Since Kafka brokers are stateless, which means that the consumer has to maintain how many messages have been consumed by using partition offset. If the consumer acknowledges a particular message offset, it implies that the consumer has consumed all prior messages. The consumer issues an asynchronous pull request to the broker to have a buffer of bytes ready to consume. The consumers can rewind or skip to any point in a partition simply by supplying an offset value. Consumer offset value is notified by ZooKeeper.
+
+Kafka is simply a collection of topics split into one or more partitions. A Kafka partition is a linearly ordered sequence of messages, where each message is identified by their index (called as offset). All the data in a Kafka cluster is the disjointed union of partitions. Incoming messages are written at the end of a partition and messages are sequentially read by consumers. Durability is provided by replicating messages to different brokers.
+
+Following is the step wise workflow of the Pub-Sub Messaging −
+----------
+.Producers send message to a topic at regular intervals.
+.Kafka broker stores all messages in the partitions configured for that particular topic. It ensures the messages are equally shared between partitions. If the producer sends two messages and there are two partitions, Kafka will store one message in the first partition and the second message in the second partition.
+.Consumer subscribes to a specific topic.
+.Once the consumer subscribes to a topic, Kafka will provide the current offset of the topic to the consumer and also saves the offset in the Zookeeper ensemble.
+.Consumer will request the Kafka in a regular interval (like 100 Ms) for new messages.
+.Once Kafka receives the messages from producers, it forwards these messages to the consumers.
+.Consumer will receive the message and process it.
+.Once the messages are processed, consumer will send an acknowledgement to the Kafka broker.
+.Once Kafka receives an acknowledgement, it changes the offset to the new value and updates it in the Zookeeper. Since offsets are maintained in the Zookeeper, the consumer can read next message correctly even during server outrages.
+.This above flow will repeat until the consumer stops the request.
+.Consumer has the option to rewind/skip to the desired offset of a topic at any time and read all the subsequent messages.
+Workflow of Consumer Group
+--------------------------
+n a queue messaging system instead of a single consumer, a group of consumers having the same "Group ID" will subscribe to a topic. In simple terms, consumers subscribing to a topic with same "Group ID" are considered as a single group and the messages are shared among them. Let us check the actual workflow of this system.
+.Producers send message to a topic in a regular interval.
+.Kafka stores all messages in the partitions configured for that particular topic similar to the earlier scenario.
+.A single consumer subscribes to a specific topic, assume "Topic-01" with "Group ID" as "Group-1".
+.Kafka interacts with the consumer in the same way as Pub-Sub Messaging until new consumer subscribes the same topic, "Topic-01" with the same "Group ID" as "Group-1".
+.Once the new consumer arrives, Kafka switches its operation to share mode and shares the data between the two consumers. This sharing will go on until the number of con-sumers reach the number of partition configured for that particular topic.
+
+Once the number of consumer exceeds the number of partitions, the new consumer will not receive any further message until any one of the existing consumer unsubscribes. This scenario arises because each consumer in Kafka will be assigned a minimum of one partition and once all the partitions are assigned to the existing consumers, the new consumers will have to wait.
+
+Role of ZooKeeper
+--------
+A critical dependency of Apache Kafka is Apache Zookeeper, which is a distributed configuration and synchronization service. Zookeeper serves as the coordination interface between the Kafka brokers and consumers. The Kafka servers share information via a Zookeeper cluster. Kafka stores basic metadata in Zookeeper such as information about topics, brokers, consumer offsets (queue readers) and so on.
+Since all the critical information is stored in the Zookeeper and it normally replicates this data across its ensemble, failure of Kafka broker / Zookeeper does not affect the state of the Kafka cluster. Kafka will restore the state, once the Zookeeper restarts. This gives zero downtime for Kafka. The leader election between the Kafka broker is also done by using Zookeeper in the event of leader failure.
+
+Consumer Group
+-----------
+Consumers can join a group by using the same"group.id."
+The maximum parallelism of a group is that the number of consumers in the group ← no of partitions.
+Kafka assigns the partitions of a topic to the consumer in a group, so that each partition is consumed by exactly one consumer in the group.
+Kafka guarantees that a message is only ever read by a single consumer in the group.
+Consumers can see the message in the order they were stored in the log.
+
+
+my-experiment
+==============
+./bin/zookeeper-server-start.sh config/zookeeper.properties
+
+change these three oarameter on server.properties
+    broker.id=1
+    listeners=PLAINTEXT://:9093
+    log.dirs=/tmp/kafka-logs-1
+
+./bin/kafka-server-start.sh config/server1.properties 
+./bin/kafka-server-start.sh config/server2.properties 
+./bin/kafka-server-start.sh config/server3.properties 
+
+bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 3 --partitions 3 --topic my-replicated-topic
+
+bin/kafka-topics.sh --list --bootstrap-server localhost:9092
+
+bin/kafka-topics.sh --describe --bootstrap-server localhost:9092 --topic my-replicated-topic
+Topic: my-replicated-topic	PartitionCount: 3	ReplicationFactor: 3	Configs: segment.bytes=1073741824
+	Topic: my-replicated-topic	Partition: 0	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3
+	Topic: my-replicated-topic	Partition: 1	Leader: 2	Replicas: 2,3,1	Isr: 2,3,1
+	Topic: my-replicated-topic	Partition: 2	Leader: 3	Replicas: 3,1,2	Isr: 3,1,2
+
+start producer with broker 1
+
+bin/kafka-console-producer.sh --broker-list localhost:9092 --topic my-replicated-topic
+> In 9092 broker
+
+
+
+start four consumer different group id
+------
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic my-replicated-topic
+In 9092 broker
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9093 --from-beginning --topic my-replicated-topic
+In 9092 broker
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9094 --from-beginning --topic my-replicated-topic
+In 9092 broker
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic my-replicated-topic
+In 9092 broker
+
+In this case, unlimited consumer can parallel pull the data using different group id . it looks like bradcast the message.
+
+
+start four consumer same group id
+------
+
+bin/kafka-console-producer.sh --broker-list localhost:9092 --topic my-replicated-topic
+> 1
+> 2
+> 3
+> 4
+> 5
+> 6
+
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic my-replicated-topic1 --group 1
+1
+4
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic my-replicated-topic1 --group 1
+2
+5
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic my-replicated-topic1 --group 1
+3
+6
+bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --from-beginning --topic my-replicated-topic1 --group 1
+//This consumer is ideal state
+
+In this case , 
+in a group, number of consumer subscribed <= no. of partitions on that topic .In a group, only one consumer pull that data at a time and process the data.
+
+check group list
+--------
+bin/kafka-consumer-groups.sh  --list --bootstrap-server localhost:9092
+
+
+
+
+Baeldung
+========
+Apache Kafka with Spring
+-------------------------
+<dependency>
+    <groupId>org.springframework.kafka</groupId>
+    <artifactId>spring-kafka</artifactId>
+    <version>2.2.7.RELEASE</version>
+</dependency>
+
+@Configuration
+public class KafkaTopicConfig {
+     
+    @Value(value = "${kafka.bootstrapAddress}")
+    private String bootstrapAddress;
+ 
+    @Bean
+    public KafkaAdmin kafkaAdmin() {
+        Map<String, Object> configs = new HashMap<>();
+        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+        return new KafkaAdmin(configs);
+    }
+     
+    @Bean
+    public NewTopic topic1() {
+         //topic name,no. of partitions, no.of replication factor
+         return new NewTopic("baeldung", 1, (short) 1);
+    }
+}
+
+Producing Messages
+--------
+Producer instances are thread-safe and hence using a single instance throughout an application context will give higher performance. Consequently, KakfaTemplate instances are also thread-safe and use of one instance is recommended.
+
+@Configuration
+public class KafkaProducerConfig {
+ 
+    @Bean
+    public ProducerFactory<String, String> producerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(
+          ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, 
+          bootstrapAddress);
+        configProps.put(
+          ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, 
+          StringSerializer.class);
+        configProps.put(
+          ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, 
+          StringSerializer.class);
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+ 
+    @Bean
+    public KafkaTemplate<String, String> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
+    }
+}
+Publishing Messages
+-----
+@Autowired
+private KafkaTemplate<String, String> kafkaTemplate;
+ 
+public void sendMessage(String msg) {
+    kafkaTemplate.send(topicName, msg);
+}
+The send API returns a ListenableFuture object. If we want to block the sending thread and get the result about the sent message, we can call the get API of the ListenableFuture object. The thread will wait for the result, but it will slow down the producer.
+Kafka is a fast stream processing platform. So it's a better idea to handle the results asynchronously so that the subsequent messages do not wait for the result of the previous message. We can do this through a callback:
+public void sendMessage(String message) {
+             
+    ListenableFuture<SendResult<String, String>> future = 
+      kafkaTemplate.send(topicName, message);
+     
+    future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
+ 
+        @Override
+        public void onSuccess(SendResult<String, String> result) {
+            System.out.println("Sent message=[" + message + 
+              "] with offset=[" + result.getRecordMetadata().offset() + "]");
+        }
+        @Override
+        public void onFailure(Throwable ex) {
+            System.out.println("Unable to send message=["
+              + message + "] due to : " + ex.getMessage());
+        }
+    });
+}
+
+Consuming Messages
+----------
+@EnableKafka
+@Configuration
+public class KafkaConsumerConfig {
+ 
+    @Bean
+    public ConsumerFactory<String, String> consumerFactory() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(
+          ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, 
+          bootstrapAddress);
+        props.put(
+          ConsumerConfig.GROUP_ID_CONFIG, 
+          groupId);
+        props.put(
+          ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, 
+          StringDeserializer.class);
+        props.put(
+          ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, 
+          StringDeserializer.class);
+        return new DefaultKafkaConsumerFactory<>(props);
+    }
+ 
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> 
+      kafkaListenerContainerFactory() {
+    
+        ConcurrentKafkaListenerContainerFactory<String, String> factory =
+          new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        return factory;
+    }
+}
+
+Consuming Messages
+--------
+@KafkaListener(topics = "topicName", groupId = "foo")
+public void listen(String message) {
+    System.out.println("Received Messasge in group foo: " + message);
+}
+one consumer can listen for messages from various topics:
+@KafkaListener(topics = "topic1, topic2", groupId = "foo")
+
+Spring also supports retrieval of one or more message headers using the @Header annotation in the listener:
+KafkaListener(topics = "topicName")
+public void listenWithHeaders(
+  @Payload String message, 
+  @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition) {
+      System.out.println(
+        "Received Message: " + message"
+        + "from partition: " + partition);
+}
+
+Consuming Messages from a Specific Partition
+@KafkaListener(
+  topicPartitions = @TopicPartition(topic = "topicName",
+  partitionOffsets = {
+    @PartitionOffset(partition = "0", initialOffset = "0"), 
+    @PartitionOffset(partition = "3", initialOffset = "0")
+}))
+public void listenToParition(
+  @Payload String message, 
+  @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition) {
+      System.out.println(
+        "Received Messasge: " + message"
+        + "from partition: " + partition);
+}
+f setting the offset is not required, then you can write as below
+KafkaListener(topicPartitions 
+  = @TopicPartition(topic = "topicName", partitions = { "0", "1" }))
+
+Adding Message Filter for Listeners
+--------------
+@Bean
+public ConcurrentKafkaListenerContainerFactory<String, String>
+  filterKafkaListenerContainerFactory() {
+ 
+    ConcurrentKafkaListenerContainerFactory<String, String> factory =
+      new ConcurrentKafkaListenerContainerFactory<>();
+    factory.setConsumerFactory(consumerFactory());
+    factory.setRecordFilterStrategy(
+      record -> record.value().contains("World"));
+    return factory;
+}
+
+@KafkaListener(
+  topics = "topicName", 
+  containerFactory = "filterKafkaListenerContainerFactory")
+public void listen(String message) {
+    // handle message
+}
+
+Custom Message Converters
+---------
+dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.9.7</version>
+</dependency>
+
+we can also send and receive custom Java objects
+Producing Custom Messages
+configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, 
+      JsonSerializer.class);
+Consuming Custom Messages
+return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(Greeting.class)); 
+
+consuming Greeting message as below
+@KafkaListener(
+  topics = "topicName", 
+  containerFactory = "greetingKafkaListenerContainerFactory")
+public void greetingListener(Greeting greeting) {
+    // process greeting message
+}
+	
+
+
+

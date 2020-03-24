@@ -7,10 +7,11 @@ Cassandra stores data on different nodes with a peer to peer distributed fashion
 
 All the nodes exchange information with each other using Gossip protocol. Gossip is a protocol in Cassandra by which nodes can communicate with each other. 
 
-Cluster – a collection of nodes or Data Centers arranged in a ring architecture. A name must be assigned to every cluster, which will subsequently be used by the participating nodes
 
 Keyspace-The keyspace is the outermost container for data in Cassandra. The main attributes to set per keyspace are the Replication Factor, the Replica Placement Strategy and the Column Families
 
+Create Keyspace
+---------------
 CREATE KEYSPACE “KeySpace Name”
 WITH replication = {'class': ‘Strategy name’, 'replication_factor' : ‘No.Of  replicas’}
 
@@ -30,14 +31,28 @@ Old Network Topology Strategy 	This is a legacy replication strategy.
 By default, the durable_writes properties of a table is set to true, however it can be set to false. You cannot set this property to simplex strategy.
 Durable Writes provides a means to instruct Cassandra whether to use "commitlog" for updates on the current KeySpace or not. This option is not mandatory. The default value for durable writes is TRUE.
 
+Alter Keyspace
+---------------
+alter Keyspace KeyspaceName with replication={'class':'StrategyName', 
+	'replication_factor': no of replications on different nodes} 
+    	with DURABLE_WRITES=true/false
+
+Drop Keyspace
+-------------
+Drop keyspace KeyspaceName;
 
 Node :Node is the place where data is stored. It is the basic component of Cassandra.
 Data Center :A collection of nodes are called data center. Many nodes are categorized as a data center.
-Cluster :The cluster is the collection of many data centers.
+Cluster :The cluster is the collection of many data centers.Cluster – a collection of nodes or Data Centers arranged in a ring architecture. A name must be assigned to every cluster, which will subsequently be used by the participating nodes
+
+In our project custer name is "instance1"
+
 Commit Log : Every write operation is written to Commit Log. Commit log is used for crash recovery.
 Mem-table :After data written in Commit log, data is written in Mem-table. Data is written in Mem-table temporarily.
 SSTable : When Mem-table reaches a certain threshold, data is flushed to an SSTable disk file. 
 
+Replication Strategy
+=====================
 SimpleStrategy is used when you have just one data center. SimpleStrategy places the first replica on the node selected by the partitioner. After that, remaining replicas are placed in clockwise direction in the Node ring.
 
 NetworkTopologyStrategy is used when you have more than two data centers.In NetworkTopologyStrategy, 
@@ -48,4 +63,681 @@ NetworkTopologyStrategy places replicas in the clockwise direction in the ring u
 
 This strategy tries to place replicas on different racks in the same data center. This is due to the reason
  that sometimes failure or problem can occur in the rack. Then replicas on other nodes can provide data.
+
+ Write Operation
+ =================
+
+ The coordinator sends a write request to replicas. If all the replicas are up, they will receive write request according to  their consistency level.Consistency level determines how many nodes will respond back with the success acknowledgment.
+The node will respond back with the success acknowledgment if data is written successfully to the commit log and memTable.
+For example, in a single data center with replication factor equals to three, three replicas will receive write request. If consistency level is one, only one replica will respond back with the success acknowledgment, and the remaining two will remain asleep.
+
+Write Repair mechanism in cassandra
+------------------------------
+Suppose if remaining two replicas lose data due to node downs or some other problem, Cassandra will make the row consistent by the built-in repair mechanism in Cassandra.
+Here it is explained, how write process occurs in Cassandra,
+    1)When write request comes to the node, first of all, it logs in the commit log.
+    2)Then Cassandra writes the data in the mem-table. Data written in the mem-table on each write request also writes in commit log separately. Mem-table is a temporarily stored data in the memory while Commitlog logs the transaction records for back up purposes.
+    3)When mem-table is full, data is flushed to the SSTable data file. 
+
+Read Operation
+================
+There are three types of read requests that a coordinator sends to replicas.
+    Direct request
+    Digest request
+    Read repair request
+
+The coordinator sends direct request to one of the replicas. After that, the coordinator sends the digest request to the number of replicas specified by the consistency level (for example single node ) and checks whether the returned data is an updated data.
+
+After that, the coordinator sends digest request to all the remaining replicas. If any node gives out of date value, a background read repair request will update that data. This process is called read repair mechanism.
+
+Cassandra Data Model Rules
+==========================
+In Cassandra, writes are not expensive. Cassandra does not support joins, group by, OR clause, aggregations, etc. So you have to store your data in such a way that it should be completely retrievable. So these rules must be kept in mind while modelling data in Cassandra.
+
+Maximize the number of writes
+-----------------------------
+    In Cassandra, writes are very cheap. Cassandra is optimized for high write performance. So try to maximize your writes for better read performance and data availability. There is a tradeoff between data write and data read. So, optimize you data read performance by maximizing the number of data writes.
+Maximize Data Duplication
+-------------------------
+    Data denormalization and data duplication are defacto of Cassandra. Disk space is not more expensive than memory, CPU processing and IOs operation. As Cassandra is a distributed database, so data duplication provides instant data availability and no single point of failure.
+
+Data Modeling Goals
+--------------------
+You should have following goals while modelling data in Cassandra.
+Spread Data Evenly Around the Cluster
+--------------------------------------
+    You want an equal amount of data on each node of Cassandra cluster. Data is spread to different nodes based on partition keys that is the first part of the primary key. So, try to choose integers as a primary key for spreading data evenly around the cluster.
+Minimize number of partitions read while querying data
+-------------------------------------------------------
+Partition are a group of records with the same partition key. When the read query is issued, it collects data from different nodes from different partitions.
+If there will be many partitions, then all these partitions need to be visited for collecting the query data.
+It does not mean that partitions should not be created. If your data is very large, you can’t keep that huge amount of data on the single partition. The single partition will be slowed down.
+So try to choose a balanced number of partitions.
+
+Good Primary Key
+-----------------
+Let’s take an example and find which primary key is good.Here is the table MusicPlaylist.
+Create table MusicPlaylist
+    (
+        SongId int,
+        SongName text,
+        Year int,
+        Singer text,
+        Primary key(SongId, SongName)
+    );
+
+In above example, table MusicPlaylist,
+    Songid is the partition key, and
+    SongName is the clustering column
+    Data will be clustered on the basis of SongName. Only one partition will be created with the SongId. There will not be any other partition in the table MusicPlaylist.
+Data retrieval will be slow by this data model due to the bad primary key.
+Here is another table MusicPlaylist.
+Create table MusicPlaylist
+    (
+        SongId int,
+        SongName text,
+        Year int,
+        Singer text,
+        Primary key((SongId, Year), SongName)
+    );
+
+In above example, table MusicPlaylist,
+    Songid and Year are the partition key, and
+    SongName is the clustering column.
+    Data will be clustered on the basis of SongName. In this table, each year, a new partition will be created. All the songs of the year will be on the same node. This primary key will be very useful for the data.
+Our data retrieval will be fast by this data model.
+
+
+Model Your Data in Cassandra
+-----------------------------
+Following things should be kept in mind while modelling your queries.Determine what queries you want to support and Create table according to your queries. Create a table that will satisfy your queries. Try to create a table in such a way that a minimum number of partitions needs to be read.
+RDBMS                                       Cassandra
+
+Stores data in normalized form       Stores data in denormalized form
+Legacy dbms; structured data       Wide row store,Dynamic; structured & unstructured data
+
+
+Table
+======
+Column family in Cassandra is similar to RDBMS table. Column family is used to store data.
+Column Families in Cassandra are like tables in Relational Databases. Each Column Family contains a collection of rows which are represented by a Map<RowKey, SortedMap<ColumnKey, ColumnValue>>.
+
+Column – A column in Cassandra is a data structure which contains a column name, a value and a timestamp. The columns and the number of columns in each row may vary in contrast with a relational database where data are well structured
+
+
+Create table KeyspaceName.TableName
+(
+ColumnName DataType,
+ColumnName DataType,
+ColumnName DataType
+.
+.
+.
+Primary key(ColumnName)
+) with PropertyName=PropertyValue;
+
+Primary key: There are two types of primary key.
+------------
+Single Primary Key: Single primary key is specified by the following syntax.
+------------------
+Primary key (ColumnName) 
+In the single primary key, there is only a single column. That column is also called partitioning key. Data is partitioned on the basis of that column. Data is spread on different nodes on the basis of the partition key.
+
+Compound Primary Key: Compound primary key is specified by the following syntax.
+--------------------
+Primary key(ColumnName1,ColumnName2 . . .)
+In above syntax, ColumnName1 is the partitioning key and ColumnName2 is the Clustering key. Data will be partitioned on the basis of ColumnName1 and data will be clustered on the basis of ColumnName2. Clustering is the process that sorts data in the partition.
+
+Compound Partitioning key
+--------------------------
+Compound partitioning key is specified by the following syntax.
+Primary Key((ColumnName1,ColumnName2),ColumnName3...))
+In above syntax, ColumnName1 and ColumnName2 are the compound partition key. Data will be partitioned on the basis of both columns ColumnName1 and ColumnName2 and data will be clustered on the basis of the ColumnName3. If you have too much data on the single partition. Then, compound partitioning key is used. Compound partitioning key is used to create multiple partitions for the data. 
+    
+With Clause
+-----------
+"With clause" is used to specify any property and its value for the defined table. For example, if you want to compress Cassandra table data. You can set compression property by specifying compression algorithm property value in "With clause." 
+Ex
+CREATE TABLE user_actions(user_id INT,ts TIMESTAMP,action TEXT,                                PRIMARY KEY((user_id), ts)) WITH CLUSTERING ORDER BY (ts DESC);
+
+more table_properties
+-------
+The CLUSTERING ORDER BY property can be used to set the ordering for each clustering column individually (default is ASC).
+The default_time_to_live property sets the default expiration time (TTL) in seconds for a table. The expiration time can be overridden by setting TTL for individual rows. The default value is 0 and means rows do not expire.
+The transactions property specifies if distributed transactions are enabled in the table. To enable distributed transactions, use transactions = { 'enabled' : true }.
+Use the AND operator to use multiple table properties.
+
+Alter Table
+-----------
+lter table KeyspaceName.TableName  +
+Alter ColumnName TYPE ColumnDataype |
+Add ColumnName ColumnDataType |
+Drop ColumnName |
+Rename ColumnName To NewColumnName |
+With propertyName=PropertyValue;
+
+Drop Table : Drop Table KeyspaceName.TableName;
+
+Truncate Table
+---------------
+Command 'Truncate table' removes all the data from the specified table. Before truncating the data, Cassandra takes the snapshot of the data as a backup.
+Truncate KeyspaceName.TableName
+
+ Cassandra Query Language(CQL): Insert Into, Update, Delete
+ -----------------------------------------------------------
+ Insert into KeyspaceName.TableName(ColumnName1, ColumnName2, ColumnName3 . . . .)
+values (Column1Value, Column2Value, Column3Value . . . .)
+
+Update KeyspaceName.TableName 
+Set ColumnName1=new Column1Value,
+      ColumnName2=new Column2Value,
+      ColumnName3=new Column3Value, ...
+Where ColumnName=ColumnValue;
+
+Delete from KeyspaceName.TableName
+	Where ColumnName1=ColumnValue;
+
+What Cassandra does not support
+-------------------------------
+CQL does not support aggregation queries like max, min, avg
+CQL does not support group by, having queries.
+CQL does not support joins.
+CQL does not support OR queries.
+CQL does not support wildcard queries.
+CQL does not support Union, Intersection queries.
+Table columns cannot be filtered without creating the index.
+Greater than (>) and less than (<) query is only supported on clustering column.
+Cassandra query language is not suitable for analytics purposes because it has so many limitations.
+
+Cassandra Where Clause
+-----------------------
+In Cassandra, data retrieval is a sensitive issue. The column is filtered in Cassandra by creating an index on non-primary key columns.
+Select ColumnNames from KeyspaceName.TableName Where ColumnName1=Column1Value AND
+	ColumnName2=Column2Value
+
+Cassandra Create Index
+-----------------------
+Command 'Create index' creates an index on the column specified by the user. If the data already exists for the column you want to index, Cassandra creates indexes on the data during the 'create index' statement execution.
+After creating an index, Cassandra indexes new data automatically when data is inserted.
+The index cannot be created on primary key as a primary key is already indexed.
+Indexes on collections are not supported in Cassandra.
+ Without indexing on the column, Cassandra can't filter that column unless it is a primary key. 
+
+That's why, for filtering columns in Cassandra, indexes needs to be created.
+Create index IndexName on KeyspaceName.TableName(ColumnName);
+
+Ex : select * from University.Student where dept='CS';
+it will throw error like : no secondary indexes on the restricted column support
+Create index DeptIndex on University.Student(dept);
+After that you can filter on dept column
+
+Cassandra Drop Index
+--------------------
+Drop index IF EXISTS KeyspaceName.IndexName;
+ex:drop index IF EXISTS University.DeptIndex;
+
+Cassandra Automatic Data Expiration using Time to Live (ttl)
+------------------------------------------------------------
+Insert into KeyspaceName.TableName(ColumnNames) values(ColumnValues) using ttl TimeInseconds;
+ex: insert into University.Student(rollno,name,dept,semester) values(3,'Guru99','CS’,7) using ttl 100;
+
+Cassandra Collections
+=====================
+limitations in Cassandra collections.
+    Cassandra collection cannot store data more than 64KB.
+    Keep a collection small to prevent the overhead of querying collection because entire collection needs to be traversed.
+    If you store more than 64 KB data in the collection, only 64 KB will be able to query, it will result in loss of data.
+
+Cassandra Set
+-------------
+A Set stores group of elements that returns sorted elements when querying.
+Create table University.Teacher
+(
+id int,
+Name text,
+Email set<text>,
+Primary key(id)
+);
+insert into University.Teacher(id,Name,Email) values(1,'Guru99',{'abc@gmail.com','xyz@hotmail.com'});
+
+Cassandra List
+---------------
+Create table University.Teacher
+(
+id int,
+Name text,
+Email set<text>,
+coursenames list<text>,
+Primary key(id)
+);
+insert into University.Teacher(id,Name,Email,coursenames) values(2,'Hamilton',{'hamilton@hotmail.com'},[Data Science']);
+
+Cassandra Map
+--------------
+The map is a collection type that is used to store key value pairs. As its name implies that it maps one thing to another.
+Create tabel University.Course(id int,prereq map<text,text>, Primary key(id));
+insert into University.Course(id,prereq) values(1,{'DataScience':'Database', 'Neural Network':'Artificial Intelligence'});
+
+Cassandra Tuple
+----------------
+CREATE TABLE Emp_data (
+  E_id int PRIMARY KEY,
+  E_data tuple<int, text, int>
+);
+Cassandra counter
+-----------------
+The counter is a special column used to store a number that this changed increments.
+    Counter column cannot index, delete or re-add a counter column.
+    All non-counter columns in the table must be defined as a part of the primary key.
+    To load data in a counter column or to increase or decrease the value of the counter, use the update command.
+Create table View_Counts 
+ (
+  count_view counter,
+  name varchar,
+  blog_name text,
+  primary key(name, blog_name)
+ ); 
+update View_counts set count_view = count_view+1 
+where name = 'Ashish'and blog_name =  'cassandra';  
+
+
+Cassandra Cluster Setup on Multiple Nodes
+========================================
+diff cassandra.yaml cassandra.yaml.orig
+cluster_name: quantumCluster-cluster_R11
+cluster_name: 'Test Cluster'
+
+authenticator: PasswordAuthenticator
+authenticator: AllowAllAuthenticator
+
+authorizer: CassandraAuthorizer
+authorizer: AllowAllAuthorizer
+
+seeds: "127.127.127.2,127.127.127.1,127.127.127.3"
+seeds: "127.0.0.1"
+
+listen_address: 127.127.127.2
+listen_address: localhost
+
+rpc_address: 127.127.127.2
+rpc_address: localhost
+
+diff cassandra-rackdc.properties.orig cassandra-rackdc.properties
+dc=dc1
+dc=instance1
+
+Coordinator node is the node that communicates with replicas.
+-----------
+The coordinator is selected by the driver based on the policy you have set. Common policies are DCAwareRoundRobinPolicy and TokenAware Policy.
+
+For DCAwareRoundRobinPolicy, the driver selects the coordinator node based on its round robin policy. See more here: http://docs.datastax.com/en/drivers/java/2.1/com/datastax/driver/core/policies/DCAwareRoundRobinPolicy.html
+
+For TokenAwarePolicy, it selects a coordinator node that has the data being queried - to reduce "hops" and latency. More info: http://docs.datastax.com/en/drivers/java/2.1/com/datastax/driver/core/policies/TokenAwarePolicy.html
+
+
+Partitioner
+-----------
+ partitioner determines how the data should be distributed on the cluster. Partitioner uses a hash function to distribute data on the cluster. It takes partition key to calculate the hash. That hash is called token. Data is distributed on the basis of this token.
+
+Partitioners in CQL
+Murmur3partitioner :(MurmurHash hash values)
+    It is default partitioner in Cassandra 3.0. If we used TOKEN function then it distribute data over cluster based on MurmurHash hash values. It is also useful to provide good performance and fast hashing.
+RandomPartitioner : (MD5 hash values)
+    It is default partitioner prior to Cassandra 1.2. It distribute data over across cluster by using MD5 hash values.
+ByteOrderedPartitioner : (data lexically by key bytes)
+    In Cassandra Query Language Byte Ordered partitioner data distribute over cluster based on data lexically by key bytes.It is used for ordered partitioning in Cassandra Query Language. It is also useful for backward compatibility.
+example : SELECT TOKEN(Id) FROM User_info; 
+
+Port Number  Description
+9042 Cassandra Client Port
+9160 Cassandra Client Port Thrift
+7000 Cassandra internode cluster communication
+7001 Cassandra SSL internode cluster communication
+7199 Cassandra JMX monitoring port
+22 SSH port
+8888 OpsCenter Website. Browser http request.
+61620 OpsCenter monitoring port.
+61621 Opscenter agent port
+ 
+
+Application of Apache Cassandra:
+Some of the application use cases that Cassandra excels in include:
+    Real-time, big data workloads
+    Time series data management
+    High-velocity device data consumption and analysis
+    Media streaming management (e.g., music, movies)
+    Social media (i.e., unstructured data) input and analysis
+    Online web retail (e.g., shopping carts, user transactions)
+    Real-time data analytics
+    Online gaming (e.g., real-time messaging)
+    Software as a Service (SaaS) applications that utilize web services
+    Online portals (e.g., healthcare provider/patient interactions)
+    Most write-intensive systems
+
+
+Nodetool:
+---------
+It is one of the important tool for monitoring and managing Cassandra cluster. 
+nodetool ring:
+It provide the information about node status and information about the ring.
+nodetool cfstats:
+The tool has been renamed to nodetool tablestats. nodetool tablestats provides statistics about one or more tables.
+nodetool cfhistograms:
+This tool has been renamed to nodetool tablehistograms. It provide the initial troubleshooting performance metric and current performance statics for read and write latency on a table during the past fifteen minutes to monitor a cluster in Cassandra.
+
+Gossip Protocol in Cassandra
+-----------------------------
+In Cassandra all nodes communicating with each other via a gossip protocol. Gossip is the message system that Cassandra node use to make their data consistent with each other and is used to enforce the replication factor in a cluster. So, let’s imagine and Cassandra cluster as a ring system where each node contains a certain partition of each table in the database. And, can only communicate with adjacent nodes. 
+Gossip is a peer-to-peer communication protocol in which nodes periodically exchange state information about themselves and about other nodes they know about
+The Gossip protocol runs every second and exchange state messages with up to three other nodes 
+in the cluster.
+
+Aggregate functions:
+1. Count
+2. Max and Min
+3. Sum 
+4. Avg 
+
+Snitches in Cassandra
+---------------------
+n Cassandra Snitch is very useful and snitch is also helps in keep record to avoid storing multiple replicas of data on the same rack. In Cassandra.it is very important aspects to avoid multiple replica. In replication strategy we assign number of replica and also we define the data-center. This information is very helpful for snitch to identify the node and which rack belong to.
+In Cassandra, snitch job is to determine which data centers and racks it should use to read data from and write data to. In Cassandra, all snitch are dynamic by default. 
+Types of Snitches:
+SimpleSnitch:
+    In Cassandra, It is default snitch and good for development environments. It is unaware of datacenters or racks and also is not look for Cassandra-topologies.properties file and therefore is unusable for multi-datacenter environments.
+GossipingPropertyFileSnitch:
+    In Cassandra, it is very important file snitch also recommends by datastax for production usage. This snitch also look for the Cassandra-topologies.properties file to identify the cluster inforamtion such that which data center and rack belong to then we configure in the cassandra-rackdc.properties file to the rest of the nodes using gossip.
+    We can configure the GossipingPropertyFileSnitch by editing the Cassandra-topologies.properties file.
+    Let’s have a look.
+    dc=DC1
+    rack=RACK1
+    prefer_local=true //refers to communicate with local IP adress while it is not communicating in multiple data center in order to limit the network bandwidth usage.
+
+
+Cassandra with Java
+===================
+<dependency>
+    <groupId>com.datastax.cassandra</groupId>
+    <artifactId>cassandra-driver-core</artifactId>
+    <version>3.1.0</version>
+</dependency>
+In order to test the code with an embedded database server we should also add the cassandra-unit dependency.
+<dependency>
+    <groupId>org.cassandraunit</groupId>
+    <artifactId>cassandra-unit</artifactId>
+    <version>3.0.0.1</version>
+</dependency>
+
+public class CassandraConnector {
+    private Cluster cluster;
+     private Session session;
+ 
+    public void connect(String node, Integer port) {
+        Builder b = Cluster.builder().addContactPoint(node);
+        if (port != null) {
+            b.withPort(port);
+        }
+     
+   cluster = b.build();
+ 
+        session = cluster.connect();
+    }
+ 
+    public Session getSession() {
+        return this.session;
+    }
+ 
+    public void close() {
+        session.close();
+        cluster.close();
+    }
+}
+
+execute queries
+---------------
+session.execute(query);
+ResultSet
+---------
+public List<Book> selectAll() {
+    StringBuilder sb = 
+      new StringBuilder("SELECT * FROM ").append(TABLE_NAME);
+ 
+    String query = sb.toString();
+    ResultSet rs = session.execute(query);
+ 
+    List<Book> books = new ArrayList<Book>();
+ 
+    rs.forEach(r -> {
+        books.add(new Book(
+          r.getUUID("id"), 
+          r.getString("title"),  
+          r.getString("subject")));
+    });
+    return books;
+}
+
+Data Modeling in Cassandra
+==========================
+Partition Key
+Cassandra is a distributed database in which data is partitioned and stored across multiple nodes within a cluster.The partition key is made up of one or more data fields and is used by the partitioner to generate a token via hashing to distribute the data uniformly across a cluster.
+Clustering Key
+A clustering key is made up of one or more fields and helps in clustering or grouping together rows with same partition key and storing them in sorted order.Let's say that we are storing time-series data in Cassandra and we want to retrieve the data in chronological order. A clustering key that includes time-series data fields will be very helpful for efficient retrieval of data for this use case.
+
+Note: The combination of partition key and clustering key makes up the primary key and uniquely identifies any record in the Cassandra cluster.
+
+Guidelines Around Query Patterns
+-------------------------------
+    Each query should fetch data from a single partition
+    We should keep track of how much data is getting stored in a partition, as Cassandra has limits around the number of columns that can be stored in a single partition
+    It is OK to denormalize and duplicate the data to support different kinds of query patterns over the same data
+some query patterns are not at all efficient, including the following:
+    Fetching data from multiple partitions – this will require a coordinator to fetch the data from multiple nodes, store it temporarily in heap, and then aggregate the data before returning results to the user
+    Join-based queries – due to its distributed nature, Cassandra does not support table joins in queries the same way a relational database does, and as a result, queries with joins will be slower and can also lead to inconsistency and availability issues
+
+DataStax Java Driver for Apache Cassandra
+-----------------------------------------
+dependency>
+    <groupId>com.datastax.oss</groupId>
+    <artifactId>java-driver-core</artifactId>
+    <version>4.1.0</version>
+</dependency>
+ 
+<dependency>
+    <groupId>com.datastax.oss</groupId>
+    <artifactId>java-driver-query-builder</artifactId>
+    <version>4.1.0</version>
+</dependency>
+public class CassandraConnector {
+ 
+    private CqlSession session;
+ 
+    public void connect(String node, Integer port, String dataCenter) {
+        CqlSessionBuilder builder = CqlSession.builder();
+        builder.addContactPoint(new InetSocketAddress(node, port));
+        builder.withLocalDatacenter(dataCenter);
+ 
+        session = builder.build();
+    }
+ 
+    public CqlSession getSession() {
+        return this.session;
+    }
+ 
+    public void close() {
+        session.close();
+    }
+}
+for crete keyspace
+-----
+CreateKeyspace createKeyspace = SchemaBuilder.createKeyspace(keyspaceName)
+          .ifNotExists()
+          .withSimpleStrategy(numberOfReplicas);
+session.execute(createKeyspace.build());
+
+
+Spring Data Cassandra
+=====================
+<dependency>
+    <groupId>com.datastax.cassandra</groupId>
+    <artifactId>cassandra-driver-core</artifactId>
+    <version>2.1.9</version>
+</dependency>
+
+@Configuration
+public class CassandraConfig extends AbstractCassandraConfiguration {
+ 
+    @Override
+    protected String getKeyspaceName() {
+        return "testKeySpace";
+    }
+ 
+    @Bean
+    public CassandraClusterFactoryBean cluster() {
+        CassandraClusterFactoryBean cluster = 
+          new CassandraClusterFactoryBean();
+        cluster.setContactPoints("127.0.0.1");
+        cluster.setPort(9142);
+        return cluster;
+    }
+ 
+    @Bean
+    public CassandraMappingContext cassandraMapping() 
+      throws ClassNotFoundException {
+        return new BasicCassandraMappingContext();
+    }
+}
+
+Repository
+------
+@Repository
+public interface BookRepository extends CassandraRepository<Book> {
+    //
+}
+@Configuration
+@EnableCassandraRepositories(
+  basePackages = "com.baeldung.spring.data.cassandra.repository")
+public class CassandraConfig extends AbstractCassandraConfiguration {
+    //
+}
+
+Entity:
+-------
+@Table
+public class Book {
+    @PrimaryKeyColumn(
+      name = "isbn", 
+      ordinal = 2, //t
+      he order of this column relative to other primary key columns.
+      type = PrimaryKeyType.CLUSTERED, 
+      ordering = Ordering.DESCENDING)
+    private UUID id;
+    @PrimaryKeyColumn(
+      name = "title", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
+    private String title;
+    @PrimaryKeyColumn(
+      name = "publisher", ordinal = 1, type = PrimaryKeyType.PARTITIONED)
+    private String publisher;
+    @Column
+    private Set<String> tags = new HashSet<>();
+    // standard getters and setters
+}
+GURD
+-----
+Book javaBook = new Book(
+  UUIDs.timeBased(), "Head First Java", "O'Reilly Media", 
+  ImmutableSet.of("Computer", "Software"));
+bookRepository.save(ImmutableSet.of(javaBook));
+
+Iterable<Book> books = bookRepository.findByTitleAndPublisher(
+  "Head First Java", "O'Reilly Media");
+assertEquals(javaBook.getId(), books.iterator().next().getId());
+
+bookRepository.delete(javaBook);
+
+Iterable<Book> books = bookRepository.findAll();
+
+
+Using the CassandraTemplate from Spring Data
+=============================================
+Cassandra Query Language (CQL) is the query language for the Cassandra database and CqlTemplate is the low-level data access template in Spring Data Cassandra 
+CassandraTemplate builds on top of the low level CqlTemplate and provides a simple way to query domain objects and map the objects to a persisted data structure in Cassandra.
+
+@Configuration
+@EnableCassandraRepositories(basePackages = "com.baeldung.spring.data.cassandra.repository")
+public class CassandraConfig extends AbstractCassandraConfiguration { ... }
+
+@Autowired
+private CassandraOperations cassandraTemplate;
+
+cassandraTemplate.insert(javaBook);
+
+Select select = QueryBuilder.select().from("book")
+  .where(QueryBuilder.eq("title", "Head First Java"))
+  .and(QueryBuilder.eq("publisher", "O'Reilly Media"));
+Book retrievedBook = cassandraTemplate.selectOne(select, Book.class);
+
+cassandraTemplate.insert(bookList);//inserting mutliple books at a time
+cassandraTemplate.update(retrievedBook);
+cassandraTemplate.delete(javaBook);
+cassandraTemplate.deleteAll(Book.class); // delete all entries 
+
+ Using QueryBuilder
+ Insert insertQueryBuider = QueryBuilder.insertInto("book")
+ .value("isbn", UUIDs.timeBased())
+ .value("title", "Head First Java")
+ .value("publisher", "OReilly Media")
+ .value("tags", ImmutableSet.of("Software"));
+cassandraTemplate.execute(insertQueryBuider);
+
+Using PreparedStatements
+UUID uuid = UUIDs.timeBased();
+String insertPreparedCql = 
+  "insert into book (isbn, title, publisher, tags) values (?, ?, ?, ?)";
+List<Object> singleBookArgsList = new ArrayList<>();
+List<List<?>> bookList = new ArrayList<>();
+singleBookArgsList.add(uuid);
+singleBookArgsList.add("Head First Java");
+singleBookArgsList.add("OReilly Media");
+singleBookArgsList.add(ImmutableSet.of("Software"));
+bookList.add(singleBookArgsList);
+cassandraTemplate.ingest(insertPreparedCql, bookList);
+
+Using CQL Statements
+UUID uuid = UUIDs.timeBased();
+String insertCql = "insert into book (isbn, title, publisher, tags) 
+  values (" + uuid + ", 'Head First Java', 'OReilly Media', {'Software'})";
+cassandraTemplate.execute(insertCql);
+
+
+
+
+
+
+
+
+
+
+                                                                                                                            ✔
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

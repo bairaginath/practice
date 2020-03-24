@@ -12,5 +12,10 @@ https://cleanprogrammer.net/mapping-between-domain-data-transfer-objects-with-ma
 
 https://www.baeldung.com/java-full-text-search-algorithms
 
-https://www.hackerrank.com/challenges/fraudulent-activity-notifications/problem		
+https://www.hackerrank.com/challenges/fraudulent-activity-notifications/problem	
+
+cassandra
+----------
+how cassandra clustering did ?
+see cassandra repairing code ?	
 

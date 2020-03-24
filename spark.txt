@@ -1,0 +1,134 @@
+Apache Spark is a lightning-fast cluster computing designed for fast computation. It was built on top of Hadoop MapReduce and it extends the MapReduce model to efficiently use more types of computations which includes Interactive Queries and Stream Processing.
+Spark was introduced by Apache Software Foundation for speeding up the Hadoop computational computing software process.
+Spark uses Hadoop in two ways – one is storage and second is processing. Since Spark has its own cluster management computation, it uses Hadoop for storage purpose only.
+The main feature of Spark is its in-memory cluster computing that increases the processing speed of an application.
+ide range of workloads such as batch applications, iterative algorithms, interactive queries and streaming.
+benefit
+------
+Speed,Supports multiple languages,
+Advanced Analytics − Spark not only supports ‘Map’ and ‘reduce’. It also supports SQL queries, Streaming data, Machine learning (ML), and Graph algorithms.
+Spark Streaming leverages Spark Core's fast scheduling capability to perform streaming analytics. It ingests data in mini-batches and performs RDD (Resilient Distributed Datasets) transformations on those mini-batches of data.
+MLlib is a distributed machine learning framework above Spark because of the distributed memory-based Spark architecture.
+GraphX is a distributed graph-processing framework on top of Spark. It provides an API for expressing graph computation that can model the user-defined graphs by using Pregel abstraction API.
+
+Resilient Distributed Datasets (RDD)
+------------------------------------
+Resilient Distributed Datasets (RDD) is a fundamental data structure of Spark. It is an immutable distributed collection of objects. Each dataset in RDD is divided into logical partitions, which may be computed on different nodes of the cluster. RDDs can contain any type of Python, Java, or Scala objects, including user-defined classes.
+
+Formally, an RDD is a read-only, partitioned collection of records. RDDs can be created through deterministic operations on either data on stable storage or other RDDs. RDD is a fault-tolerant collection of elements that can be operated on in parallel.
+
+There are two ways to create RDDs − parallelizing an existing collection in your driver program, or referencing a dataset in an external storage system, such as a shared file system, HDFS, HBase, or any data source offering a Hadoop Input Format.
+
+Data Sharing using Spark RDD
+------
+Data sharing is slow in MapReduce due to replication, serialization, and disk IO. Most of the Hadoop applications, they spend more than 90% of the time doing HDFS read-write operations.The key idea of spark is Resilient Distributed Datasets (RDD); it supports in-memory processing computation. This means, it stores the state of memory as an object across the jobs and the object is sharable between those jobs. Data sharing in memory is 10 to 100 times faster than network and Disk.
+Iterative Operations on Spark RDD
+--------
+It will store intermediate results in a distributed memory instead of Stable storage (Disk) and make the system faster.
+Note − If the Distributed memory (RAM) is not sufficient to store intermediate results (State of the JOB), then it will store those results on the disk.
+Interactive Operations on Spark RDD
+-------
+If different queries are run on the same set of data repeatedly, this particular data can be kept in memory for better execution times
+By default, each transformed RDD may be recomputed each time you run an action on it. However, you may also persist an RDD in memory, in that case Spark will keep the elements around on the cluster for much faster access, the next time you query it. There is also support for persisting RDDs on disk, or replicated across multiple nodes.
+
+Create simple RDD
+scala> val inputfile = sc.textFile(“input.txt”)
+
+RDD Transformations
+-------
+map(func)
+filter(func)
+flatMap(func)
+mapPartitions(func)
+mapPartitionsWithIndex(func)
+sample(withReplacement, fraction, seed)
+union(otherDataset)
+intersection(otherDataset)
+distinct([numTasks])
+groupByKey([numTasks])
+reduceByKey(func, [numTasks])
+aggregateByKey(zeroValue)(seqOp, combOp, [numTasks])
+sortByKey([ascending], [numTasks])
+join(otherDataset, [numTasks])
+cogroup(otherDataset, [numTasks])
+cartesian(otherDataset)
+pipe(command, [envVars])
+coalesce(numPartitions)
+repartition(numPartitions)
+repartitionAndSortWithinPartitions(partitioner)
+
+
+Actions
+-------
+reduce(func)
+collect()
+count()
+first()
+take(n)
+takeSample (withReplacement,num, [seed])
+takeOrdered(n, [ordering])
+saveAsTextFile(path)
+saveAsSequenceFile(path)
+saveAsObjectFile(path)
+countByKey()
+foreach(func)
+
+Spark-submit Options
+---------------------
+--master 	spark://host:port, mesos://host:port, yarn, or local.
+--deploy-mode 	Whether to launch the driver program locally ("client") or on one of the worker machines inside the cluster ("cluster") (Default: client).
+--class Your application's main class (for Java / Scala apps).
+--name 	A name of your application.
+--jars 	Comma-separated list of local jars to include on the driver and executor classpaths.
+--packages 	Comma-separated list of maven coordinates of jars to include on the driver and executor classpaths.
+--repositories 	Comma-separated list of additional remote repositories to search for the maven coordinates given with --packages.
+--py-files 	Comma-separated list of .zip, .egg, or .py files to place on the PYTHON PATH for Python apps.
+--files 	Comma-separated list of files to be placed in the working directory of each executor.
+--conf (prop=val) 	Arbitrary Spark configuration property.
+--properties-file 	Path to a file from which to load extra properties. If not specified, this will look for conf/spark-defaults.
+--driver-memory 	Memory for driver (e.g. 1000M, 2G) (Default: 512M).
+--driver-java-options 	Extra Java options to pass to the driver.
+--driver-library-path 	Extra library path entries to pass to the driver.
+--driver-class-path 	Extra class path entries to pass to the driver.
+(Note that jars added with --jars are automatically included in the classpath.)
+--executor-memory 	Memory per executor (e.g. 1000M, 2G) (Default: 1G).
+--proxy-user 	User to impersonate when submitting the application.
+--help, -h 	Show this help message and exit.
+--verbose, -v 	Print additional debug output.
+--version 	Print the version of current Spark.
+--driver-cores NUM 	Cores for driver (Default: 1).
+--supervise 	If given, restarts the driver on failure.
+--kill 	If given, kills the driver specified.
+--status 	If given, requests the status of the driver specified.
+--total-executor-cores 	Total cores for all executors.
+--executor-cores 	Number of cores per executor. (Default : 1 in YARN mode, or all available cores on the worker in standalone mode).
+
+Broadcast and Accumulators
+---------------------------
+Spark contains two different types of shared variables − one is broadcast variables and second is accumulators.
+Broadcast variables − used to efficiently, distribute large values.
+-------
+Broadcast variables allow the programmer to keep a read-only variable cached on each machine rather than shipping a copy of it with tasks. They can be used, for example, to give every node, a copy of a large input dataset, in an efficient manner. Spark also attempts to distribute broadcast variables using efficient broadcast algorithms to reduce communication cost.
+
+Spark actions are executed through a set of stages, separated by distributed “shuffle” operations. Spark automatically broadcasts the common data needed by tasks within each stage.
+
+Broadcast variables are created from a variable v by calling SparkContext.broadcast(v). The broadcast variable is a wrapper around v, and its value can be accessed by calling the value method. The code given below shows this −
+scala> val broadcastArray = sc.broadcast(Array(1, 2, 3))
+
+Accumulators − used to aggregate the information of particular collection.
+----------
+Accumulators are variables that are only “added” to through an associative operation and can therefore, be efficiently supported in parallel. They can be used to implement counters (as in MapReduce) or sums.
+scala> val accum = sc.accumulator(0) 
+scala> sc.parallelize(Array(1, 2, 3, 4)).foreach(x => accum += x)
+scala> accum.value //output : 10
+
+TODO :
+explore more our project
+see more 
+https://github.com/bairaginath/spark_tutorial
+pyspark tutorial
+https://spark.apache.org/docs/latest/api/python/index.html#
+
+
+
+
