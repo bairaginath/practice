@@ -1,0 +1,294 @@
+Redis is an open source, BSD licensed, advanced key-value store. It is often referred to as a data structure server, since the keys can contain strings, hashes, lists, sets and sorted sets. Redis is written in C.
+    Redis holds its database entirely in the memory, using the disk only for persistence.
+Redis has a relatively rich set of data types when compared to many key-value data stores.
+Redis can replicate data to any number of slaves.
+Exceptionally fast − Redis is very fast and can perform about 110000 SETs per second, about 81000 GETs per second.
+Supports rich data types − Redis natively supports most of the datatypes that developers already know such as list, set, sorted set, and hashes. This makes it easy to solve a variety of problems as we know which problem can be handled better by which data type.
+Operations are atomic − All Redis operations are atomic, which ensures that if two clients concurrently access, Redis server will receive the updated value.
+Multi-utility tool − Redis is a multi-utility tool and can be used in a number of use cases such as caching, messaging-queues (Redis natively supports Publish/Subscribe), any short-lived data in your application, such as web application sessions, web page hit counts, etc.
+Redis is a different evolution path in the key-value DBs, where values can contain more complex data types, with atomic operations defined on those data types.
+Redis is an in-memory database but persistent on disk database, hence it represents a different trade off where very high write and read speed is achieved with the limitation of data sets that can't be larger than the memory.
+Another advantage of in-memory databases is that the memory representation of complex data structures is much simpler to manipulate compared to the same data structure on disk. Thus, Redis can do a lot with little internal complexity.
+
+Data Type
+----------
+In Redis, there is a configuration file (redis.conf) available at the root directory of Redis. Although you can get and set all Redis configurations by Redis CONFIG command.
+String
+------
+Redis string is a sequence of bytes. Strings in Redis are binary safe, meaning they have a known length not determined by any special terminating characters. Thus, you can store anything up to 512 megabytes in one string.
+Hash
+-----
+A Redis hash is a collection of key value pairs. Redis Hashes are maps between string fields and string values. Hence, they are used to represent objects.
+HMSET user:1 username tutorialspoint password tutorialspoint points 200 
+OK 
+redis 127.0.0.1:6379> HGETALL user:1
+Every hash can store up to 232 - 1 field-value pairs (more than 4 billion).
+Lists
+-----
+Redis Lists are simply lists of strings, sorted by insertion order. You can add elements to a Redis List on the head or on the tail.
+redis 127.0.0.1:6379> lpush tutoriallist redis 
+(integer) 1 
+redis 127.0.0.1:6379> lrange tutoriallist 0 10 // range between 0 to 10
+redis 127.0.0.1:6379> lpop tutoriallist //remove top of element from stack
+SortedSet
+---------
+Redis Sorted Sets are similar to Redis Sets, non-repeating collections of Strings. The difference is, every member of a Sorted Set is associated with a score, that is used in order to take the sorted set ordered, from the smallest to the greatest score. While members are unique, the scores may be repeated.
+
+ZADD 	ZADD key-name score member [score member …] — Adds members with the given scores to the ZSET
+ZREM 	ZREM key-name member [member …] — Removes the members from the ZSET, returning the number of members that were removed
+ZCARD 	ZCARD key-name — Returns the number of members in the ZSET
+ZINCRBY 	ZINCRBY key-name increment member — Increments the member in the ZSET
+ZCOUNT 	ZCOUNT key-name min max — Returns the number of members with scores between the provided minimum and maximum
+ZRANK 	ZRANK key-name member — Returns the position of the given member in the ZSET
+ZSCORE 	ZSCORE key-name member — Returns the score of the member in the ZSET
+ZRANGE 	ZRANGE key-name start stop [WITHSCORES] — Returns the members and optionally the scores for the members with ranks between start and stop
+
+Redis commands
+--------------
+DEL key
+DUMP key
+EXISTS key
+EXPIRE key seconds
+EXPIREAT key timestamp
+PEXPIRE key milliseconds
+PEXPIREAT key milliseconds-timestamp
+KEYS pattern //Finds all keys matching the specified pattern.
+MOVE key db
+PERSIST key //Removes the expiration from the key.
+PTTL key //Gets the remaining time in keys expiry in milliseconds.
+TTL key //Gets the remaining time in keys expiry.
+RANDOMKEY
+RENAME key newkey
+RENAMENX key newkey
+TYPE key
+
+Redis Strings Commands
+----------------------
+SET key value
+GET key
+GETRANGE key start end //Gets a substring of the string stored at a key.
+GETSET key value //Sets the string value of a key and return its old value.
+SETBIT key offset value //Sets or clears the bit at the offset in the string value stored at the key
+GETBIT key offset //Returns the bit value at the offset in the string value stored at the key.
+MGET key1 [key2..] //Gets the values of all the given keys
+SETEX key seconds value //Sets the value with the expiry of a key
+SETNX key value //Sets the value of a key, only if the key does not exist
+SETRANGE key offset value
+STRLEN key
+MSET key value [key value ...]
+MSETNX key value [key value ...] //Sets multiple keys to multiple values, only if none of the keys exist
+PSETEX key milliseconds value
+INCR key//Increments the integer value of a key by one
+INCRBY key increment
+INCRBYFLOAT key increment
+DECR key
+DECRBY key decrement
+APPEND key value //Appends a value to a key
+
+
+Redis Hash Commands
+-------------------
+HDEL key field2 [field2] //Deletes one or more hash fields.
+HEXISTS key field //Determines whether a hash field exists or not.
+HGET key field //Gets the value of a hash field stored at the specified key.
+HGETALL key//Gets all the fields and values stored in a hash at the specified key
+HINCRBY key field increment //Increments the integer value of a hash field by the given number
+HINCRBYFLOAT key field increment
+HKEYS key //Get the fields in a hash
+HLEN key //Gets the number of fields in a hash
+HMGET key field1 [field2] //Gets the values of all the given hash fields
+HMSET key field1 value1 [field2 value2 ] //Sets multiple hash fields to multiple values
+HSET key field value //Sets the string value of a hash field
+HSETNX key field value
+HVALS key //Gets all the values in a hash
+HSCAN key cursor [MATCH pattern] [COUNT count]//Incrementally iterates hash fields and associated values
+ex : hmset user:1 name bairagi age 31 namelast behera
+hscan user:1 0 match name* count 100
+output
+1) "0"
+2) 1) "name"
+2) "bairagi"
+3) "namelast"
+4) "behera"
+
+Redis Lists Commands
+--------------------
+BLPOP key1 [key2 ] timeout //Removes and gets the first element in a list, or blocks until one is available
+BRPOP key1 [key2 ] timeout //Removes and gets the last element in a list, or blocks until one is available
+BRPOPLPUSH source destination timeout
+//Pops a value from a list, pushes it to another list and returns it; or blocks until one is available
+LINDEX key index
+//Gets an element from a list by its index
+LINSERT key BEFORE|AFTER pivot value
+//Inserts an element before or after another element in a list
+LLEN key //Gets the length of a list
+LPOP key
+LPUSH key value1 [value2]
+LPUSHX key value //Prepends a value to a list, only if the list exists
+LRANGE key start stop // Gets a range of elements from a list
+LREM key count value //Removes elements from a list
+LSET key index value Sets the value of an element in a list by its index
+LTRIM key start stop //Trims a list to the specified range
+RPOP key //Removes and gets the last element in a list
+RPOPLPUSH source destination
+//Removes the last element in a list, appends it to another list and returns it
+RPUSH key value1 [value2]
+Appends one or multiple values to a list
+RPUSHX key value //Appends a value to a list, only if the list exists
+
+Redis Sets Commands
+-------------------
+SADD key member1 [member2] //Adds one or more members to a set
+SCARD key //Gets the number of members in a set
+SDIFF key1 [key2] //Subtracts multiple sets
+SDIFFSTORE destination key1 [key2] //Subtracts multiple sets and stores the resulting set in a key
+SINTER key1 [key2] //Intersects multiple sets
+SINTERSTORE destination key1 [key2] //Intersects multiple sets and stores the resulting set in a key
+SISMEMBER key member //Determines if a given value is a member of a set
+SMEMBERS key //Gets all the members in a set
+SMOVE source destination member //Moves a member from one set to another
+SPOP key //Removes and returns a random member from a set
+SRANDMEMBER key [count] //Gets one or multiple random members from a set
+SREM key member1 [member2] //Removes one or more members from a set
+SUNION key1 [key2] //Adds multiple sets
+SUNIONSTORE destination key1 [key2] //Adds multiple sets and stores the resulting set in a key
+SSCAN key cursor [MATCH pattern] [COUNT count] //Incrementally iterates set elements
+Redis HyperLogLog Commands
+---------------------------
+Redis HyperLogLog is an algorithm that uses randomization in order to provide an approximation of the number of unique elements in a set using just a constant, and small amount of memory.
+Adds the specified elements to the specified HyperLogLog.
+redis 127.0.0.1:6379> PFADD mykey a b c d e f g h i j 
+(integer) 1 
+Returns the approximated cardinality of the set(s) observed by the HyperLogLog at key(s).
+redis 127.0.0.1:6379> PFCOUNT mykey 
+(integer) 10 
+Merges N different HyperLogLogs into a single one. 
+redis 127.0.0.1:6379> PFADD hll1 foo bar zap a 
+(integer) 1 
+redis 127.0.0.1:6379> PFADD hll2 a b c foo 
+(integer) 1 
+redis 127.0.0.1:6379> PFMERGE hll3 hll1 hll2 
+OK 
+redis 127.0.0.1:6379> PFCOUNT hll3 
+(integer) 6 
+
+Redis PubSub Commands
+---------------------
+Redis Pub/Sub implements the messaging system where the senders (in redis terminology called publishers) sends the messages while the receivers (subscribers) receive them. The link by which the messages are transferred is called channel.
+In Redis, a client can subscribe any number of channels.
+Redis PSUBSCRIBE command is used to subscribe to channels matching the given patterns.
+Following listing shows some supported patterns in Redis.
+    h?llo subscribes to hello, hallo and hxllo
+    h*llo subscribes to hllo and heeeello
+    h[ae]llo subscribes to hello and hallo, but not hillo
+
+Redis PUBSUB command is an introspection command that allows to inspect the state of the Pub/Sub subsystem
+
+Redis PUBLISH command posts a message to a channel.
+redis 127.0.0.1:6379> PUBLISH mychannel "hello, i m here" 
+(integer) 1
+
+SUBSCRIBE channel [channel ...] //Listens for messages published to the given channels.
+UNSUBSCRIBE [channel [channel ...]]//Stops listening for messages posted to the given channels.
+
+Redis Transaction Commands
+--------------------------
+DISCARD //Discards all commands issued after MULTI
+Redis DISCARD command flushes all previously queued commands in a transaction and restores the connection state to normal.
+
+EXEC //Executes all commands issued after MULTI
+MULTI //Marks the start of a transaction block
+UNWATCH //Forgets about all watched keys
+WATCH key [key ...]//Watches the given keys to determine the execution of the MULTI/EXEC block.Redis WATCH command marks the given keys to be watched for conditional execution of a transaction.
+
+> multi
+OK
+> set name bairagi
+QUEUED
+> hmset user name bairagi
+QUEUED
+> exec
+1) OK
+2) OK
+Redis Scripting Commands
+------------------------
+Redis scripting is used to evaluate scripts using the Lua interpreter. It is built into Redis starting from version 2.6.0. The command used for scripting is EVAL command.
+
+EVAL script numkeys key [key ...] arg [arg ...]
+Executes a Lua script.
+EVALSHA sha1 numkeys key [key ...] arg [arg ...]
+Executes a Lua script.
+SCRIPT EXISTS script [script ...]
+Checks the existence of scripts in the script cache.
+SCRIPT FLUSH
+Removes all the scripts from the script cache.
+SCRIPT KILL
+Kills the script currently in execution.
+SCRIPT LOAD script
+Loads the specified Lua script into the script cache.
+
+
+Redis Backup
+------------
+Redis SAVE command is used to create a backup of the current Redis database.
+127.0.0.1:6379> SAVE 
+To create Redis backup, an alternate command BGSAVE is also available. This command will start the backup process and run this in the background.
+127.0.0.1:6379> BGSAVE  
+Background saving started
+
+To restore Redis data, move Redis backup file (dump.rdb) into your Redis directory and start the server. To get your Redis directory, use CONFIG command of Redis as shown below.
+
+127.0.0.1:6379> CONFIG get dir  
+1) "dir" 
+2) "/user/tutorialspoint/redis-2.8.13/src" 
+
+
+
+Pipelining
+-----------
+Redis is a TCP server and supports request/response protocol. In Redis, a request is accomplished with the following steps −
+The client sends a query to the server, and reads from the socket, usually in a blocking way, for the server response.
+The server processes the command and sends the response back to the client.
+
+he basic meaning of pipelining is, the client can send multiple requests to the server without waiting for the replies at all, and finally reads the replies in a single step.
+$(echo -en "PING\r\n SET tutorial redis\r\nGET tutorial\r\nINCR 
+visitor\r\nINCR visitor\r\nINCR visitor\r\n"; sleep 10) | nc localhost 6379  
++PONG 
++OK 
+redis 
+:1 
+:2 
+:3 
+
+Partitioning
+-------------
+Partitioning is the process of splitting your data into multiple Redis instances, so that every instance will only contain a subset of your keys.
+
+It allows for much larger databases, using the sum of the memory of many computers. 
+It allows to scale the computational power to multiple cores and multiple computers, and the network bandwidth to multiple computers and network adapters.
+
+Disadvantages of Partitioning
+-----
+Operations involving multiple keys are usually not supported. For instance, you can't perform the intersection between two sets if they are stored in the keys that are mapped to different Redis instances.
+Redis transactions involving multiple keys cannot be used.
+
+The partitioning granuliary is the key, so it is not possible to shard a dataset with a single huge key like a very big sorted set.
+
+When partitioning is used, data handling is more complex. For instance, you have to handle multiple RDB/AOF files, and to get a backup of your data you need to aggregate the persistence files from multiple instances and hosts.
+
+Adding and removing the capacity can be complex. For instance, Redis Cluster supports mostly transparent rebalancing of data with the ability to add and remove nodes at runtime. However, other systems like client-side partitioning and proxies don't support this feature. A technique called Presharding helps in this regard.
+
+Range Partitioning
+
+Range partitioning is accomplished by mapping ranges of objects into specific Redis instances. Suppose in our example, the users from ID 0 to ID 10000 will go into instance R0, while the users from ID 10001 to ID 20000 will go into instance R1 and so forth.
+Hash Partitioning
+
+In this type of partitioning, a hash function (eg. modulus function) is used to convert the key into a number and then the data is stored in different-different Redis instances.
+
+
+
+
+
+Baeldung
+========
+TODO

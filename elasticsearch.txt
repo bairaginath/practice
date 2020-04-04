@@ -1,0 +1,506 @@
+Elasticsearch is a real-time distributed and open source full-text search and analytics engine.It is licensed under the Apache license version 2.0.
+ElasticSearch is a search engine based on Apache Lucene, a free and open-source information retrieval software library. It provides a distributed, full-text search engine with an HTTP web interface and schema-free JSON documents.
+
+ElasticSearch is document oriented. It stores and indexes documents. Indexing creates or updates documents. After indexing, you can search, sort, and filter complete documents.
+
+Elasticsearch is an Apache Lucene-based search server. It was developed by Shay Banon and published in 2010.
+Elasticsearch is a real-time distributed and open source full-text search and analytics engine. It is accessible from RESTful web service interface and uses schema less JSON (JavaScript Object Notation) documents to store data. It is built on Java programming language and hence Elasticsearch can run on different platforms. It enables users to explore very large amount of data at very high speed.
+General Features
+----------------
+Elasticsearch is scalable up to petabytes of structured and unstructured data.
+Elasticsearch can be used as a replacement of document stores like MongoDB and RavenDB.
+Elasticsearch uses denormalization to improve the search performance.
+Elasticsearch is one of the popular enterprise search engines, and is currently being used by many big organizations like Wikipedia, The Guardian, StackOverflow, GitHub etc.
+Creating full backups are easy by using the concept of gateway, which is present in Elasticsearch.
+Handling multi-tenancy is very easy in Elasticsearch when compared to Apache Solr.
+Elasticsearch uses JSON objects as responses, which makes it possible to invoke the Elasticsearch server with a large number of different programming languages.
+Elasticsearch supports almost every document type except those that do not support text rendering.
+
+Disadvantages
+------
+Elasticsearch does not have multi-language support in terms of handling request and response data (only possible in JSON) unlike in Apache Solr, where it is possible in CSV, XML and JSON formats.
+
+
+
+Key Concepts
+============
+Node
+----
+It refers to a single running instance of Elasticsearch. 
+Cluster
+-------
+It is a collection of one or more nodes. Cluster provides collective indexing and search capabilities across all the nodes for entire data.
+Index
+------
+It is a collection of different type of documents and their properties. Index also uses the concept of shards to improve the performance. .Sharding is a type of database partitioning that separates very large databases the into smaller, faster, more easily managed parts called data shards. The word shard means a small part of a whole.
+Document
+--------
+It is a collection of fields in a specific manner defined in JSON format. Every document belongs to a type and resides inside an index. Every document is associated with a unique identifier called the UID.
+Shard
+------
+Indexes are horizontally subdivided into shards. This means each shard contains all the properties of document but contains less number of JSON objects than index. 
+The horizontal separation makes shard an independent node, which can be store in any node. Primary shard is the original horizontal part of an index and then these primary shards are replicated into replica shards.
+Replicas
+--------
+Elasticsearch allows a user to create replicas of their indexes and shards. Replication not only helps in increasing the availability of data in case of failure, but also improves the performance of searching by carrying out a parallel search operation in these replicas.
+
+The following table gives a direct comparison between these terms−
+Elasticsearch 	RDBMS
+Cluster 	Database
+Shard 	Shard
+Index 	Table
+Field 	Column
+Document 	Row
+
+
+
+
+
+
+
+Baeldung
+========
+ Full-Text Search with ElasticSearch
+ -----------------------------------
+ Full-text search queries and performs linguistic searches against documents. It includes single or multiple words or phrases and returns documents that match search condition.
+ Before we can index a document, we need to decide where to store it. It's possible to have multiple indexes, which in turn contain multiple types. These types hold multiple documents, and each document has multiple fields.
+
+ curl -XPUT 'localhost:9200/text/article/1?pretty'
+  -H 'Content-Type: application/json' -d '
+{
+  "title": "He went",
+  "random_text": 
+    "He went such dare good fact. The small own seven saved man age."
+}'
+text: The index name.
+article: The type name.
+id: id for  document entry 
+
+After we add all our documents we can check how many documents, using the following command, we have in the cluster :
+curl -XGET 'http://localhost:9200/_count?pretty' -d '
+{
+  "query": {
+    "match_all": {}
+  }
+}'
+get a document using its id with the following command
+curl -XGET 'localhost:9200/text/article/1?pretty'
+output:
+{
+  "_index": "text",
+  "_type": "article",
+  "_id": "1",
+  "_version": 1,
+  "found": true,
+  "_source": {
+    "title": "He went",
+    "random_text": 
+      "He went such dare good fact. The small own seven saved man age."
+  }
+}
+
+perform a full-text search with the following command:
+
+curl -XGET 'localhost:9200/text/article/_search?pretty'
+  -H 'Content-Type: application/json' -d '
+{
+  "query": {
+    "match": {
+      "random_text": "him departure"
+    }
+  }
+}'
+output:
+{
+  "took": 32,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "failed": 0
+  },
+  "hits": {
+    "total": 2,
+    "max_score": 1.4513469,
+    "hits": [
+      {
+        "_index": "text",
+        "_type": "article",
+        "_id": "4",
+        "_score": 1.4513469,
+        "_source": {
+          "title": "Old education",
+          "random_text": "Old education him departure any arranging one prevailed."
+        }
+      },
+      {
+        "_index": "text",
+        "_type": "article",
+        "_id": "3",
+        "_score": 0.28582606,
+        "_source": {
+          "title": "Repulsive questions",
+          "random_text": "Repulsive questions contented him few extensive supported."
+        }
+      }
+    ]
+  }
+}
+
+By default, ElasticSearch sorts matching results by their relevance score . here
+ the score of the second result is small relative to the first hit, indicating lower relevance.
+
+Fuzzy Search
+------
+Elasticsearch supports a maximum edit distance, specified with the fuzziness parameter, of 2. The fuzziness parameter can be set to AUTO, which results in the following maximum edit distances:
+    0 for strings of one or two characters
+    1 for strings of three, four, or five characters
+    2 for strings of more than five characters
+You may get better results, and better performance, with a maximum fuzziness of 1.Distance refers to the Levenshtein distance that is a string metric for measuring the difference between two sequences. Informally, the Levenshtein distance between two words is the minimum number of single-character edits.
+
+curl -XGET 'localhost:9200/text/article/_search?pretty' -H 'Content-Type: application/json' -d' 
+{ 
+  "query": 
+  { 
+    "match": 
+    { 
+      "random_text": 
+      {
+        "query": "him departure",
+        "fuzziness": "2"
+      }
+    } 
+  } 
+}'
+output :
+{
+  "took": 88,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "failed": 0
+  },
+  "hits": {
+    "total": 4,
+    "max_score": 1.5834423,
+    "hits": [
+      {
+        "_index": "text",
+        "_type": "article",
+        "_id": "4",
+        "_score": 1.4513469,
+        "_source": {
+          "title": "Old education",
+          "random_text": "Old education him departure any arranging one prevailed."
+        }
+      },
+      {
+        "_index": "text",
+        "_type": "article",
+        "_id": "2",
+        "_score": 0.41093433,
+        "_source": {
+          "title": "He oppose",
+          "random_text":
+            "He oppose at thrown desire of no. 
+              \ Announcing impression unaffected day his are unreserved indulgence."
+        }
+      },
+      {
+        "_index": "text",
+        "_type": "article",
+        "_id": "3",
+        "_score": 0.2876821,
+        "_source": {
+          "title": "Repulsive questions",
+          "random_text": "Repulsive questions contented him few extensive supported."
+        }
+      },
+      {
+        "_index": "text",
+        "_type": "article",
+        "_id": "1",
+        "_score": 0.0,
+        "_source": {
+          "title": "He went",
+          "random_text": "He went such dare good fact. The small own seven saved man age."
+        }
+      }
+    ]
+  }
+}'
+
+
+Elasticsearch in Java
+---------------------
+By default, Elasticsearch listens to the 9200 port for upcoming HTTP queries by default.
+<dependency>
+    <groupId>org.elasticsearch</groupId>
+    <artifactId>elasticsearch</artifactId>
+    <version>5.6.0</version>
+</dependency>
+
+client client = new PreBuiltTransportClient(
+  Settings.builder().put("client.transport.sniff", true)
+                    .put("cluster.name","elasticsearch").build()) 
+  .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
+
+String jsonObject = "{\"age\":10,\"dateOfBirth\":1471466076564,"
+      +"\"fullName\":\"John Doe\"}";
+    IndexResponse response = client.prepareIndex("people", "Doe")
+      .setSource(jsonObject, XContentType.JSON).get();
+String id = response.getId();
+String index = response.getIndex();
+String type = response.getType();
+long version = response.getVersion();
+
+earchResponse response = client.prepareSearch().execute().actionGet();
+List<SearchHit> searchHits = Arrays.asList(response.getHits().getHits());
+List<Person> results = new ArrayList<Person>();
+searchHits.forEach(
+  hit -> results.add(JSON.parseObject(hit.getSourceAsString(), Person.class)));
+The results returned by the actionGet() method are called Hits, each Hit refers to a JSON document matching a search request.we're using the FastJson library in order to convert JSON Strings to Java objects.
+
+enhance the request by adding additional parameters in order to customize the query using the QueryBuilders methods
+-------
+SearchResponse response = client.prepareSearch()
+  .setTypes()
+  .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+  .setPostFilter(QueryBuilders.rangeQuery("age").from(5).to(15))
+  .execute()
+  .actionGet();
+
+more example of QueryBuilders
+QueryBuilder matchAllQuery = QueryBuilders.matchAllQuery();
+QueryBuilder matchSpecificFieldQuery= QueryBuilders
+  .matchQuery("fullName", "John Doe");
+
+QueryBuilder matchSpecificFieldQuery= QueryBuilders.matchQuery(
+  "Text I am looking for", "field_1", "field_2^3", "*_field_wildcard");
+We can use the caret symbol (^) to boost specific fields.In our example the field_2 has boost value set to three, making it more important than the other fields.
+
+If you are more familiar with the Lucene queries syntax, you can use the simpleQueryStringQuery() method to customize search queries:
+QueryBuilder simpleStringQuery = QueryBuilders
+  .simpleQueryStringQuery("+John -Doe OR Janette");
+  Note : + : specific piece of text exists somewhere in fields of a document.
+  excludes all documents that contain a keyword declared after the (–) symbol.
+
+delete query 
+---
+DeleteResponse response = client.prepareDelete("people", "Doe", "5").get();
+
+Spring Data Elasticsearch
+--------------------------
+While Elasticsearch is schemaless, it can use mappings in order to tell the type of a field. When a document is indexed, its fields are processed according to their types. For example, a text field will be tokenized and filtered according to mapping rules. You could also create filters and tokenizers of your own.
+Spring Data helps avoid boilerplate code.
+<dependency>
+    <groupId>org.springframework.data</groupId>
+    <artifactId>spring-data-elasticsearch</artifactId>
+    <version>3.0.8.RELEASE</version>
+</dependency>
+
+public interface ArticleRepository extends ElasticsearchRepository<Article, String> {
+ 
+    Page<Article> findByAuthorsName(String name, Pageable pageable);
+ 
+    @Query("{\"bool\": {\"must\": [{\"match\": {\"authors.name\": \"?0\"}}]}}")
+    Page<Article> findByAuthorsNameUsingCustomQuery(String name, Pageable pageable);
+}
+
+@Configuration
+@EnableElasticsearchRepositories(basePackages = "com.baeldung.spring.data.es.repository")
+@ComponentScan(basePackages = { "com.baeldung.spring.data.es.service" })
+public class Config {
+ 
+    @Value("${elasticsearch.home:/usr/local/Cellar/elasticsearch/5.6.0}")
+    private String elasticsearchHome;
+ 
+    @Value("${elasticsearch.cluster.name:elasticsearch}")
+    private String clusterName;
+ 
+    @Bean
+    public Client client() {
+        Settings elasticsearchSettings = Settings.builder()
+          .put("client.transport.sniff", true)
+          .put("path.home", elasticsearchHome)
+          .put("cluster.name", clusterName).build();
+        TransportClient client = new PreBuiltTransportClient(elasticsearchSettings);
+        client.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName("127.0.0.1"), 9300));
+        return client;
+    }
+ 
+    @Bean
+    public ElasticsearchOperations elasticsearchTemplate() {
+        return new ElasticsearchTemplate(client());
+    }
+}
+
+@Document(indexName = "blog", type = "article")
+public class Article {
+ 
+    @Id
+    private String id;
+     
+    private String title;
+     
+    @Field(type = FieldType.Nested, includeInParent = true)
+    private List<Author> authors;
+     
+    // standard getters and setters
+}
+authors field is marked as FieldType.Nested. This allows us to define the Author class separately, but have the individual instances of author embedded in an Article document when it is indexed in Elasticsearch.
+public class Author {
+    public Author() {
+    }
+    public Author(String name) {
+        this.name = name;
+    }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    @Override
+    public String toString() {
+        return "Author{" + "name='" + name + '\'' + '}';
+    }
+}
+
+In service implemnet class
+private final ArticleRepository articleRepository;
+    
+    @Autowired
+    public ArticleServiceImpl(ArticleRepository articleRepository) {
+        this.articleRepository = articleRepository;
+    }
+
+ Article article = new Article("Spring Data Elasticsearch");
+article.setAuthors(asList(new Author("John Smith"), new Author("John Doe")));
+articleRepository.save(article);
+
+String nameToFind = "John Smith";
+Page<Article> articleByAuthorName
+  = articleRepository.findByAuthorName(nameToFind, PageRequest.of(0, 10));
+
+Page<Article> articleByAuthorName
+  = articleRepository.findByAuthorsNameUsingCustomQuery(nameToFind, PageRequest.of(0, 10));
+
+update
+    article.setTitle("Getting started with Search Engines");
+articleRepository.save(article);
+delete
+articleRepository.delete(article);
+
+
+A Custom Query
+-----
+SearchQuery searchQuery = new NativeSearchQueryBuilder()
+  .withFilter(regexpQuery("title", ".*data.*"))
+  .build();
+List<Article> articles = elasticsearchTemplate.queryForList(searchQuery, Article.class);
+
+
+
+Elasticsearch Queries with Spring Data
+---------------------------------------
+Analyzers
+---------
+All stored string fields are, by default, processed by an analyzer. An analyzer consists of one tokenizer and several token filters, and is usually preceded by one or more character filters.
+The default analyzer splits the string by common word separators (such as spaces or punctuation) and puts every token in lowercase.
+Elasticsearch can also be configured to regard a field as analyzed and not-analyzed at the same time.
+
+MultiField(
+  mainField = @Field(type = Text, fielddata = true),
+  otherFields = {
+      @InnerField(suffix = "verbatim", type = Keyword)
+  }
+)
+private String title;
+
+@MultiField annotation to tell Spring Data that we would like this field to be indexed in several ways. The main field will use the name title and will be analyzed according to the rules described above.
+
+But we also provide a second annotation, @InnerField, which describes an additional indexing of the title field. We use FieldType.keyword to indicate that we do not want to use an analyzer when performing the additional indexing of the field, and that this value should be stored using a nested field with the suffix verbatim(in exactly the same words as were used originally).
+Analyzed Fields
+---
+Let's look at an example. Suppose an article with the title “Spring Data Elasticsearch” is added to our index. The default analyzer will break up the string at the space characters and produce lowercase tokens: “spring“, “data“, and “elasticsearch“.
+SearchQuery searchQuery = new NativeSearchQueryBuilder()
+  .withQuery(matchQuery("title", "elasticsearch data"))
+  .build();
+
+ Non-analyzed Fields
+ -----
+ A non-analyzed field is not tokenized, so can only be matched as a whole when using match or term queries:
+ SearchQuery searchQuery = new NativeSearchQueryBuilder()
+  .withQuery(matchQuery("title.verbatim", "Second Article About Elasticsearch"))
+  .build();
+
+Match Query
+-------------
+A match query accepts text, numbers and dates.There are three type of “match” query:boolean,phrase and phrase_prefix
+boolean match query
+------
+SearchQuery searchQuery = new NativeSearchQueryBuilder()
+  .withQuery(matchQuery("title","Search engines").operator(AND))
+  .build();
+List<Article> articles = getElasticsearchTemplate()
+  .queryForList(searchQuery, Article.class);
+this query would return an article with the title “Search engines” by specifying two terms from the title with and operator.
+
+The sum of the scores of each matching term add up to the total score of each resulting document.
+There may be situations in which a document containing a rare term entered in the query will have higher rank then a document which contains several common terms.
+phrase
+------
+Phase search is stricter, although you can control it with the slop parameter. This parameter tells the phrase query how far apart terms are allowed to be while still considering the document a match.
+In other words, it represents the number of times you need to move a term in order to make the query and document match:
+SearchQuery searchQuery = new NativeSearchQueryBuilder()
+  .withQuery(matchPhraseQuery("title", "spring elasticsearch").slop(1))
+  .build();
+ Here the query will match the document with the title “Spring Data Elasticsearch” because we set the slop to one.
+phrase_prefix
+------------
+SearchQuery searchQuery = new NativeSearchQueryBuilder()
+  .withQuery(matchPhraseQuery("title", "spring elas").
+  .build();
+
+Fuzziness
+---------
+When the user makes a typo in a word, it is still possible to match it with a search by specifying a fuzziness parameter, which allows inexact matching.
+For string fields fuzziness means the edit distance: the number of one-character changes that need to be made to one string to make it the same as another string.
+SearchQuery searchQuery = new NativeSearchQueryBuilder()
+  .withQuery(matchQuery("title", "spring date elasticsearch")
+  .operator(AND)
+  .fuzziness(Fuzziness.ONE)
+  .prefixLength(3))
+  .build();
+  The prefix_length parameter is used to improve performance. In this case, we require that the first three characters should match exactly, which reduces the number of possible combinations.
+
+ Multi Match Query
+ -----------------
+ When you want to search in multiple fields then you could use QueryBuilders#multiMatchQuery() where you specify all the fields to match:
+ SearchQuery searchQuery = new NativeSearchQueryBuilder()
+  .withQuery(multiMatchQuery("tutorial")
+    .field("title")
+    .field("tags")
+    .type(MultiMatchQueryBuilder.Type.BEST_FIELDS))
+  .build();
+  Here we search the title and tags fields for a match.Notice that here we use the “best fields” scoring strategy. It will take the maximum score among the fields as a document score.
+@Test
+public void givenAnalyzedQuery_whenMakeAggregationOnTermCount_thenEachTokenCountsSeparately() {
+    final TermsAggregationBuilder aggregation = AggregationBuilders.terms("top_tags").field("title");
+    final SearchResponse response = client.prepareSearch("blog").setTypes("article").addAggregation(aggregation)
+      .execute().actionGet();
+
+    final Map<String, Aggregation> results = response.getAggregations().asMap();
+    final StringTerms topTags = (StringTerms) results.get("top_tags");
+
+    final List<String> keys = topTags.getBuckets().stream()
+      .map(MultiBucketsAggregation.Bucket::getKeyAsString)
+      .sorted()
+      .collect(toList());
+    assertEquals(asList("about", "article", "data", "elasticsearch", "engines", "search", "second", "spring", "tutorial"), keys);
+}
+
+
+

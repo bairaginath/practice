@@ -1,0 +1,799 @@
+https://www.geeksforgeeks.org/data-structures/
+
+XOR Linked List – A Memory Efficient Doubly Linked List 
+-----
+A memory efficient version of Doubly Linked List can be created using only one space for address field with every node.
+instead of storing actual memory addresses, every node stores the XOR of addresses of previous and next nodes. 
+class Node  
+{  
+    public: 
+    int data;  
+    Node* npx; /* XOR of next and previous node */
+}; 
+A<->B<->C<->D 
+forword direction travels : A.npx XOR null = B , in B we already know address of A and use B.npx XOR B=C . in C,we already know address B, then apply C.npx XOR B=D. if we travel forword we have to know previous node of current node and apply currentnode.npx XOR with previous node will get next node address.
+backword direction travels : if we travel backword , we have to know next node of current node and applying currentnode.npx XOR with current node will get previous node address.
+ In java we can't write memory efficent Double linkedlist.
+
+Skip List
+---------
+Can we search in a sorted linked list in better than O(n) time?
+The worst case search time for a sorted linked list is O(n) as we can only linearly traverse the list and cannot skip nodes while searching. For a Balanced Binary Search Tree, we skip almost half of the nodes after one comparison with root. For a sorted array, we have random access and we can apply Binary Search on arrays.
+
+Can we augment sorted linked lists to make the search faster? The answer is Skip List. The idea is simple, we create multiple layers so that we can skip some nodes.
+Time complexity in big O notation
+Algorithm       Average Worst case
+Space       O (n)  O(nlogn 
+Search      O(log n) O(n)
+Insert      O(log n) O(n)
+Delete      O(log n) O(n)
+example
+-------
+layer1:      4
+layer2:1     4       8
+layer3:1 2 3 4 5 6 7 8
+Insert,Delete and Search operation first check layer1 check for which side it belongs and move to layer2 and so on.
+
+TODO
+Implement own code (create,insert,delete)
+
+Self Organizing List
+====================
+A Self Organizing list reorders its nodes based on searches which are done. The idea is to use locality of reference.
+Following are different strategies used by Self Organizing Lists.
+1) Move-to-Front Method: Any node searched is moved to the front. This strategy is easy to implement, but it may over-reward infrequently accessed items as it always move the item to front. 
+2) Count Method: Each node stores count of the number of times it was searched. Nodes are ordered by decreasing count. This strategy requires extra space for storing count. 
+3) Transpose Method: Any node searched is swapped with the preceding node. Unlike Move-to-front, this method does not adapt quickly to changing access patterns.
+
+https://www.youtube.com/watch?v=o5ZhdQFnLhA
+Competitive Analysis:
+The worst case time complexity of all methods is O(n). In worst case, the searched element is always the last element in list. For average case analysis, we need probability distribution of search sequences which is not available many times.
+
+Unrolled Linked List
+====================
+like array and linked list, unrolled Linked List is also a linear data structure and is a variant of linked list. Unlike simple linked list, it stores multiple elements at each node. That is, instead of storing single element at a node, unrolled linked lists store an array of elements at a node. Unrolled linked list covers advantages of both array and linked list as it reduces the memory overhead in comparison to simple linked lists by storing multiple elements at each node and it also has the advantage of fast insertion and deletion as that of a linked list.
+Advantages:
+Because of the Cache behavior, linear search is much faster in unrolled linked lists.
+In comparison to ordinary linked list, it requires less storage space for pointers/references.
+It performs operations like insertion, deletion and traversal more quickly than ordinary linked lists (because search is faster).
+Disadvantages:
+The overhead per node is comparatively high than singly linked lists. Refer an example node in below code.
+Insertion
+---------
+Time complexity : O(n)
+Also, few real world applications :
+    It is used in B-Tree and T-Tree
+    Used in Hashed Array Tree
+    Used in Skip List
+    Used in CDR Coding
+code ;
+----
+public class UnrollLinkedList<T> {
+    final int capacity;
+    Unode<T> header;
+    Unode<T> current;
+    public UnrollLinkedList(int capacity){
+        this.capacity=capacity;
+    }
+    class Unode<T>{
+        Unode<T> next;
+        int cursor=0;
+        T data[];
+        Unode(){
+            this.next=null;
+            this.data=(T[])new Object[capacity];
+        }
+        
+    }
+    
+    void insert(T t) {
+        if(header==null) {
+            header=new Unode<T>();
+            header.data[header.cursor]=t;
+            header.cursor++;
+            current=header;
+        }
+        else if(current.cursor<=capacity-1) {
+            current.data[current.cursor]=t;
+            current.cursor++;
+        }
+        else {
+            Unode newNode=new Unode<T>();
+            int shiftFromPoint=(capacity/2)+1; //if current node is full,then half of its data will be move to another new Node 
+            System.arraycopy(current.data,shiftFromPoint,newNode.data,0,
+                    capacity-shiftFromPoint);
+            newNode.cursor=capacity-shiftFromPoint;
+            current.cursor=shiftFromPoint;
+            newNode.data[newNode.cursor]=t;
+            newNode.cursor++;
+            newNode.next=current.next;
+            current.next=newNode;
+            current=newNode;
+        }
+        System.out.println(current+Arrays.deepToString(current.data));
+    }
+    void display() {
+        Unode<T> curr=header;
+        while(curr!=null) {
+            for(int i=0;i<curr.cursor;i++)
+                System.out.println(curr.data[i]);
+            curr=curr.next;
+        }
+    }
+    
+    public static void main(String[] args) {
+        int n=10;
+        UnrollLinkedList<Integer> ull=new UnrollLinkedList<Integer>(5);
+        IntStream.rangeClosed(1,n).forEach(x->ull.insert(x));
+        ull.display();
+        }
+}
+Segment Tree
+============
+Let us consider the following problem to understand Segment Trees.
+We have an array arr[0 . . . n-1]. We should be able to
+1) Find the sum of elements from index l to r where 0 <= l <= r <= n-1
+2) Change value of a specified element of the array to a new value x. We need to do arr[i] = x where 0 <= i <= n-1.
+
+https://www.youtube.com/watch?v=Ic7OO3Uw6J0
+What if the number of query and updates are equal? Can we perform both the operations in O(log n) time once given the array? We can use a Segment Tree to do both operations in O(Logn) time.
+
+example
+-----
+give arrry arr=[2 3 -1 5 -2 4 8 10] , construct to segement tree as below
+         29
+    9        20
+ 5    4    2   18 
+2 3 -1 5 -2 4 8 10
+after that query [0,2]=[0,1]+[2,2]=5+(-1)=4
+[3,6]=[3,3]+[4,5]+[6,6]=5+2+8=15
+
+space complexity ( number of nodes on segement tree)
+2^0(level 0)+2^1(level 1)+2^2(level 2)+.... +2^h(level h)=  2^(h+1)-1=  2.(2^h)-1=2.(array length N )-1=O(N)
+
+Time Complexity
+for queries O(log N) and update O(log N)
+
+TODO : write complete code using array
+
+Similary problem (Range Minimum Query)
+We have an array arr[0 . . . n-1]. We should be able to efficiently find the minimum value from index qs (query start) to qe (query end) where 0 <= qs <= qe <= n-1.
+Lazy Propagation in Segment Tree
+--------------------------------
+https://www.youtube.com/watch?v=xuoQdt5pHj0
+
+update function was called to update only a single value in array. Please note that a single value update in array may cause multiple updates in Segment Tree as there may be many segment tree nodes that have a single array element in their ranges.
+What if there are updates on a range of array indexes?
+For example add 10 to all values at indexes from 2 to 7 in array. 
+When there are many updates and updates are done on a range, we can postpone some updates (avoid recursive calls in update) and do those updates only when required.
+Please remember that a node in segment tree stores or represents result of a query for a range of indexes. And if this node’s range lies within the update operation range, then all descendants of the node must also be update.
+
+With Lazy propagation, we update only node which lies within the range and postpone updates to its children by storing this update information in separate nodes called lazy nodes or values. We create an array lazy[] which represents lazy node. Size of lazy[] is same as array that represents segment tree.
+
+The idea is to initialize all elements of lazy[] as 0. A value 0 in lazy[i] indicates that there are no pending updates on node i in segment tree. A non-zero value of lazy[i] means that this amount needs to be added to node i in segment tree before making any query to the node.
+
+Layman way :update on range of array indexess . instead of updating indivisual index , first find the nodes which came under given range and update only these nodes first and postpone to update their desendent nodes . these desendent node's update information stored on another lazy array.While ondemand queries came with range , first check with lazy array, if any update need to that node of the segment tree, then first update that node and return the updated result.
+
+TODO : write own code for this 
+
+Persistent Segment Tree
+-----------------------
+https://www.youtube.com/watch?v=TH9n_HVkjQM&t=672s
+
+https://www.geeksforgeeks.org/persistent-segment-tree-set-1-introduction/
+
+Segment Tree is itself a great data structure that comes into play in many cases. In this post we will introduce the concept of Persistency in this data structure. Persistency, simply means to retain the changes. But obviously, retaining the changes cause extra memory consumption and hence affect the Time Complexity.
+
+Our aim is to apply persistency in segment tree and also to ensure that it does not take more than O(log n) time and space for each change.
+
+Let’s think in terms of versions i.e. for each change in our segment tree we create a new version of it.
+We will consider our initial version to be Version-0. Now, as we do any update in the segment tree we will create a new version for it and in similar fashion track the record for all versions.
+
+
+But creating the whole tree for every version will take O(n log n) extra space and O(n log n) time. So, this idea runs out of time and memory for large number of versions.
+
+Let’s exploit the fact that for each new update(say point update for simplicity) in segment tree, At max logn nodes will be modified. So, our new version will only contain these log n new nodes and rest nodes will be the same as previous version. Therefore, it is quite clear that for each new version we only need to create these log n new nodes whereas the rest of nodes can be shared from the previous version.
+
+for example expleain read 
+https://www.geeksforgeeks.org/persistent-segment-tree-set-1-introduction/
+Now, the Question arises : How to keep track of all the versions?
+– We only need to keep track the first root node for all the versions and this will serve the purpose to track all the newly created nodes in the different versions. For this purpose we can maintain an array of pointers to the first node of segment trees for all versions.
+
+Problem : Given an array A[] and different point update operations.Considering 
+each point operation to create a new version of the array. We need to answer 
+the queries of type
+Q v l r : output the sum of elements in range l to r just after the v-th update.
+
+solution : We will create all the versions of the segment tree and keep track of their root node.Then for each range sum query we will pass the required version’s root node in our query function and output the required sum.
+
+
+Trie
+=====
+https://www.youtube.com/watch?v=AXjmTQ8LEoI
+
+Trie is an efficient information reTrieval data structure. Using Trie, search complexities can be brought to optimal limit (key length). If we store keys in binary search tree, a well balanced BST will need time proportional to M * log N, where M is maximum string length and N is number of keys in tree. Using Trie, we can search the key in O(M) time. 
+Maximum number of children of a node is equal to size of alphabet.
+Trie supports search, insert and delete operations in O(L) time where L is length of key.
+We need to mark the last node of every key as end of word node.
+
+class Trie{
+   static Map<Character,TrieNode> root;
+    
+    class TrieNode{
+       char name;
+       boolean endOfWord;
+       Map<Character,TrieNode> map;
+       TrieNode(char name,boolean endOfWord){
+       this.name=name;
+       this.endOfWord=endOfWord;
+       }
+       void addChild(TrieNode node){
+         if(map==null)
+            map=new HashMap<>();
+        map.put(node.name,node);
+       }
+
+    }
+
+}
+Delete 
+------
+During delete operation we delete the key in bottom up manner using recursion. The following are possible conditions when deleting key from trie,
+
+1)Key may not be there in trie. Delete operation should not modify trie.
+2)Key present as unique key (no part of key contains another key (prefix), nor the key itself is prefix of another key in trie). Delete all the nodes.
+3)Key is prefix key of another long key in trie. Unmark the leaf node.
+Key present in trie, having atleast one other key as prefix key. Delete nodes from end of key until first leaf node of longest prefix key.
+
+TODO : write own code for trie datastructure(Insert,search,delete)
+Compress Trie
+-------------
+https://www.youtube.com/watch?v=4ZONA83QfiY
+
+Problems
+--------
+Given a dictionary of words and an input string, find the longest prefix of the string which is also a word in dictionary.
+Examples:
+Let the dictionary contains the following words:
+{are, area, base, cat, cater, children, basement}
+Below are some input/output examples:
+--------------------------------------
+Input String            Output
+--------------------------------------
+caterer                 cater
+basemexy                base
+child                   < Empty >
+
+Reverse DNS look up is using an internet IP address to find a domain name. For example, if you type 74.125.200.106 in browser, it automatically redirects to google.in.
+How to implement Reverse DNS Look Up cache? Following are the operations needed from cache.
+1) Add a IP address to URL Mapping in cache.
+2) Find URL for a given IP address.
+
+Binary Indexed Tree or Fenwick Tree
+===================================
+https://www.youtube.com/watch?v=CWDQJGaN1gY
+
+Let us consider the following problem to understand Binary Indexed Tree.
+We have an array arr[0 . . . n-1]. We would like to
+1 Compute the sum of the first i elements.
+2 Modify the value of a specified element of the array arr[i] = x where 0 <= i <= n-1.
+
+A simple solution is to run a loop from 0 to i-1 and calculate the sum of the elements. To update a value, simply do arr[i] = x. The first operation takes O(n) time and the second operation takes O(1) time. Another simple solution is to create an extra array and store the sum of the first i-th elements at the i-th index in this new array. The sum of a given range can now be calculated in O(1) time, but the update operation takes O(n) time now. This works well if there are a large number of query operations but a very few number of update operations.
+
+Could we perform both the query and update operations in O(log n) time?
+One efficient solution is to use Segment Tree that performs both operations in O(Logn) time.
+
+An alternative solution is Binary Indexed Tree, which also achieves O(Logn) time complexity for both operations. Compared with Segment Tree, Binary Indexed Tree requires less space and is easier to implement..
+
+Representation
+Binary Indexed Tree is represented as an array. Let the array be BITree[]. Each node of the Binary Indexed Tree stores the sum of some elements of the input array. The size of the Binary Indexed Tree is equal to the size of the input array, denoted as n. In the code below, we use a size of n+1 for ease of implementation.
+
+
+update(x, val): Updates the Binary Indexed Tree (BIT) by performing arr[index] += val
+// Note that the update(x, val) operation will not change arr[].  It only makes changes to BITree[]
+1) Initialize the current index as x+1.
+2) Do the following while the current index is smaller than or equal to n.
+...a) Add the val to BITree[index]
+...b) Go to parent of BITree[index].  The parent can be obtained by incrementing
+     the last set bit of the current index, i.e., index = index + (index & (-index))
+
+getSum(x): Returns the sum of the sub-array arr[0,...,x]
+// Returns the sum of the sub-array arr[0,...,x] using BITree[0..n], which is constructed from arr[0..n-1]
+1) Initialize the output sum as 0, the current index as x+1.
+2) Do following while the current index is greater than 0.
+...a) Add BITree[index] to sum
+...b) Go to the parent of BITree[index].  The parent can be obtained by removing
+     the last set bit from the current index, i.e., index = index - (index & (-index))
+3) Return sum.
+
+How does Binary Indexed Tree work?
+The idea is based on the fact that all positive integers can be represented as the sum of powers of 2. For example 19 can be represented as 16 + 2 + 1. Every node of the BITree stores the sum of n elements where n is a power of 2. For example,  the sum of the first 12 elements can be obtained by the sum of the last 4 elements (from 9 to 12) plus the sum of 8 elements (from 1 to 8). 
+
+The number of set bits in the binary representation of a number n is O(Logn). Therefore, we traverse at-most O(Logn) nodes in both getSum() and update() operations. 
+The time complexity of the construction is O(nLogn) as it calls update() for all n elements. 
+
+Can we extend the Binary Indexed Tree to computing the sum of a range in O(Logn) time?
+Yes. rangeSum(l, r) = getSum(r) – getSum(l-1).
+
+Two Dimensional Binary Indexed Tree or Fenwick Tree
+---------------------------------------------------
+Can we answer sub-matrix sum queries efficiently using Binary Indexed Tree ?
+
+The answer is yes. This is possible using a 2D BIT which is nothing but an array of 1D BIT.
+
+In our program, we use the getSum(x, y) function which finds the sum of the matrix from (0, 0) to (x, y).
+To see more below
+https://www.geeksforgeeks.org/two-dimensional-binary-indexed-tree-or-fenwick-tree/
+
+Suffix Tree 
+=============
+Given a text txt[0..n-1] and a pattern pat[0..m-1], write a function search(char pat[], char txt[]) that prints all occurrences of pat[] in txt[]. You may assume that n > m.
+1)KMP Algorithm
+2)Rabin Karp Algorithm
+3)Finite Automata based Algorithm
+4)Boyer Moore Algorithm
+
+All of the above algorithms preprocess the pattern to make the pattern searching faster. The best time complexity that we could get by preprocessing pattern is O(n) where n is length of the text.
+
+But In case of Suffix Tree,we preprocesses the text.
+A suffix tree is built of the text. After preprocessing text (building suffix tree of text), we can search any pattern in O(m) time where m is length of the pattern.
+
+Preprocessing of text may become costly if the text changes frequently. It is good for fixed text or less frequently changing text though.
+
+A Suffix Tree for a given text is a compressed trie for all suffixes of the given text.
+
+Compress Trie is obtained from standard trie by joining chains of single nodes.The nodes of a compressed trie can be stored by storing index ranges at the nodes. see more about compress trie 
+https://www.youtube.com/watch?v=4ZONA83QfiY
+
+How to build a Suffix Tree for a given text?
+As discussed above, Suffix Tree is compressed trie of all suffixes, so following are very abstract steps to build a suffix tree from given text.
+1) Generate all suffixes of given text.
+2) Consider all suffixes as individual words and build a compressed trie.
+
+Following are abstract steps to search a pattern in the built Suffix Tree.
+1) Starting from the first character of the pattern and root of Suffix Tree, do following for every character.
+…..a) For the current character of pattern, if there is an edge from the current node of suffix tree, follow the edge.
+…..b) If there is no edge, print “pattern doesn’t exist in text” and return.
+2) If all characters of pattern have been processed, i.e., there is a path from root for characters of the given pattern, then print “Pattern found”.
+
+How does this work?
+Every pattern that is present in text (or we can say every substring of text) must be a prefix of one of all possible suffixes. 
+
+TODO :- Write own code for suffix tree
+
+suffix array (Introduction)
+===========================
+A suffix array is a sorted array of all suffixes of a given string.
+Any suffix tree based algorithm can be replaced with an algorithm that uses a suffix array enhanced with additional information and solves the same problem in the same time complexity .
+
+A suffix array can be constructed from Suffix tree by doing a DFS traversal of the suffix tree. In fact Suffix array and suffix tree both can be constructed from each other in linear time.
+Advantages of suffix arrays over suffix trees include improved space requirements, simpler linear time construction algorithms (e.g., compared to Ukkonen’s algorithm) and improved cache locality (Source: Wiki)
+
+             Average     Worst case
+Space            O(n)     O(n) 
+Construction     O(n)     O(n)
+
+Let the given string be "banana".
+
+0 banana                          5 a
+1 anana     Sort the Suffixes     3 ana
+2 nana      ---------------->     1 anana  
+3 ana        alphabetically       0 banana  
+4 na                              4 na   
+5 a                               2 nana
+
+So the suffix array for "banana" is {5, 3, 1, 0, 4, 2}.
+
+indexArray[]={5, 3, 1, 0, 4, 2} and correspending suffixes are
+suffixArray[]={a,ana,anana,banana,na,nana}
+any pattern P  match with suffixArray using binary search .if match occurs  then find the correspending index from the indexArray. that index is the match index of Text. 
+
+The time complexity of above method to build suffix array is O(n^2Logn) if we consider a O(nLogn) algorithm used for sorting.
+The time complexity of the above search  is O(mLogn) using binary search.
+
+
+Splay Tree
+==========
+https://www.youtube.com/watch?v=qMmqOHr75b8&t=1025s
+
+The worst case time complexity of Binary Search Tree (BST) operations like search, delete, insert is O(n). The worst case occurs when the tree is skewed. We can get the worst case time complexity as O(Logn) with AVL and Red-Black Trees.
+
+Can we do better than AVL or Red-Black trees in practical situations?
+Like AVL and Red-Black Trees, Splay tree is also self-balancing BST. The main idea of splay tree is to bring the recently accessed item to root of the tree, this makes the recently searched item to be accessible in O(1) time if accessed again. The idea is to use locality of reference (In a typical application, 80% of the access are to 20% of the items). Imagine a situation where we have millions or billions of keys and only few of them are accessed frequently, which is very likely in many practical applications.
+
+Insert
+------
+The insert operation is similar to Binary Search Tree insert with additional steps to make sure that the newly inserted key becomes the new root.
+
+
+
+Following are different cases to insert a key k in splay tree.
+
+1) Root is NULL: We simply allocate a new node and return it as root.
+
+2) Splay the given key k. If k is already present, then it becomes the new root. If not present, then last accessed leaf node becomes the new root.
+
+3) If new root’s key is same as k, don’t do anything as k is already present.
+
+4) Else allocate memory for new node and compare root’s key with k.
+…….4.a) If k is smaller than root’s key, make root as right child of new node, copy left child of root as left child of new node and make left child of root as NULL.
+…….4.b) If k is greater than root’s key, make root as left child of new node, copy right child of root as right child of new node and make right child of root as NULL.
+
+5) Return new node as new root of tree.
+
+Example:
+
+ 
+          100                  [20]                             25     
+          /  \                   \                             /  \
+        50   200                  50                          20   50 
+       /          insert(25)     /  \        insert(25)           /  \  
+      40          ======>      30   100      ========>           30  100    
+     /          1. Splay(25)    \     \      2. insert 25         \    \
+    30                          40    200                         40   200   
+   /                                                          
+ [20] 
+ In this above example , we are inserting 25 . 
+step 1 explain : here root is not null . so nothing to do
+step 2 explain :
+ first check 25 is present or not . while checking 25 is not present, but we reached up to last leaf 20 . Again 20 is closer 25 . then make 20 as new root .
+step 3 explain :currently 20 is not equal to 25 . 
+step 4; create newNode(25),current root(20)<newNode(25) . newNode(25)->left=root(20);newNode(25)->right=root(20)->right;(root)20->right=null;
+step 5: root=newNode(25) ;return root
+
+Search
+-------
+Search Operation
+The search operation in Splay tree does the standard BST search, in addition to search, it also splays (move a node to the root). If the search is successful, then the node that is found is splayed and becomes the new root. Else the last node accessed prior to reaching the NULL is splayed and becomes the new root.
+
+There are following cases for the node being accessed.
+
+1) Node is root We simply return the root, don’t do anything else as the accessed node is already root.
+
+2) Zig: Node is child of root (the node has no grandparent). Node is either a left child of root (we do a right rotation) or node is a right child of its parent (we do a left rotation).
+T1, T2 and T3 are subtrees of the tree rooted with y (on left side) or x (on right side)
+
+                y                                     x
+               / \     Zig (Right Rotation)          /  \
+              x   T3   – - – - – - – - - ->         T1   y 
+             / \       < - - - - - - - - -              / \
+            T1  T2     Zag (Left Rotation)            T2   T3
+
+3) Node has both parent and grandparent. There can be following subcases.
+……..3.a) Zig-Zig and Zag-Zag Node is left child of parent and parent is also left child of grand parent (Two right rotations) OR node is right child of its parent and parent is also right child of grand parent (Two Left Rotations).
+
+Zig-Zig (Left Left Case):
+       G                        P                           X       
+      / \                     /   \                        / \      
+     P  T4   rightRotate(G)  X     G     rightRotate(P)  T1   P     
+    / \      ============>  / \   / \    ============>       / \    
+   X  T3                   T1 T2 T3 T4                      T2  G
+  / \                                                          / \ 
+ T1 T2                                                        T3  T4 
+
+Zag-Zag (Right Right Case):
+  G                          P                           X       
+ /  \                      /   \                        / \      
+T1   P     leftRotate(G)  G     X     leftRotate(P)    P   T4
+    / \    ============> / \   / \    ============>   / \   
+   T2   X               T1 T2 T3 T4                  G   T3
+       / \                                          / \ 
+      T3 T4                                        T1  T2
+
+……..3.b) Zig-Zag and Zag-Zig Node is left child of parent and parent is right child of grand parent (Left Rotation followed by right rotation) OR node is right child of its parent and parent is left child of grand parent (Right Rotation followed by left rotation).
+
+Zag-Zig (Left Right Case):
+       G                        G                            X       
+      / \                     /   \                        /   \      
+     P   T4  leftRotate(P)   X     T4    rightRotate(G)   P     G     
+   /  \      ============>  / \          ============>   / \   /  \    
+  T1   X                   P  T3                       T1  T2 T3  T4 
+      / \                 / \                                       
+    T2  T3              T1   T2                                     
+
+Zig-Zag (Right Left Case):
+  G                          G                           X       
+ /  \                      /  \                        /   \      
+T1   P    rightRotate(P)  T1   X     leftRotate(P)    G     P
+    / \   =============>      / \    ============>   / \   / \   
+   X  T4                    T2   P                 T1  T2 T3  T4
+  / \                           / \                
+ T2  T3                        T3  T4  
+
+Example:
+
+ 
+         100                      100                       [20]
+         /  \                    /   \                        \ 
+       50   200                50    200                      50
+      /          search(20)    /          search(20)         /  \  
+     40          ======>     [20]         ========>         30   100
+    /            1. Zig-Zig    \          2. Zig-Zig         \     \
+
+   30               at 40       30            at 100         40    200  
+  /                               \     
+[20]                              40
+
+The important thing to note is, the search or splay operation not only brings the searched key to root, but also balances the BST. For example in above case, height of BST is reduced by 1.
+
+Summary
+-------
+Splay trees have excellent locality properties. Frequently accessed items are easy to find. Infrequent items are out of way.
+All splay tree operations take O(Logn) time on average. 
+Splay trees are simpler compared to AVL and Red-Black Trees as no extra field is required in every tree node.
+Unlike AVL tree, a splay tree can change even with read-only operations like search.
+
+B-Tree
+======
+https://www.youtube.com/watch?v=aZjYr87r1b8
+
+B-Tree is a self-balancing search tree. 
+In most of the other self-balancing search trees (like AVL and Red-Black Trees), these algorithms are good for main memory , i.e if data are less, we can store these data SBST( AVL or Red Black tree). on that case O(h) time for access these data . if data are more, then height of tree will be increse and it more time to access these data. so these SBST are good for less data and insie main memory.  
+To understand the use of B-Trees, we must think of the huge amount of data that cannot fit in main memory. When the number of keys is high, the data is read from disk in the form of blocks. Disk access time is very high compared to main memory access time. 
+The main idea of using B-Trees is to reduce the number of disk accesses. Most of the tree operations (search, insert, delete, max, min, ..etc ) require O(h) disk accesses where h is the height of the tree. B-tree is a fat tree. The height of B-Trees is kept low by putting maximum possible keys in a B-Tree node. 
+Generally, a B-Tree node size is kept equal to the disk block size. Since h is low for B-Tree, total disk accesses for most of the operations are reduced significantly compared to balanced Binary Search Trees like AVL Tree, Red-Black Tree, ..etc.
+
+Properties of B-Tree
+1) All leaves are at same level.
+2) A B-Tree is defined by the term minimum degree ‘t’. The value of t depends upon disk block size.
+3) Every node except root must contain at least t-1 keys. Root may contain minimum 1 key.
+4) All nodes (including root) may contain at most 2t – 1 keys.
+5) Number of children of a node is equal to the number of keys in it plus 1.
+6) All keys of a node are sorted in increasing order. The child between two keys k1 and k2 contains all keys in the range from k1 and k2.
+7) B-Tree grows and shrinks from the root which is unlike Binary Search Tree. Binary Search Trees grow downward and also shrink from downward.
+8) Like other balanced Binary Search Trees, time complexity to search, insert and delete is O(Logn).
+
+
+Following is an example B-Tree of minimum degree 3. Note that in practical B-Trees, the value of minimum degree is much more than 3.
+
+Search
+Search is similar to the search in Binary Search Tree. Let the key to be searched be k. We start from the root and recursively traverse down. For every visited non-leaf node, if the node has the key, we simply return the node. Otherwise, we recur down to the appropriate child (The child which is just before the first greater key) of the node. If we reach a leaf node and don’t find k in the leaf node, we return NULL.
+
+Traverse
+Traversal is also similar to Inorder traversal of Binary Tree. We start from the leftmost child, recursively print the leftmost child, then repeat the same process for remaining children and keys. In the end, recursively print the rightmost child.
+
+class Btree<T> { 
+    public BTreeNode<T> root; // Pointer to root node 
+    public int t; // Minimum degree 
+    Btree(int t) { 
+        this.root = null; 
+        this.t = t; 
+    }
+
+    class BTreeNode<T> { 
+    int[] keys; // An array of keys 
+    int t; // Minimum degree (defines the range for number of keys) 
+    BTreeNode[] childern; // An array of child pointers 
+    int n; // Current number of keys 
+    boolean leaf; // Is true when node is leaf. Otherwise false 
+   
+
+    BTreeNode(int t, boolean leaf) { 
+        this.t = t; 
+        this.leaf = leaf; 
+        this.keys = new int[2 * t - 1]; 
+        this.children = new BTreeNode[2 * t]; 
+        this.n = 0; 
+    } 
+}
+
+Insert 
+-------
+A new key is always inserted at the leaf node. Let the key to be inserted be k. Like BST, we start from the root and traverse down till we reach a leaf node. Once we reach a leaf node, we insert the key in that leaf node. 
+
+Unlike BSTs, we have a predefined range on the number of keys that a node can contain. So before inserting a key to the node, we make sure that the node has extra space.
+How to make sure that a node has space available for a key before the key is inserted? We use an operation called splitChild() that is used to split a child of a node. 
+See the following diagram to understand split. space for diagram
+
+
+
+
+
+we go down from root to leaf. Before traversing down to a node, we first check if the node is full. If the node is full, we split it to create space. Following is the complete algorithm.
+Insertion
+1) Initialize x as root.
+2) While x is not leaf, do following
+..a) Find the child of x that is going to be traversed next. Let the child be y.
+..b) If y is not full, change x to point to y.
+..c) If y is full, split it and change x to point to one of the two parts of y. If k is smaller than mid key in y, then set x as the first part of y. Else second part of y. When we split y, we move a key from y to its parent x.
+3) The loop in step 2 stops when x is leaf. x must have space for 1 extra key as we have been splitting all nodes in advance. So simply insert k to x. 
+
+This algorithm from Cormen book.
+ example : https://www.geeksforgeeks.org/insert-operation-in-b-tree/
+
+ TODO : Write own code create,search,insert,delete
+
+ B+ Tree
+ =======
+ In order, to implement dynamic multilevel indexing, B-tree and B+ tree are generally employed. 
+ the increase in the number of levels in the B-tree, hence increasing the search time of a record.
+ B+ tree eliminates the above drawback by storing data pointers only at the leaf nodes of the tree. Thus, the structure of leaf nodes of a B+ tree is quite different from the structure of internal nodes of the B+ tree.
+
+ since data pointers are present only at the leaf nodes, the leaf nodes must necessarily store all the key values along with their corresponding data pointers to the disk file block, in order to access them. Moreover, the leaf nodes are linked to provide ordered access to the records.
+
+ The leaf nodes, therefore form the first level of index, with the internal nodes forming the other levels of a multilevel index.
+
+ a B+ tree, unlike a B-tree has two orders, ‘a’ and ‘b’, one for the internal nodes and the other for the external (or leaf) nodes. 
+ The structure of the internal nodes of a B+ tree of order ‘a’ 
+ ---------------------- 
+1)Each internal node is of the form :
+<P1, K1, P2, K2, ….., Pc-1, Kc-1, Pc>
+2)Every internal node has : K1 < K2 < …. < Kc-1
+3)For each search field values ‘X’ in the sub-tree pointed at by Pi, the following condition holds :
+Ki-1 < X <= Ki, for 1 < i < c and,
+Ki-1 < X, for i = c
+Each internal nodes has at most ‘a’ tree pointers.
+The root node has, at least two tree pointers, while the other internal nodes have at least \ceil(a/2) tree pointers each.
+If any internal node has ‘c’ pointers, c <= a, then it has 'c – 1' key values. 
+
+The structure of the leaf nodes of a B+ tree of order ‘b’ is as follows:
+----------------------
+1)Each leaf node is of the form :
+<<K1, D1>, <K2, D2>, ….., <Kc-1, Dc-1>, Pnext>
+where c <= b and each Di is a data pointer and, each Ki is a key value and, Pnext points to next leaf node in the B+ tree 
+2)Every leaf node has : K1 < K2 < …. < Kc-1, c <= b
+3)Each leaf node has at least \ceil(b/2) values.
+4)All leaf nodes are at same level.
+
+
+Advantage –
+A B+ tree with ‘l’ levels can store more entries in its internal nodes compared to a B-tree having the same ‘l’ levels. This accentuates the significant improvement made to the search time for any given key. Having lesser levels and presence of Pnext pointers imply that B+ tree are very quick and efficient in accessing records from disks. 
+
+
+
+ Red-Black Tree
+ ==============
+ https://www.youtube.com/watch?v=UaLIHuR1t8Q
+
+ Red-Black Tree is a self-balancing Binary Search Tree (BST) where every node 
+
+ follows following rules/properties .
+ 1) Every node has a color either red or black.
+2) Root of tree is always black.
+3) There are no two adjacent red nodes (A red node cannot have a red parent or red child).
+4) Every path from a node (including root) to any of its descendant NULL node has the same number of black nodes.
+
+Why Red-Black Trees?
+Most of the BST operations (e.g., search, max, min, insert, delete.. etc) take O(h) time where h is the height of the BST. The cost of these operations may become O(n) for a skewed Binary tree. If we make sure that height of the tree remains O(Logn) after every insertion and deletion, then we can guarantee an upper bound of O(Logn) for all these operations. The height of a Red-Black tree is always O(Logn) where n is the number of nodes in the tree.
+
+Comparison with AVL Tree
+The AVL trees are more balanced compared to Red-Black Trees, but they may cause more rotations during insertion and deletion. So if your application involves many frequent insertions and deletions, then Red Black trees should be preferred. And if the insertions and deletions are less frequent and search is a more frequent operation, then AVL tree should be preferred over Red-Black Tree.
+
+Following is an important fact about balancing in Red-Black Trees.
+Black Height of a Red-Black Tree :
+-----
+Black height is number of black nodes on a path from root to a leaf. Leaf nodes are also counted black nodes. From above properties 3 and 4, we can derive, a Red-Black Tree of height h has black-height >= h/2.
+Every Red Black Tree with n nodes has height <= 2Log2(n+1)
+--------
+This can be proved using following facts:
+1) For a general Binary Tree, let k be the minimum number of nodes on all root to NULL paths, then n >= 2^k – 1 (Ex. If k is 3, then n is atleast 7). This expression can also be written as k <= Log2(n+1)
+2) From property 4 of Red-Black trees and above claim, we can say in a Red-Black Tree with n nodes, there is a root to leaf path with at-most Log2(n+1) black nodes.
+3) From property 3 of Red-Black trees, we can claim that the number black nodes in a Red-Black tree is at least ⌊ n/2 ⌋ where n is the total number of nodes.
+From above 2 points, we can conclude the fact that Red Black Tree with n nodes has height <= 2Log2(n+1)
+
+Applications :
+    Most of the self-balancing BST library functions like map and set in C++ (OR TreeSet and TreeMap in Java) use Red Black Tree
+    It is used to implement CPU Scheduling Linux. Completely Fair Scheduler uses it.
+
+Insert
+-------
+In Red-Black tree, we use two tools to do balancing.
+1) Recoloring
+2) Rotation
+We try recoloring first, if recoloring doesn’t work, then we go for rotation. Following is detailed algorithm. The algorithms has mainly two cases depending upon the color of uncle. If uncle is red, we do recoloring. If uncle is black, we do rotations and/or recoloring.
+
+Color of a NULL node is considered as BLACK.
+Let x be the newly inserted node.
+1) Perform standard BST insertion and make the color of newly inserted nodes as RED.
+2) If x is root, change color of x as BLACK (Black height of complete tree increases by 1).
+3) Do following if color of x’s parent is not BLACK and x is not root.
+….a) If x’s uncle is RED (Grand parent must have been black from property 4)
+……..(i) Change color of parent and uncle as BLACK.
+……..(ii) color of grand parent as RED.
+……..(iii) Change x = x’s grandparent, repeat steps 2 and 3 for new x.
+
+….b) If x’s uncle is BLACK, then there can be four configurations for x, x’s parent (p) and x’s grandparent (g) (This is similar to AVL Tree)
+……..i) Left Left Case (p is left child of g and x is left child of p)
+……..ii) Left Right Case (p is left child of g and x is right child of p)
+……..iii) Right Right Case (Mirror of case i)
+……..iv) Right Left Case (Mirror of case ii)
+
+example : please see https://www.geeksforgeeks.org/red-black-tree-set-2-insert/
+
+class RBTree<T> {
+   
+    enum Color {
+         RED;
+         BLACK;
+    }
+    
+    class RBTNode<T>{
+       T data;
+       Color color;
+       boolean left,right,parent;
+       RBTNode(T data){
+         this.data=data;
+         this.left=null;
+         this.right=null;
+         this.parent=null;
+         this.color=Color.RED;
+
+       }
+    }
+
+}
+
+
+DELETE:
+--------
+https://www.youtube.com/watch?v=CTvfzU_uNKE
+
+In insert operation, we check color of uncle to decide the appropriate case. In delete operation, we check color of sibling to decide the appropriate case.
+
+The main property that violates after insertion is two consecutive reds. In delete, the main violated property is, change of black height in subtrees as deletion of a black node may cause reduced black height in one root to leaf path.
+
+When a black node is deleted and replaced by a black child, the child is marked as double black. The main task now becomes to convert this double black to single black.
+
+Following are detailed steps for deletion.
+--------------------
+1) Perform standard BST delete. When we perform standard delete operation in BST, we always end up deleting a node which is either leaf or has only one child (For an internal node, we copy the inorder successor and then recursively call delete for that successor, inoder successor is always a leaf node or a node with one child). So we only need to handle cases where a node is leaf or has one child. 
+Let v be the node to be deleted and u be the child that replaces v (Note that u is NULL when v is a leaf and color of NULL is considered as Black).
+
+ v  (B or R)              u (B or R) ( u replaced v)
+  \                      / \ 
+   u (B or R)   ===>   null null
+  / \                   (B)  (B)
+null null
+(B)    (B)
+
+2) Simple Case: let u is single child of v,If either u or v is red,not both are red(accordingly rule 3).In this case, we mark the replaced child as black (No change in black height). i.e if either (u is red and v is black ) or (v is black and v is red), we can replace v by u with black .
+
+3) If Both u and v are Black.
+3.1) Color u as double black.  Now our task reduces to convert this double black to single black. 
+Note that If v is leaf, then u is NULL and color of NULL is considered as black. So the deletion of a black leaf also causes a double black.
+
+3.2) Do following while the current node u is double black and it is not root. Let sibling of node be s.
+….(a): If sibling s is black and at least one of sibling’s children is red, perform rotation(s). Let the red child of s be r. This case can be divided in four subcases depending upon positions of s and r.
+
+
+…………..(i) Left Left Case (s is left child of its parent and r is left child of s ).
+…………..(ii) Left Right Case (s is left child of its parent and r is right child). 
+…………..(iii) Right Right Case (s is right child of its parent and r is right child of s )
+-----(iv) Right Left Case (s is right child of its parent and r is left child of s)
+
+…..(b): If sibling is black and its both children are black, perform recoloring, and recur for the parent if parent is black. (i.e now double black on parent and sibling became red).
+
+if parent was red, then we didn’t need to recur for prent, we can simply make it black (red + double black = single black) (i.e parent became black and sibling became red . No duble black)
+
+…..(c): If sibling is red, perform a rotation to move old sibling up, recolor the old sibling and parent. The new sibling is always black. This case can be divided in two subcases.
+…………..(i) Left Case (s is left child of its parent)
+…………..(iii) Right Case (s is right child of its parent).
+
+3.3) If u is root, make it single black and return (Black height of complete tree reduces by 1).
+
+example : https://www.geeksforgeeks.org/red-black-tree-set-3-delete-2/
+
+TODO : write own code Create,insert, delete,search, travels.
+
+
+K Dimensional Tree
+==================
+A K-D Tree(also called as K-Dimensional Tree) is a binary search tree where data in each node is a K-Dimensional point in space. In short, it is a space partitioning(details below) data structure for organizing points in a K-Dimensional space.
+A non-leaf node in K-D tree divides the space into two parts, called as half-spaces.
+Points to the left of this space are represented by the left subtree of that node and points to the right of the space are represented by the right subtree.
+
+2-D Tree with an example.The root would have an x-aligned plane, the root’s children would both have y-aligned planes, the root’s grandchildren would all have x-aligned planes, and the root’s great-grandchildren would all have y-aligned planes and so on.
+
+Generalization:
+Let us number the planes as 0, 1, 2, …(K – 1). From the above example, it is quite clear that a point (node) at depth D will have A aligned plane where A is calculated as:
+
+A = D mod K
+
+How to determine if a point will lie in the left subtree or in right subtree?
+
+If the root node is aligned in planeA, then the left subtree will contain all points whose coordinates in that plane are smaller than that of root node. Similarly, the right subtree will contain all points whose coordinates in that plane are greater-equal to that of root node.
+
+example : https://www.geeksforgeeks.org/k-dimensional-tree/
+
+
+

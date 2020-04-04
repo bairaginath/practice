@@ -17,5 +17,20 @@ https://www.hackerrank.com/challenges/fraudulent-activity-notifications/problem
 cassandra
 ----------
 how cassandra clustering did ?
-see cassandra repairing code ?	
+see cassandra repairing code ?
+
+more details on coodinators and partitioner
+
+https://www.baeldung.com/spring-multiple-data-modules
+
+https://hpe4e749dba5ec.local./eSCL/ScanJobs/1c85ad45-ba2e-1f08-9a93-e4e749dba5ec/NextDocument
+
+https://hpe4e749dba5ec.local./#hId-pgWebScan
+
+
+Kafka
+-----
+
+
+	
 

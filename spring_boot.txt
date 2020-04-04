@@ -1,5 +1,26 @@
 Spring-boot
 ============
+Spring Boot is an open source Java-based framework used to create a Micro Service.
+It is developed by Pivotal Team and is used to build stand-alone and production ready spring applications.
+Goals and benefit
+-----------------
+To avoid complex XML configuration in Spring
+To develop a production ready Spring applications in an easier way
+To reduce the development time and run the application independently
+Offer an easier way of getting started with the application
+It provides a flexible way to configure Java Beans, XML configurations, and Database Transactions.
+It provides a powerful batch processing and manages REST endpoints.
+In Spring Boot, everything is auto configured; no manual configurations are needed.
+It offers annotation-based spring application
+Eases dependency management
+It includes Embedded Servlet Container
+
+Spring Boot automatically configures your application based on the dependencies you have added to the project by using @EnableAutoConfiguration annotation. For example, if MySQL database is on your classpath, but you have not configured any database connection, then Spring Boot auto-configures an in-memory database.
+The entry point of the spring boot application is the class contains @SpringBootApplication annotation and the main method.
+Spring Boot automatically scans all the components included in the project by using @ComponentScan annotation.
+
+
+
 @SpringBootApplication
 
 Spring MVC
@@ -500,6 +521,35 @@ Next, we can start simply start adding Spring dependencies and making use of Spr
         </plugin>
     </plugins>
 </build>
+
+
+Log Format
+-----------
+which gives you the following information −
+Date and Time that gives the date and time of the log
+Log level shows INFO, ERROR or WARN
+Process ID
+The --- which is a separator
+Thread name is enclosed within the square brackets []
+Logger Name that shows the Source class name
+The Log message
+
+Run as debug 
+java –jar demo.jar --debug 
+or
+debug = true //in application.properties file
+
+Configure Logback
+Logback supports XML based configuration to handle Spring Boot Log configurations. Logging configuration details are configured in logback.xml file. The logback.xml file should be placed under the classpath.
+<?xml version = "1.0" encoding = "UTF-8"?>
+<configuration>
+   <root level = "INFO">
+   </root>
+</configuration>
+
+
+
+
 
 
 
