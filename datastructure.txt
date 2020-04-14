@@ -795,5 +795,312 @@ If the root node is aligned in planeA, then the left subtree will contain all po
 
 example : https://www.geeksforgeeks.org/k-dimensional-tree/
 
+TODO : own code for create, insert,delete,find min,search
+
+Treap (A Randomized Binary Search Tree)
+=======================================
+Like Red-Black and AVL Trees, Treap is a Balanced Binary Search Tree, but not guaranteed to have height as O(Log n). The idea is to use Randomization and Binary Heap property to maintain balance with high probability. The expected time complexity of search, insert and delete is O(Log n).
+
+Every node of Treap maintains two values.
+1) Key Follows standard BST ordering (left is smaller and right is greater)
+2) Priority Randomly assigned value that follows Max-Heap property.
+
+search(x)
+Perform standard BST Search to find x.
+
+Insert(x):
+1) Create new node with key equals to x and value equals to a random value.
+2) Perform standard BST insert.
+3) Use rotations to make sure that inserted node's priority follows max heap property. (accordingly priority value )
+Delete(x): 
+1) If node is a leaf, delete it.
+2) If node has one child NULL and other as non-NULL, replace node with the non-empty child.
+3)Else replace node's priority with minus infinite ( -INF ), and do appropriate rotations to bring the node down to a leaf.
+The idea of step 3 is to move the node to down so that we end up with either case 1 or case 2.
+
+
+
+Ternary Search Tree
+===================
+A ternary search tree is a special trie data structure where the child nodes of a standard trie are ordered as a binary search tree.
+
+Representation of ternary search trees:
+Unlike trie(standard) data structure where each node contains 26 pointers for its children, each node in a ternary search tree contains only 3 pointers:
+1. The left pointer points to the node whose value is less than the value in the current node.
+2. The equal pointer points to the node whose value is equal to the value in the current node.
+3. The right pointer points to the node whose value is greater than the value in the current node.
+
+Time Complexity: The time complexity of the ternary search tree operations is similar to that of binary search tree. i.e. the insertion, deletion and search operations take time proportional to the height of the ternary search tree. The space is proportional to the length of the string to be stored.
+
+Interval Tree
+=============
+https://www.youtube.com/watch?v=-u46FbZSNLU
+
+Consider a situation where we have a set of intervals and we need following operations to be implemented efficiently.
+1) Add an interval
+2) Remove an interval
+3) Given an interval x, find if x overlaps with any of the existing intervals.
+
+Interval Tree: The idea is to augment a self-balancing Binary Search Tree (BST) like Red Black Tree, AVL Tree, etc to maintain set of intervals so that all operations can be done in O(Logn) time. 
+
+Every node of Interval Tree stores following information.
+a) i: An interval which is represented as a pair [low, high]
+b) max: Maximum high value in subtree rooted with this node.
+
+The low value of an interval is used as key to maintain order in BST. The insert and delete operations are same as insert and delete in self-balancing BST used. 
+
+Interval overlappingIntervalSearch(root, x)
+1) If x overlaps with root's interval, return the root's interval.
+2) If left child of root is not empty and the max  in left child 
+is greater than x's low value, recur for left child
+3) Else recur for right child.
+
+Applications of Interval Tree:
+Interval tree is mainly a geometric data structure and often used for windowing queries, for instance, to find all roads on a computerized map inside a rectangular viewport, or to find all visible elements inside a three-dimensional scene (Source Wiki).
+
+Interval Tree vs Segment Tree
+Both segment and interval trees store intervals. Segment tree is mainly optimized for queries for a given point, and interval trees are mainly optimized for overlapping queries for a given interval.
+
+Exercise:
+1) Implement delete operation for interval tree.
+2) Extend the intervalSearch() to print all overlapping intervals instead of just one. 
+
+LRU Cache Implementation
+=======================
+We are given total possible page numbers that can be referred. We are also given cache (or memory) size (Number of page frames that cache can hold at a time). The LRU caching scheme is to remove the least recently used frame when the cache is full and a new page is referenced which is not there in cache.
+
+We use two data structures to implement an LRU Cache.(both Queue and HashSet)
+public class LRUCache<T> {
+LinkedList<T> cache;
+Set<T> checkForElementPresent;//same size of cache and used for element present 
+ int frameSize;
+
+    LRUCache(int frameSize) {
+        this.frameSize = frameSize;
+        this.cache = new LinkedList<>();
+        this.checkForElementPresent = new HashSet<>();
+    }
+
+    public void refer(T t) {
+        System.out.println("input "+t);
+        /*
+         * The found page may not be always the last element, even if it's an
+         * intermediate element that needs to be removed and added to the start of the cache
+         */
+        if (checkForElementPresent.contains(t)) {
+            cache.removeLastOccurrence(t);
+        } else {
+            if (cache.size() >= frameSize) {
+                T lastElement = cache.removeLast();
+                checkForElementPresent.remove(lastElement);
+            }
+            checkForElementPresent.add(t);
+        }
+        cache.addFirst(t);
+        System.out.println(cache);
+    }
+    
+    public T getFirstElementFromCache() {
+        return cache.getFirst();
+    }
+    
+    public static void main(String[] args) {
+        LRUCache<Integer> lru=new LRUCache<Integer>(3);
+        int arr[]= {1,2,1,3,2,3,1,5,3,5,4,4,7,6};
+        Arrays.stream(arr).forEach(lru::refer);
+    }
+
+}
+
+Find the k most frequent words from a file.
+============
+Given a book of words. Assume you have enough main memory to accommodate all words. design a data structure to find top K maximum occurring words. The data structure should be dynamic so that new words can be added.
+
+A simple solution is to use Hashing. Hash all words one by one in a hash table. If a word is already present, then increment its count. Finally, traverse through the hash table and return the k words with maximum counts.
+
+We can use Trie and Min Heap to get the k most frequent words efficiently. The idea is to use Trie for searching existing words adding new words efficiently. Trie also stores count of occurrences of words. A Min Heap of size k is used to keep track of k most frequent words at any point of time(Use of Min Heap is same as we used it to find k largest elements in this post).
+
+Trie and Min Heap are linked with each other by storing an additional field in Trie ‘indexMinHeap’ .
+
+// A Trie node 
+struct TrieNode 
+{ 
+    bool isEnd; // indicates end of word 
+    unsigned frequency;  // the number of occurrences of a word 
+    int indexMinHeap; // the index of the word in minHeap .The value of ‘indexMinHeap’ is maintained as -1 for the words which are currently not in Min Heap
+    TrieNode* child[MAX_CHARS]; // represents 26 slots each for 'a' to 'z'. 
+}; 
+  
+// A Min Heap node 
+struct MinHeapNode 
+{ 
+    TrieNode* root; // indicates the leaf node of TRIE 
+    unsigned frequency; //  number of occurrences 
+    char* word; // the actual word stored 
+}; 
+  
+// A Min Heap 
+struct MinHeap 
+{ 
+    unsigned capacity; // the total size a min heap 
+    int count; // indicates the number of slots filled. 
+    MinHeapNode* array; //  represents the collection of minHeapNodes 
+}; 
+
+Tournament Tree (Winner Tree)
+=============================
+Tournament tree is a form of min (max) heap which is a complete binary tree. Every external node represents a player and internal node represents winner. In a tournament tree every internal node contains winner and every leaf node contains one player.
+There will be N – 1 internal nodes in a binary tree with N leaf (external) nodes.
+It is obvious that to select the best player among N players, (N – 1) players to be eliminated, i.e. we need minimum of (N – 1) games (comparisons). 
+
+
+ Spaghetti stack
+ ================
+A spaghetti stack is an N-ary tree data structure in which child nodes have pointers to the parent nodes (but not vice-versa)
+
+Spaghetti stack structure is used in situations when records are dynamically pushed and popped onto a stack as execution progresses, but references to the popped records remain in use.
+
+Compilers for languages such as C create a spaghetti stack as it opens and closes symbol tables representing block scopes. When a new block scope is opened, a symbol table is pushed onto a stack. When the closing curly brace is encountered, the scope is closed and the symbol table is popped. But that symbol table is remembered, rather than destroyed. And of course it remembers its higher level “parent” symbol table and so on.
+
+example https://www.geeksforgeeks.org/g-fact-87/
+
+Data Structure for Dictionary and Spell Checker?
+================================================
+Hashing is one simple option for this. We can put all words in a hash table. Refer this paper which compares hashing with self-balancing Binary Search Trees and Skip List, and shows that hashing performs better.
+
+Hashing doesn’t support operations like prefix search. Prefix search is something where a user types a prefix and your dictionary shows all words starting with that prefix. Hashing also doesn’t support efficient printing of all words in dictionary in alphabetical order and nearest neighbor search.
+
+If we want both operations, look up and prefix search, Trie is suited. With Trie, we can support all operations like insert, search, delete in O(n) time where n is length of the word to be processed. Another advantage of Trie is, we can print all words in alphabetical order which is not possible with hashing.
+
+The disadvantage of Trie is, it requires lots of space. If space is concern, then Ternary Search Tree can be preferred. In Ternary Search Tree, time complexity of search operation is O(h) where h is height of the tree. Ternary Search Trees also supports other operations supported by Trie like prefix search, alphabetical order printing and nearest neighbor search.
+
+If we want to support suggestions, like google shows “did you mean …”, then we need to find the closest word in dictionary. The closest word can be defined as the word that can be obtained with minimum number of character transformations (add, delete, replace). A Naive way is to take the given word and generate all words which are 1 distance (1 edit or 1 delete or 1 replace) away and one by one look them in dictionary. If nothing found, then look for all words which are 2 distant and so on. There are many complex algorithms for this. As per the wiki page, The most successful algorithm to date is Andrew Golding and Dan Roth’s Window-based spelling correction algorithm.
+
+
+Cartesian Tree
+==============
+A Cartesian tree is a tree data structure created from a set of data that obeys the  following structural invariants:
+    The tree obeys in the min (or max) heap property – each node is less (or greater) than its children.
+    An inorder traversal of the nodes yields the values in the same order in which they appear in the initial sequence.
+Note:
+    Cartesian Tree is not a height-balanced tree.
+    Cartesian tree of a sequence of distinct numbers is always unique.
+
+A O(nlogn) Algorithm :
+It’s possible to build a Cartesian tree from a sequence of data in O(NlogN) time on average. Beginning with the empty tree,
+
+TODO : write own code
+https://www.geeksforgeeks.org/cartesian-tree-sorting/
+
+Sparse Set
+===========
+How to do the following operations efficiently if there are large number of queries for them.
+    1)Insertion
+    2)Deletion
+    3)Searching
+    4)Clearing/Removing all the elements.
+One solution is to use a Self-Balancing Binary Search Tree like Red-Black Tree, AVL Tree, etc. Time complexity of this solution for insertion, deletion and searching is O(Log n).
+We can also use Hashing. With hashing, time complexity of first three operations is O(1). But time complexity of the fourth operation is O(n). 
+
+We can also use bit-vector (or direct access table), but bit-vector also requires O(n) time for clearing.
+
+Sparse Set outperforms all BST, Hashing and bit vector. We assume that we are given range of data (or maximum value an element can have) and maximum number of elements that can be stored in set. The idea is to maintain two arrays: sparse[] and dense[]. 
+ense[]   ==> Stores the actual elements
+sparse[]  ==> This is like bit-vector where we use elements as index. Here 
+              values are not binary, but indexes of dense array.
+maxVal    ==> Maximum value this set can store. Size of sparse[] is
+              equal to maxVal + 1.
+capacity  ==> Capacity of Set. Size of sparse is equal to capacity.  
+n         ==> Current number of elements in Set.
+Example
+-------
+Let there be a set with two elements {3, 5}, maximum
+value as 10 and capacity as 4. The set would be 
+represented as below.
+Initially:
+maxVal   = 10  // Size of sparse
+capacity = 4  // Size of dense
+n = 2         // Current number of elements in set
+// dense[] Stores actual elements
+dense[]  = {3, 5, _, _}
+// Uses actual elements as index and stores
+// indexes of dense[]
+sparse[] = {_, _, _, 0, _, 1, _, _, _, _,}
+'_' means it can be any value and not used in 
+sparse set
+Insert 7:
+n        = 3
+dense[]  = {3, 5, 7, _}
+sparse[] = {_, _, _, 0, _, 1, _, 2, _, _,}
+Insert 4:
+n        = 4
+dense[]  = {3, 5, 7, 4}
+sparse[] = {_, _, _, 0, 3, 1, _, 2, _, _,}
+Delete 3:
+n        = 3
+dense[]  = {4, 5, 7, _}
+sparse[] = {_, _, _, _, 0, 1, _, 2, _, _,}
+Clear (Remove All):
+n        = 0
+dense[]  = {_, _, _, _}
+sparse[] = {_, _, _, _, _, _, _, _, _, _,}
+
+
+Centroid Decomposition of Tree
+===============================
+https://www.geeksforgeeks.org/centroid-decomposition-of-tree/
+https://www.youtube.com/watch?v=2izuGA8T8IE
+
+Centroid of a Tree is a node which if removed from the tree would split it into a ‘forest’, such that any tree in the forest would have at most half the number of vertices in the original tree.
+
+Let S(v) be size of tree rooted at node v.
+Centroid is a node v such that,
+
+maximum(n - S(v), S(u1), S(u2), .. S(ui)) <= n/2
+
+where ui is i'th child to v and n is total number of nodes
+
+Algorithm :(finding centroid of tree)
+-----------
+    Select arbitrary node v
+    Start a DFS from v, and setup subtree sizes
+    Re-position to node v (or start at any arbitrary v that belongs to the tree)
+    Check mathematical condition of centroid for v
+        If condition passed, return current node as centroid
+        Else move to adjacent node with ‘greatest’ subtree size, and back to step 4
+Time Complexity
+    Select arbitrary node v: O(1)
+    DFS: O(n)
+    Reposition to v: O(1)
+    Find centroid: O(n)
+
+Algorithm (Constructing contrid tree)
+---------
+    Make the centroid as the root of a new tree (which we will call as the ‘centroid tree’)
+    Recursively decompose the trees in the resulting forest
+    Make the centroids of these trees as children of the centroid which last split them.
+The centroid tree has depth O(log n), and can be constructed in O(n lg n), as we can find the centroid in O(n). 
+
+
+
+
+
+
+
+Decision Trees
+==============
+https://www.geeksforgeeks.org/decision-trees-fake-coin-puzzle/
+
+Gomory-Hu Tree
+==============
+https://www.geeksforgeeks.org/gomory-hu-tree-introduction/
+
+TODO : it is related to max flow algorithms
+
+
+
+
+
+
 
 
