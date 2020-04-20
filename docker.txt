@@ -1,0 +1,45 @@
+Docker is a container management service. The keywords of Docker are develop, ship and run anywhere. The whole idea of Docker is for developers to easily develop applications, ship them into containers which can then be deployed anywhere.
+Features of Docker
+    Docker has the ability to reduce the size of development by providing a smaller footprint of the operating system via containers.
+
+    With containers, it becomes easier for teams across different units, such as development, QA and Operations to work seamlessly across applications.
+
+    You can deploy Docker containers anywhere, on any physical and virtual machines and even on the cloud.
+
+    Since Docker containers are pretty lightweight, they are very easily scalable.
+Docker Engine − It is used for building Docker images and creating Docker containers.
+Docker Hub − This is the registry which is used to host various Docker images.
+Docker Compose − This is used to define applications using multiple Docker containers.
+
+Create Image
+=============
+1)first create Dockerfile and add OS name , software details
+ex : 
+FROM ubuntu 
+COPY application.jar /root/app/
+2)create image as below
+docker build -t ubuntu-app:1.1 .
+3)create container by instance of image with interactive mode as below
+docker run -it ubuntu-app:1.1 /bin/bash
+
+
+sudo docker images -q //show only the Image ID’s of the images on the Docker host.
+
+Removing Docker Images docker rmi
+
+This command is used see the details of an image or container.
+docker inspect <image_name>
+
+Containers are instances of Docker images that can be run using the Docker run command. The basic purpose of Docker is to run containers
+
+Running of containers is managed with the Docker run command. To run a container in an interactive mode, first launch the Docker container.
+example:
+sudo docker run –it centos /bin/bash
+
+docker history ImageID
+
+you can see the top processes within a container.
+docker top ContainerID 
+
+This command is used to stop a running container.
+docker stop ContainerID 

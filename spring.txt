@@ -1,0 +1,405 @@
+Spring framework is an open source Java platform. It was initially written by Rod Johnson and was first released under the Apache 2.0 license in June 2003.
+
+Spring is lightweight when it comes to size and transparency.
+
+great benefits of using Spring Framework 
+POJO Based -The benefit of using only POJOs is that you do not need an EJB container product such as an application server but you have the option of using only a robust servlet container such as Tomcat or some commercial product.
+
+Modular - Spring is organized in a modular fashion.
+Integration with existing frameworks (like several ORM frameworks, logging frameworks, JEE, Quartz and JDK timers, and other view technologies)
+
+Testablity-by using JavaBeanstyle POJOs, it becomes easier to use dependency injection for injecting test data.
+Web MVC - Spring's web framework is a well-designed web MVC framework, which provides a great alternative to web frameworks such as Struts or other over-engineered or less popular web frameworks.
+
+Central Exception Handling 
+
+Lightweight - Lightweight IoC containers tend to be lightweight, especially when compared to EJB containers, for example. This is beneficial for developing and deploying applications on computers with limited memory and CPU resources.
+
+Transaction management - Spring provides a consistent transaction management interface that can scale down to a local transaction (using a single database, for example) and scale up to global transactions (using JTA, for example).
+
+Problems with the older EJB Model
+Some of the problems with older EJB model were:
+    The EJB 2.x specification required developers to use interfaces from the EJB framework package, which created tight coupling with EJB framework package.
+    
+    You were also required to implement several callback methods, even if you don’t need them, such as ejbCreate, ejbPassivate and ejbActivate.
+
+    You had to understand the complex EJP programming model involving concepts such as local interface, remote interface etc.
+
+    You need an EJB container to execute EJBs. EJB container is part of application servers such as JBoss, Websphere, Weblogic etc., but is not part of lighter web containers like Apache Tomcat. 
+
+    Due to the requirement of an EJB container, it is difficult to unit test EJB components such as session and entity beans outside a container.
+POJO Programming Model
+
+POJO stands for Plain Old Java Objects, and denotes regular Java classes that are not tied up to any interface.
+
+POJO programming model benefits over EJBs
+
+    POJO classes did not have any dependency on any API or a specialized EJB container, like EJBs, and hence was easy to develop, test and deploy.
+
+    You were also not required to implement unnecessary callback methods.
+
+    POJO programming is more object-oriented, as POJO classes usually encapsulate behavior and properties; older EJB programming model was more procedural.
+
+ When writing a complex Java application, application classes should be as independent (loosely coupling) as possible of other Java classes to increase the possibility to reuse these classes and to test them independently of other classes while unit testing. Dependency Injection helps in gluing these classes together and at the same time keeping them independent.Dependency injection can happen in the way of passing parameters to the constructor or by post-construction using setter methods.
+
+IOC
+---
+Inversion of Control (IoC) is a design principles used to invert different kinds of controls in object-oriented design to achieve loose coupling.
+
+IoC is all about inverting the control. To explain this in layman's terms, suppose you drive a car to your work place. This means you control the car. The IoC principle suggests to invert the control, meaning that instead of driving the car yourself, you hire a cab, where another person will drive the car. Thus, this is called inversion of the control - from you to the cab driver. You don't have to drive a car yourself and you can let the driver do the driving so that you can focus on your main work. 
+
+The IoC principle helps in designing loosely coupled classes which make them testable, maintainable and extensible. 
+
+ Aspect Oriented Programming (AOP)- TODO
+
+ Core Container
+ --------------
+ The Core Container consists of the Core, Beans, Context, and Expression Language modules the details of which are as follows −
+	 the Core module provides the fundamental parts of the framework, including the IoC and Dependency Injection features.
+	 The Bean module provides BeanFactory, which is a sophisticated implementation of the factory pattern.
+	 The Context module builds on the solid base provided by the Core and Beans modules and it is a medium to access any objects defined and configured. The ApplicationContext interface is the focal point of the Context module.
+	The SpEL module provides a powerful expression language for querying and manipulating an object graph at runtime.
+
+IOC Container
+--------------
+The Spring container is at the core of the Spring Framework. The container will create the objects, wire them together, configure them, and manage their complete life cycle from creation till destruction. The Spring container uses DI to manage the components that make up an application.
+
+The container gets its instructions on what objects to instantiate, configure, and assemble by reading the configuration metadata provided. The configuration metadata can be represented either by XML, Java annotations, or Java code. 
+ The Spring IoC container makes use of Java POJO classes and configuration metadata to produce a fully configured and executable system or application.
+
+ Java POJO and metadata from configuration file->  IOC container->final result -> ready to use application             
+
+Spring BeanFactory Container
+----
+This is the simplest container providing the basic support for DI and is defined by the org.springframework.beans.factory.BeanFactory interface.
+Spring ApplicationContext Container
+-------
+This container adds more enterprise-specific functionality such as the ability to resolve textual messages from a properties file and the ability to publish application events to interested event listeners. This container is defined by the org.springframework.context.ApplicationContext interface.
+The ApplicationContext container includes all functionality of the BeanFactorycontainer, so it is generally recommended over BeanFactory.
+
++---------------------------------------+-----------------+--------------------------------+
+|                                       | BeanFactory     |       ApplicationContext       |
++---------------------------------------+-----------------+--------------------------------+
+| Annotation support                    | No              | Yes                            |
+| BeanPostProcessor Registration        | Manual          | Automatic                      |
+| implementation                        | XMLBeanFactory  | ClassPath/FileSystem/        WebXmlApplicationContext|
+| internationalization                  | No              | Yes                            |
+| Enterprise services                   | No              | Yes                            |
+| ApplicationEvent publication          | No              | Yes                            |
++---------------------------------------+-----------------+--------------------------------+
+
+
+
+Bean Defination
+------------
+The objects that form the backbone of your application and that are managed by the Spring IoC container are called beans. 
+A bean is an object that is instantiated, assembled, and managed by a Spring IoC container. These beans are created with the configuration metadata that you supply to the container.
+class-This attribute is mandatory and specifies the bean class to be used to create the bean.
+name-This attribute specifies the bean identifier uniquely. In XMLbased configuration metadata, you use the id and/or name attributes to specify the bean identifier(s).
+scope-This attribute specifies the scope of the objects created from a particular bean definition
+	singleton-This scopes the bean definition to a single instance per Spring IoC container (default).
+	prototype-This scopes a single bean definition to have any number of object instances.
+	request-This scopes a bean definition to an HTTP request. Only valid in the context of a web-aware Spring ApplicationContext.
+	session-This scopes a bean definition to an HTTP session. Only valid in the context of a web-aware Spring ApplicationContext.
+	global-session-This scopes a bean definition to a global HTTP session. Only valid in the context of a web-aware Spring ApplicationContext.	
+
+
+constructor-arg-This is used to inject the dependencies
+	<bean id="developer" class="com.mkyong.common.Developer">
+		<constructor-arg>
+			<ref bean="language" />
+		</constructor-arg>
+	</bean>
+		
+	<bean id="language" class="com.mkyong.common.Language" >
+		<property name="name" value="Java" />
+	</bean>
+
+Constructor-based DI is accomplished when the container invokes a class constructor with a   number of arguments, each representing a dependency on the other class.
+    You can mix both, Constructor-based and Setter-based DI but it is a good rule of thumb to use constructor arguments for mandatory dependencies and setters for optional dependencies.
+Setter-based dependency injection
+	Setter-based DI is accomplished by the container calling setter methods on your beans after invoking a no-argument constructor or no-argument static factory method to instantiate your bean.
+properties-
+<bean id = "helloWorld" class = "com.tutorialspoint.HelloWorld">
+      <property name = "message1" value = "Hello World!"/>
+      <property name = "message2" value = "Hello Second World!"/>
+   </bean>
+
+autowiring mode
+
+lazy-initialization mode-A lazy-initialized bean tells the IoC container to create a bean instance when it is first requested, rather than at the startup.
+
+initialization method-A callback to be called just after all necessary properties on the bean have been set by the container
+
+destruction method-A callback to be used when the container containing the bean is destroyed.
+
+Bean Life Cycle
+===============
+To define setup and teardown for a bean, we simply declare the <bean> with initmethod and/or destroy-method parameters. The init-method attribute specifies a method that is to be called on the bean immediately upon instantiation. Similarly, destroymethod specifies a method that is called just before a bean is removed from the container.
+
+BeanPostProcessor
+------------------
+The BeanPostProcessor interface defines callback methods that you can implement to provide your own instantiation logic, dependency-resolution logic, etc. You can also implement some custom logic after the Spring container finishes instantiating, configuring, and initializing a bean by plugging in one or more BeanPostProcessor implementations.
+
+public class HelloWorld {
+   private String message;
+
+   public void setMessage(String message){
+      this.message  = message;
+   }
+   public void getMessage(){
+      System.out.println("Your Message : " + message);
+   }
+   public void init(){
+      System.out.println("Bean is going through init.");
+   }
+   public void destroy(){
+      System.out.println("Bean will destroy now.");
+   }
+}
+
+public class InitHelloWorld implements BeanPostProcessor {
+   public Object postProcessBeforeInitialization(Object bean, String beanName) 
+      throws BeansException {
+      
+      System.out.println("BeforeInitialization : " + beanName);
+      return bean;  // you can return any other object as well
+   }
+   public Object postProcessAfterInitialization(Object bean, String beanName) 
+      throws BeansException {
+      
+      System.out.println("AfterInitialization : " + beanName);
+      return bean;  // you can return any other object as well
+   }
+
+ public class MainApp {
+   public static void main(String[] args) {
+      AbstractApplicationContext context = new ClassPathXmlApplicationContext("Beans.xml");
+
+      HelloWorld obj = (HelloWorld) context.getBean("helloWorld");
+      obj.getMessage();
+      context.registerShutdownHook();
+   }
+}
+
+<?xml version = "1.0" encoding = "UTF-8"?>
+
+<beans xmlns = "http://www.springframework.org/schema/beans"
+   xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation = "http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+   <bean id = "helloWorld" class = "com.tutorialspoint.HelloWorld"
+      init-method = "init" destroy-method = "destroy">
+      <property name = "message" value = "Hello World!"/>
+   </bean>
+  <bean class = "com.tutorialspoint.InitHelloWorld" />
+</beans>
+output
+-------
+BeforeInitialization : helloWorld
+Bean is going through init.
+AfterInitialization : helloWorld
+Your Message : Hello World!
+Bean will destroy now.
+
+Bean Definition Inheritance
+============================
+<?xml version = "1.0" encoding = "UTF-8"?>
+
+<beans xmlns = "http://www.springframework.org/schema/beans"
+   xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation = "http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+   <bean id = "helloWorld" class = "com.tutorialspoint.HelloWorld">
+      <property name = "message1" value = "Hello World!"/>
+      <property name = "message2" value = "Hello Second World!"/>
+   </bean>
+
+   <bean id ="helloIndia" class = "com.tutorialspoint.HelloIndia" parent = "helloWorld">
+      <property name = "message1" value = "Hello India!"/>
+      <property name = "message3" value = "Namaste India!"/>
+   </bean>
+</beans>
+
+Note : There is no extends HelloWorld on HelloIndia.ex
+class HelloWorld {} 
+class HelloIndia {}
+
+Injecting Inner Beans
+=====================
+<bean id = "outerBean" class = "...">
+      <property name = "target">
+         <bean id = "innerBean" class = "..."/>
+      </property>
+   </bean>
+Injecting Collection
+--------------------
+<!-- Definition for javaCollection -->
+   <bean id = "javaCollection" class = "com.tutorialspoint.JavaCollection">
+      
+      <!-- results in a setAddressList(java.util.List) call -->
+      <property name = "addressList">
+         <list>
+            <value>INDIA</value>
+            <value>Pakistan</value>
+            <value>USA</value>
+            <value>USA</value>
+         </list>
+      </property>
+
+      <!-- results in a setAddressSet(java.util.Set) call -->
+      <property name = "addressSet">
+         <set>
+            <value>INDIA</value>
+            <value>Pakistan</value>
+            <value>USA</value>
+            <value>USA</value>
+         </set>
+      </property>
+
+      <!-- results in a setAddressMap(java.util.Map) call -->
+      <property name = "addressMap">
+         <map>
+            <entry key = "1" value = "INDIA"/>
+            <entry key = "2" value = "Pakistan"/>
+            <entry key = "3" value = "USA"/>
+            <entry key = "4" value = "USA"/>
+         </map>
+      </property>
+      
+      <!-- results in a setAddressProp(java.util.Properties) call -->
+      <property name = "addressProp">
+         <props>
+            <prop key = "one">INDIA</prop>
+            <prop key = "one">INDIA</prop>
+            <prop key = "two">Pakistan</prop>
+            <prop key = "three">USA</prop>
+            <prop key = "four">USA</prop>
+         </props>
+      </property>
+   </bean>
+</beans>
+
+Beans Auto-Wiring
+==================
+The Spring container can autowire relationships between collaborating beans without using <constructor-arg> and <property> elements, which helps cut down on the amount of XML configuration you write for a big Spring-based application.
+
+no : This is default setting which means no autowiring and you should use explicit bean reference for wiring. You have nothing to do special for this wiring.
+
+byName:Autowiring by property name. Spring container looks at the properties of the beans on which autowire attribute is set to byName in the XML configuration file. It then tries to match and wire its properties with the beans defined by the same names in the configuration file.
+<!-- customer has a property name "address" -->
+	<bean id="customer" class="com.mkyong.common.Customer" autowire="byName" />
+	
+	<bean id="address" class="com.mkyong.common.Address" >
+		<property name="fulladdress" value="Block A 888, CA" />
+	</bean>
+public class Customer 
+{
+	private Address address;
+}
+byType :Autowiring by property datatype. Spring container looks at the properties of the beans on which autowire attribute is set to byType in the XML configuration file. It then tries to match and wire a property if its type matches with exactly one of the beans name in configuration file. If more than one such beans exists, a fatal exception is thrown.
+	<!-- person has a property type of class "ability" -->
+	<bean id="person" class="com.mkyong.common.Person" autowire="byType" />
+		
+	<bean id="invisible" class="com.mkyong.common.Ability" >
+		<property name="skill" value="Invisible" />
+	</bean>
+public class Person 
+{
+	private Ability ability;
+	//...
+}
+By Constructor :Similar to byType, but type applies to constructor arguments. If there is not exactly one bean of the constructor argument type in the container, a fatal error is raised.
+	<bean id="developer" class="com.mkyong.common.Developer" autowire="constructor" />
+		
+	<bean id="language" class="com.mkyong.common.Language" >
+		<property name="name" value="Java" />
+	</bean>
+autodetect :Spring first tries to wire using autowire by constructor, if it does not work, Spring tries to autowire by byType.
+
+Limitations with autowiring
+------
+Overriding possibility - You can still specify dependencies using <constructor-arg> and <property> settings which will always override autowiring.
+Primitive data types -You cannot autowire so-called simple properties such as primitives, Strings, and Classes.
+Confusing nature-Autowiring is less exact than explicit wiring, so if possible prefer using explict wiring.
+
+Annotation Based Configuration
+-------------------------------
+<?xml version = "1.0" encoding = "UTF-8"?>
+
+<beans xmlns = "http://www.springframework.org/schema/beans"
+   xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:context = "http://www.springframework.org/schema/context"
+   xsi:schemaLocation = "http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+   http://www.springframework.org/schema/context
+   http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+   <context:annotation-config/>
+   <!-- bean definitions go here -->
+</beans>
+The @Required annotation applies to bean property setter methods.
+
+Java Based Configuration- same as spring boot
+------
+
+Event Handling in Spring
+========================
+public class CStartEventHandler 
+   implements ApplicationListener<ContextStartedEvent>{
+
+   public void onApplicationEvent(ContextStartedEvent event) {
+      System.out.println("ContextStartedEvent Received");
+   }
+}
+
+public class CStopEventHandler 
+   implements ApplicationListener<ContextStoppedEvent>{
+
+   public void onApplicationEvent(ContextStoppedEvent event) {
+      System.out.println("ContextStoppedEvent Received");
+   }
+}
+<?xml version = "1.0" encoding = "UTF-8"?>
+
+<beans xmlns = "http://www.springframework.org/schema/beans"
+   xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation = "http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+   <bean id = "helloWorld" class = "com.tutorialspoint.HelloWorld">
+      <property name = "message" value = "Hello World!"/>
+   </bean>
+
+   <bean id = "cStartEventHandler" class = "com.tutorialspoint.CStartEventHandler"/>
+   <bean id = "cStopEventHandler" class = "com.tutorialspoint.CStopEventHandler"/>
+
+</beans>
+public class MainApp {
+   public static void main(String[] args) {
+      ConfigurableApplicationContext context = 
+         new ClassPathXmlApplicationContext("Beans.xml");
+
+      // Let us raise a start event.
+      context.start();
+	  
+      HelloWorld obj = (HelloWorld) context.getBean("helloWorld");
+      obj.getMessage();
+
+      // Let us raise a stop event.
+      context.stop();
+   }
+}
+output
+--
+ContextStartedEvent Received
+Your Message : Hello World!
+ContextStoppedEvent Received
+
+
+
+
+
+
+
