@@ -3,7 +3,7 @@ class Input1 {
 
 }
 
-class Service1 {
+abstract class Service1 {
 	Input1 input;
 
 	Service1(Input1 input) {
@@ -35,12 +35,14 @@ abstract class ServiceBuider {
 		Input1 input = new Input1();
 		validate(input);
 		checkPathExist(input);
-		return new Service1(input);
+		return getService(input);
 	}
 
 	abstract void validate(Input1 input);
 
 	abstract void checkPathExist(Input1 input);
+	
+	abstract Service1 getService(Input1 input);
 
 }
 
@@ -54,6 +56,11 @@ class WdmServiceBuilder extends ServiceBuider {
 	@Override
 	void checkPathExist(Input1 input) {
 		System.out.println("Path exist for wdm service");
+	}
+
+	@Override
+	Service1 getService(Input1 input) {
+		return new WdmService1(input);
 	}
 
 }
@@ -70,6 +77,11 @@ class OtnServiceBuilder extends ServiceBuider {
 		System.out.println("Path exist for otn service");
 	}
 
+	@Override
+	Service1 getService(Input1 input) {
+		return new OtnService1(input);
+	}
+
 }
 
 public class TemplateMethodDesign {
@@ -77,8 +89,10 @@ public class TemplateMethodDesign {
 	public static void main(String[] args) {
 		ServiceBuider serviceBuider=new WdmServiceBuilder();
 		Service1 service=serviceBuider.build();
+		System.out.println(service);
 		serviceBuider=new OtnServiceBuilder();
 		Service1 service2=serviceBuider.build();
+		System.out.println(service2);
 		
 	}
 

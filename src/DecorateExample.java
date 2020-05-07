@@ -18,7 +18,7 @@ class WdmService implements Service
 	
 }
 
-class ServiceTemplate implements Service
+abstract class ServiceTemplate implements Service
 {
 	Service service;
 	ServiceTemplate(Service service){

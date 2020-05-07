@@ -1,0 +1,57 @@
+
+
+https://www.slideshare.net/rohitsghatol/oauth-20-simplified
+
+
+https://www.voxxed.com/2016/10/oauth2-in-depth-introduction-for-enterprises/
+
+
+
+https://github.com/exteso/oauth2-step-by-step.git
+
+https://www.baeldung.com/spring-security-oauth
+
+
+Password Grant
+===============
+
+curl -v  -X POST 'http://fooClientIdPassword:secret@localhost:8081/spring-security-oauth-server/oauth/token?username=john&password=123&grant_type=password'
+client_credentials Grant
+===================
+
+curl -v  -X POST 'http://fooClientIdPassword:secret@localhost:8081/spring-security-oauth-server/oauth/token?grant_type=client_credentials'
+authorization_code Grant
+=========================
+1) http://localhost:8081/spring-security-oauth-server/oauth/authorize?client_id=fooClientIdPassword&redirect_uri=xxx&response_type=code
+
+     it redirect to login page and enter login credical . after successfull login and click on allow button , the send the code="xdfex" on redirect_url 
+    after getting 'code'  , trigger as following
+
+
+curl -v  -X POST 'http://fooClientIdPassword:secret@localhost:8081/spring-security-oauth-server/oauth/token?grant_type=authorization_code&code=6ZxD6E&redirect_uri=xxx'
+
+Implict Grant Type Grant Type
+====================
+
+http://localhost:8081/spring-security-oauth-server/oauth/authorize?client_id=sampleClientId&redirect_uri=http://localhost:8083/&response_type=token
+
+after entering credical on login and approve allow button , it redirct as following with 'access_token'
+http://localhost:8083/#access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJqb2huIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIiwiZm9vIiwiYmFyIl0sIm9yZ2FuaXphdGlvbiI6ImpvaG5EUkp1IiwiZXhwIjoxNTQ5NzQ1Mjk1LCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoiNzdjM2M5M2EtZWFhOS00NmIwLWFlOTgtYmM4N2YzZTVmYmY5IiwiY2xpZW50X2lkIjoic2FtcGxlQ2xpZW50SWQifQ.D7k56QVbPj-GNhPcWdjnwcoEBR6ys0LyCO9nTW-giss&token_type=bearer&expires_in=3600&scope=read%20write%20foo%20bar&organization=johnDRJu&jti=77c3c93a-eaa9-46b0-ae98-bc87f3e5fbf9
+
+Implicit with Auto Approval  Grant Type
+======================
+http://localhost:8081/spring-security-oauth-server/oauth/authorize?client_id=testImplicitClientId&redirect_uri=http://localhost:8083&response_type=token
+then enter credical and after successful login it redirct as following with 'access_token'
+http://localhost:8081/spring-security-oauth-server/oauth/xxx#access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJqb2huIiwic2NvcGUiOlsicmVhZCIsIndyaXRlIiwiZm9vIiwiYmFyIl0sIm9yZ2FuaXphdGlvbiI6ImpvaG5VZkhMIiwiZXhwIjoxNTQ5Nzg1OTE5LCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoiZWI4MmNlOGQtODA5Yy00ZTkwLWEwMTktMzExMjlmNTAyYTg5IiwiY2xpZW50X2lkIjoidGVzdEltcGxpY2l0Q2xpZW50SWQifQ.4WmdrO3KFqNtKRuFLTCrJ91BNR8EoIbubxa9qicPeQM&token_type=bearer&expires_in=43199&scope=read%20write%20foo%20bar&organization=johnUfHL&jti=eb82ce8d-809c-4e90-a019-31129f502a89
+Refresh Token Grant Type
+====================
+
+curl -v  -X POST 'http://fooClientIdPassword:secret@localhost:8081/spring-security-oauth-server/oauth/token?grant_type=refresh_token&refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJqb2huIiwic2NvcGUiOlsiZm9vIiwicmVhZCIsIndyaXRlIl0sIm9yZ2FuaXphdGlvbiI6ImpvaG5KZHNDIiwiYXRpIjoiY2RlYjczNTctZjU5ZS00NjlhLTg1NjYtMzE3MzUxMGU2NmVhIiwiZXhwIjoxNTUyMzM1MDA4LCJhdXRob3JpdGllcyI6WyJST0xFX1VTRVIiXSwianRpIjoiNDY3MjFiN2MtNzdiNi00YjRiLTkwMzYtMjlmMDFjOWYxMGNmIiwiY2xpZW50X2lkIjoiZm9vQ2xpZW50SWRQYXNzd29yZCJ9.KU8Kots-HOYr8LUWor1cHVAKrEW-Gj5-o_N8tUPXwbk'
+
+
+
+https://github.com/exteso/oauth2-step-by-step.git
+
+https://github.com/Baeldung/spring-security-oauth.git
+
+

@@ -1,5 +1,3 @@
-import com.sun.org.apache.xalan.internal.xsltc.cmdline.getopt.GetOpt;
-
 interface Expression {
 	public int interpret();
 }
