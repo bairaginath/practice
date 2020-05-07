@@ -389,6 +389,41 @@ Challenges of flyweight pattern
     To create flyweights, we extract a common template class from the existing objects. This additional layer of programming can be tricky and sometimes hard to debug and maintain.
     The flyweight pattern is often combined with singleton factory implementation and to guard the singularity, additional cost is required.
 
+Memento Design Pattern (Behavior )
+-----------------------
+he Memento Design Pattern offers a solution to implement undoable actions.
+We can do this by saving the state of an object at a given instant and restoring it if the actions performed since need to be undone.
+
+Typically, the Memento Design Pattern will be used in situations where some actions are undoable, therefore requiring to rollback to a previous state. However, if the state of the Originator is heavy, using the Memento Design Pattern can lead to an expensive creation process and increased use of memory.
+
+Practically, the object whose state needs to be saved is called an Originator. The Caretaker is the object triggering the save and restore of the state, which is called the Memento.
+
+Example :
+public class TextEditor { // This is Originator
+
+    private TextWindow textWindow; //Caretaker
+    private TextWindowState savedTextWindow; //Memento
+
+    public TextEditor(TextWindow textWindow) {
+        this.textWindow = textWindow;
+    }
+
+    public void write(String text) {
+        textWindow.addText(text);
+    }
+
+    public String print() {
+        return textWindow.getCurrentText();
+    }
+
+    public void hitSave() {
+        savedTextWindow = textWindow.save();
+    }
+
+    public void hitUndo() {
+        textWindow.restore(savedTextWindow);
+    }
+}
 
 
 
