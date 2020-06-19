@@ -77,6 +77,18 @@ This, in turn, improves the performance of collections that uses hash implementa
 
 On the other hand, mutable Strings would produce two different hashcodes at the time of insertion and retrieval if contents of String was modified after the operation, potentially losing the value object in the Map.
 
+String s=new String("james");
+        String s1="james";
+        System.out.println(s1.hashCode()==s.hashCode());
+        System.out.println(s1==s);
+        System.out.println(s.equals(s1));
+        
+        HashSet<String> hs=new HashSet<>();
+        hs.add(s1);
+        hs.add(s);
+        System.out.println(hs.size()==1);
+
+
 Performance
 -------
 As we saw previously, String pool exists because Strings are immutable. In turn, it enhances the performance by saving heap memory and faster access of hash implementations when operated with Strings.
@@ -196,55 +208,71 @@ element()- if no element's are there,will throws NSEE
 
 FailFast vs FailSafe
 =====================
-public class FailFastVsFailSafe {
-    
-    static void listModification(List<Integer> list) {
-        Iterator<Integer> it=list.iterator();
-        
-        while(it.hasNext())
-        {
-            Integer x=it.next();
-            if(x==7)
-            list.remove(x);
-        }
-    }
-    
-    
-    static void iteratorModification(List<Integer> list) {
-        Iterator<Integer> it=list.iterator();
-        
-        while(it.hasNext())
-        {
-            int x=it.next();
-            if(x==5)
-            it.remove();
-        }
-    }
-    
-    public static void main(String[] args) {
-        
-        Stream<Integer> stream=IntStream.range(1,11).boxed();
-        Stream<Integer> stream1=IntStream.range(1,11).boxed();
-        List<Integer> list=stream.collect(Collectors.toList());
-        iteratorModification(list);
-        System.out.println(list);
-        List<Integer> list1=stream1.collect(Collectors.toList());
-        List<Integer> cowal=new CopyOnWriteArrayList<Integer>(list1);
-        //cowal internally use COWSubListIterator, where remove method throws UOE
-        try {
-        iteratorModification(cowal);
-        }catch(UnsupportedOperationException uoe) {}
-        System.out.println(cowal);
-        try {
-        listModification(list);
-        }catch(ConcurrentModificationException cme) {}
-        System.out.println(list);
-        
-        listModification(cowal);
-        System.out.println(cowal);
+class BreakFailFast<T> extends ArrayList<T> {
+
+    public void decrementModCount() {
+        this.modCount--;
     }
 
 }
+
+public class FailFastVsFailSafe {
+
+    static void listModification(List<Integer> list) {
+        Iterator<Integer> it = list.iterator();
+
+        while (it.hasNext()) {
+            Integer x = it.next();
+            if (x == 7)
+                list.remove(x);
+        }
+    }
+
+    static void iteratorModification(List<Integer> list) {
+        Iterator<Integer> it = list.iterator();
+
+        while (it.hasNext()) {
+            int x = it.next();
+            if (x == 5)
+                it.remove();
+        }
+    }
+
+    public static void main(String[] args) {
+
+        Stream<Integer> stream = IntStream.range(1, 11).boxed();
+        Stream<Integer> stream1 = IntStream.range(1, 11).boxed();
+        List<Integer> list = stream.collect(Collectors.toList());
+        iteratorModification(list);
+        System.out.println(list);
+        List<Integer> list1 = stream1.collect(Collectors.toList());
+        List<Integer> cowal = new CopyOnWriteArrayList<Integer>(list1);
+        // cowal internally use COWSubListIterator, where remove method throws UOE
+        try {
+            iteratorModification(cowal);
+        } catch (UnsupportedOperationException uoe) {
+        }
+        System.out.println(cowal);
+        try {
+            listModification(list);
+        } catch (ConcurrentModificationException cme) {
+        }
+        System.out.println(list);
+
+        listModification(cowal);
+        System.out.println(cowal);
+
+        BreakFailFast<Integer> ar = new BreakFailFast<>();
+        ar.add(1);
+        ar.add(2);
+        ar.add(3);
+        Iterator<Integer> it = ar.iterator();
+        ar.add(4);
+        ar.decrementModCount(); // if comment this line, will throw CME
+        while (it.hasNext())
+            System.out.println(it.next());
+
+    }
 
 Internallly CopyOnWriteArrayList remove method will modify on snapshot/copy of original array as below code
 
@@ -263,6 +291,1250 @@ modCount
 
     Use of this field by subclasses is optional. If a subclass wishes to provide fail-fast iterators (and list iterators), then it merely has to increment this field in its add(int, E) and remove(int) methods (and any other methods that it overrides that result in structural modifications to the list). A single call to add(int, E) or remove(int) must add no more than one to this field, or the iterators (and list iterators) will throw bogus ConcurrentModificationExceptions. If an implementation does not wish to provide fail-fast iterators, this field may be ignored.
 
+Errors V/s Exceptions In Java
+=============================
+Error : An Error “indicates serious problems that a reasonable application should not try to catch.”
+Both Errors and Exceptions are the subclasses of java.lang.Throwable class. Errors are the conditions which cannot get recovered by any handling techniques. It surely cause termination of the program abnormally. Errors belong to unchecked type and mostly occur at runtime. Some of the examples of errors are Out of memory error or a System crash error.
+
+StackOverFlow Example
+
+public static void test(int i) 
+    { 
+         
+        if (i == 0) 
+            return; 
+        else { 
+            test(i++); 
+        } 
+    } 
+
+OutOfMemoryError
+int p[]=new int[Integer.MAX_VALUE]; 
+
+Exceptions : An Exception “indicates conditions that a reasonable application might want to catch.”
+Exceptions are the conditions that occur at runtime and may cause the termination of program. But they are recoverable using try, catch and throw keywords. Exceptions are divided into two catagories : checked and unchecked exceptions
 
 
+Errors                                        Exceptions
+Recovering from Error is not possible.  We can recover from exceptions by either using try-catch block or throwing exceptions back to caller.
+All errors in java are unchecked type.  Exceptions include both checked as well as unchecked type.
+Errors are mostly caused by the environment in which program is running.    Program itself is responsible for causing exceptions.
+Errors occur at runtime and not known to the compiler.  All exceptions occurs at runtime but checked exceptions are known to compiler while unchecked are not.
+Examples :java.lang.StackOverflowError, java.lang.OutOfMemoryError    
+Examples :
+Checked Exceptions : SQLException, IOException
+Unchecked Exceptions : ArrayIndexOutOfBoundException, NullPointerException, ArithmeticException. 
+
+
+Genric 
+======
+class NoGericClassLevel {
+    
+    //T t;
+    // <T> t; 
+    //<? extends Number> numbers;
+    List<? extends Number> numbers;
+     public <T> void show(T t) {}
+    public void display(List<? extends Number> argNumbers) {}
+     List<? extends Number> get() {     return null;}
+     
+     //<? extends Number>  void get(T t) {   }
+     <T extends Number>  void get(T t) {     }
+    
+}
+class GericClassLevel<T> {
+//  class GericClassLevel<T extends Number> { //allowed 
+        //class GericClassLevel<? extends Number> { //error
+    
+     T t; 
+     //<T> t;
+    //<? extends Number> numbers;
+    List<? extends Number> numbers;
+     public <T> void show(T t) {} //hidden the class type
+    public void display(List<? extends Number> argNumbers) {}
+     List<? extends Number> get() {     return null;}
+     
+     //<? extends Number>  void get(T t) {   }
+     <E extends Number>  void get(E e) {     }
+    
+}
+
+
+extends <? extends Number>
+--------------------------
+The wildcard declaration of List<? extends Number> foo3 means that any of these are legal assignments:
+
+List<? extends Number> foo3 = new ArrayList<Number>();  // Number "extends" Number (in this context)
+List<? extends Number> foo3 = new ArrayList<Integer>(); // Integer extends Number
+List<? extends Number> foo3 = new ArrayList<Double>();  // Double extends Number
+
+    Reading - Given the above possible assignments, what type of object are you guaranteed to read from List foo3:
+        You can read a Number because any of the lists that could be assigned to foo3 contain a Number or a subclass of Number.
+        You can't read an Integer because foo3 could be pointing at a List<Double>.
+        You can't read a Double because foo3 could be pointing at a List<Integer>.
+
+    Writing - Given the above possible assignments, what type of object could you add to List foo3 that would be legal for all the above possible ArrayList assignments:
+        You can't add an Integer because foo3 could be pointing at a List<Double>.
+        You can't add a Double because foo3 could be pointing at a List<Integer>.
+        You can't add a Number because foo3 could be pointing at a List<Integer>.
+
+You can't add any object to List<? extends T> because you can't guarantee what kind of List it is really pointing to, so you can't guarantee that the object is allowed in that List. The only "guarantee" is that you can only read from it and you'll get a T or subclass of T.
+
+super <? super Integer>
+-----------------------
+
+Now consider List <? super T>.
+
+The wildcard declaration of List<? super Integer> foo3 means that any of these are legal assignments:
+
+List<? super Integer> foo3 = new ArrayList<Integer>();  // Integer is a "superclass" of Integer (in this context)
+List<? super Integer> foo3 = new ArrayList<Number>();   // Number is a superclass of Integer
+List<? super Integer> foo3 = new ArrayList<Object>();   // Object is a superclass of Integer
+
+    Reading - Given the above possible assignments, what type of object are you guaranteed to receive when you read from List foo3:
+        You aren't guaranteed an Integer because foo3 could be pointing at a List<Number> or List<Object>.
+        You aren't guaranteed a Number because foo3 could be pointing at a List<Object>.
+        The only guarantee is that you will get an instance of an Object or subclass of Object (but you don't know what subclass).
+
+    Writing - Given the above possible assignments, what type of object could you add to List foo3 that would be legal for all the above possible ArrayList assignments:
+        You can add an Integer because an Integer is allowed in any of above lists.
+        You can add an instance of a subclass of Integer because an instance of a subclass of Integer is allowed in any of the above lists.
+        You can't add a Double because foo3 could be pointing at an ArrayList<Integer>.
+        You can't add a Number because foo3 could be pointing at an ArrayList<Integer>.
+        You can't add an Object because foo3 could be pointing at an ArrayList<Integer>.
+
+PECS
+
+Remember PECS: "Producer Extends, Consumer Super".
+
+    "Producer Extends" - If you need a List to produce T values (you want to read Ts from the list), you need to declare it with ? extends T, e.g. List<? extends Integer>. But you cannot add to this list.
+
+    "Consumer Super" - If you need a List to consume T values (you want to write Ts into the list), you need to declare it with ? super T, e.g. List<? super Integer>. But there are no guarantees what type of object you may read from this list.
+
+    If you need to both read from and write to a list, you need to declare it exactly with no wildcards, e.g. List<Integer>.
+
+Example
+-------
+Write on same and it's child , not for sibling or it's parents
+       List<? super P> p=new ArrayList<P>();       
+       List<? super P> gp=new ArrayList<GP>();      
+      // List<? super P> c=new ArrayList<C>();  
+       //p.add(new GP());
+       p.add(new P());
+       p.add(new C());
+      // gp.add(new GP());
+       gp.add(new P());
+       gp.add(new C());
+
+Only Read 
+List<? extends Number> f1 = new ArrayList<Number>();// Number "extends" Number (in this context)
+       List<? extends Number> f2 = new ArrayList<Integer>(); // Integer extends Number
+       List<? extends Number> f3 = new ArrayList<Double>();  // Double extends Number
+
+
+Generics and Primitive Data Types
+---------------------------------
+As the concept of Type erasure , after compilation,generic code are convert to Object format.Since primitive types don't extend Object, we can't use them as type parameters.
+However, Java provides boxed types for primitives, along with autoboxing and unboxing to unwrap them:
+  Integer a = 17;
+  int b = a;
+
+SerialVersionUID in Java
+========================
+The serialization at runtime associates with each serializable class a version number, called a serialVersionUID, which is used during deserialization to verify that the sender and receiver of a serialized object have loaded classes for that object that are compatible with respect to serialization.
+
+Why so we use SerialVersionUID : SerialVersionUID is used to ensure that during deserialization the same class (that was used during serialize process) is loaded. 
+
+Problem of depending on default SerialVersionUID generated by JVM :
+    Both sender and receiver should use the same JVM with respect to platform and version also. Otherwise receiver unable to deserialize because of different SerialVersionUID.
+    Both sender and receiver should use same .class file version. After serialization if there is any change in .class file at receiver side then receiver unable to deserialize.
+    To generate SerialVersionUID internally JVM may use complex algorithm which may create performance problem.
+
+We can solve the above problem by configuring our own SerialVersionUID. We can configure our own SerialVersionUID as follows:
+
+private static final long SerialVersionUID=10l;
+
+
+class Human implements Serializable {
+    
+    private static final long SerialVersionUID = 1005l;
+    private String name;
+    private int age;
+
+    public Human(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+    
+}
+
+public class SerialVersionUIDExample {
+
+    static <T> void writeObject(T t) {
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream("xyz.txt");
+        } catch (FileNotFoundException e1) {
+            e1.printStackTrace();
+        }
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(t);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+
+    }
+    
+    static <T> T readObject() {
+        FileInputStream fis = null;
+        T t=null;
+        try {
+            fis = new FileInputStream("xyz.txt");
+        } catch (FileNotFoundException e1) {
+            e1.printStackTrace();
+        }
+        try {
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            t=(T)ois.readObject();
+        } catch (IOException | ClassNotFoundException e1) {
+            e1.printStackTrace();
+        }
+        
+        return t;
+
+    }
+    
+    public static void main(String[] args) {
+        Human h=new Human("james", 27);
+        SerialVersionUIDExample.<Human>writeObject(h);
+        Human h2=SerialVersionUIDExample.<Human>readObject();
+        System.out.println(h2.getName()+"  "+h2.getAge() );
+    }
+
+
+}
+
+ConcurrentMap
+=============
+Even though Hashtable is thread safe, it is not very efficient. Another fully synchronized Map, Collections.synchronizedMap, does not exhibit great efficiency either. If we want thread-safety with high throughput under high concurrency, these implementations aren't the way to go.
+
+public static <K,V> Map<K,V> synchronizedMap(Map<K,V> m) {
+        return new SynchronizedMap<>(m);
+    }
+
+SynchronizedMap(Map<K,V> m) { 
+            this.m = Objects.requireNonNull(m);
+            mutex = this;
+        }
+
+private static class SynchronizedMap<K,V>
+        implements Map<K,V>, Serializable { // synchromized block in side all methods }
+
+ConcurrentMap is an extension of the Map interface. It aims to provides a structure and guidance to solving the problem of reconciling throughput with thread-safety.
+
+public class ConcurrentHashMap<K,V> extends AbstractMap<K,V>
+    implements ConcurrentMap<K,V>, Serializable { }
+
+Several default implementations are overridden, disabling the null key/value support:
+    getOrDefault
+    forEach
+    replaceAll
+    computeIfAbsent
+    computeIfPresent
+    compute
+    merge
+
+The following APIs are also overridden to support atomicity, without a default interface implementation:
+    putIfAbsent
+    remove
+    replace(key, oldValue, newValue)
+    replace(key, value)
+
+For better performance, it consists of an array of nodes as table buckets (used to be table segments prior to Java 8) under the hood, and mainly uses CAS operations during updating.
+
+public ConcurrentHashMap(int initialCapacity,
+                             float loadFactor, int concurrencyLevel) {
+        if (!(loadFactor > 0.0f) || initialCapacity < 0 || concurrencyLevel <= 0)
+            throw new IllegalArgumentException();
+        if (initialCapacity < concurrencyLevel)   // Use at least as many bins
+            initialCapacity = concurrencyLevel;   // as estimated threads
+        long size = (long)(1.0 + (long)initialCapacity / loadFactor);
+        int cap = (size >= (long)MAXIMUM_CAPACITY) ?
+            MAXIMUM_CAPACITY : tableSizeFor((int)size);
+        this.sizeCtl = cap;
+    }
+
+The table buckets are initialized lazily, upon the first insertion. Each bucket can be independently locked by locking the very first node in the bucket. Read operations do not block, and update contentions are minimized.
+
+
+Actions in a thread prior to placing an object into a ConcurrentMap as a key or value happen-before actions subsequent to the access or removal of that object in another thread.
+
+
+Most APIs provided by ConcurrentMap does not allow null key or value
+However, for compute* and merge actions, the computed value can be null, which indicates the key-value mapping is removed if present or remains absent if previously absent.
+
+Unlike most stream methods, the bulk (sequential and parallel) operations allow concurrent modification safely. ConcurrentModificationException won't be thrown, which also applies to its iterators. Relevant to streams, several forEach*, search, and reduce* methods are also added to support richer traversal and map-reduce operations.
+
+ConcurrentHashMap should yield much better performance in most concurrent cases for data retrieval and update.
+
+static class Segment<K,V> extends ReentrantLock implements Serializable {
+        private static final long serialVersionUID = 2249069246763182397L;
+        final float loadFactor;
+        Segment(float lf) { this.loadFactor = lf; }
+    }
+
+
+TODO :
+  More deep knowledge on internal implementation of ConcurrentHashMap
+
+ConcurrentSkipListMap
+=====================
+public class ConcurrentSkipListMap<K,V> extends AbstractMap<K,V>
+    implements ConcurrentNavigableMap<K,V>, Cloneable, Serializable
+
+   *
+     * Head nodes          Index nodes
+     * +-+    right        +-+                      +-+
+     * |2|---------------->| |--------------------->| |->null
+     * +-+                 +-+                      +-+
+     *  | down              |                        |
+     *  v                   v                        v
+     * +-+            +-+  +-+       +-+            +-+       +-+
+     * |1|----------->| |->| |------>| |----------->| |------>| |->null
+     * +-+            +-+  +-+       +-+            +-+       +-+
+     *  v              |    |         |              |         |
+     * Nodes  next     v    v         v              v         v
+     * +-+  +-+  +-+  +-+  +-+  +-+  +-+  +-+  +-+  +-+  +-+  +-+
+     * | |->|A|->|B|->|C|->|D|->|E|->|F|->|G|->|H|->|I|->|J|->|K|->null
+     * +-+  +-+  +-+  +-+  +-+  +-+  +-+  +-+  +-+  +-+  +-+  +-+
+ 
+ Runnable vs. Callable in Java
+ =============================
+ Execution Mechanism
+Both interfaces are designed to represent a task that can be executed by multiple threads. Runnable tasks can be run using the Thread class or ExecutorService whereas Callables can be run only using the executorService. 
+
+With Runnable                            With Callable
+public interface Runnable {             public interface Callable<V> {
+public void run();                       V call() throws Exception;
+}                                         }
+    
+Exception Handling
+-----
+With Runnable
+Since the method signature does not have the “throws” clause specified, there is no way to propagate further checked exceptions.
+
+Runnable r=new Runnable() {
+            
+            @Override
+            public void run() {
+                System.out.println(Thread.currentThread().getName());
+                throw new RuntimeException();               
+            }
+        };
+
+ExecutorService es=Executors.newFixedThreadPool(1);
+         Future<?> f=f=es.submit(r); // it will not throw any exeception
+        try {
+            f.get(); // when you can this method with throw ExecutionException
+            
+        } catch (InterruptedException | ExecutionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        es.shutdown();
+
+Callable's call() method contains “throws Exception” clause so we can easily propagate checked exceptions further:
+
+In case of running a Callable using an ExecutorService, the exceptions are collected in the Future object, which can be checked by making a call to the Future.get() method. This will throw an ExecutionException – which wraps the original exception:
+
+@Test(expected = ExecutionException.class)
+public void whenException_ThenCallableThrowsIt() {
+  
+    FactorialCallableTask task = new FactorialCallableTask(-5);
+    Future<Integer> future = executorService.submit(task); //will not thorw any Exception
+    Integer result = future.get().intValue();// when you can this method with throw ExecutionException
+}
+If we don't make the call to the get() method of Future class – then the exception thrown by call() method will not be reported back, and the task will still be marked as completed:
+
+@Test
+public void whenException_ThenCallableDoesntThrowsItIfGetIsNotCalled(){
+    FactorialCallableTask task = new FactorialCallableTask(-5);
+    Future<Integer> future = executorService.submit(task);
+  
+    assertEquals(false, future.isDone());
+} 
+
+CompareAndSwap Operation
+========================
+import java.lang.reflect.Field;
+import java.util.stream.IntStream;
+
+import sun.misc.Unsafe;
+
+public class UnsafeExample {
+    
+    private Unsafe unsafe;
+    //private volatile long counter = 0;
+    private  long counter = 0;
+    private long offset;
+    
+    public UnsafeExample() throws Exception{
+        unsafe = getUnsafe();
+        offset = unsafe.objectFieldOffset(UnsafeExample.class.getDeclaredField("counter"));
+        System.out.println(offset);
+    }
+ 
+    private Unsafe getUnsafe() throws IllegalAccessException, NoSuchFieldException {
+        Field f = Unsafe.class.getDeclaredField("theUnsafe");
+        f.setAccessible(true);
+        return (Unsafe) f.get(null);
+    }
+    
+    public void normalIncrement() {
+        counter++;
+    }
+    
+    public void increment() {
+        long before = counter;
+//public final native boolean compareAndSwapLong(java.lang.Object arg0, long memoryAddressofVariable,long expectedValue, long updatedValue);
+//public final native boolean compareAndSwapLong(java.lang.Object arg0, long arg1, long arg2, long arg3);
+        while (!unsafe.compareAndSwapLong(this, offset, before, before + 1)) {
+            System.out.println("inside increment "+Thread.currentThread().getName());
+            before = counter;
+        }
+    }
+ 
+    public long getCounter() {
+        return counter;
+    }
+    
+    public static void main(String[] args) throws Exception {
+        UnsafeExample ue=new UnsafeExample();
+        IntStream.range(0,Integer.MAX_VALUE).parallel().forEach(i->ue.increment());
+        //IntStream.range(0,101).parallel().forEach(i->ue.normalIncrement());
+        
+        System.out.println(ue.getCounter());
+    }
+
+}
+
+The very efficient constructs from the java.concurrent package, like AtomicInteger, are using the compareAndSwap() methods out of Unsafe underneath, to provide the best possible performance. This construct is widely used in the lock-free algorithms that can leverage the CAS processor instruction to provide great speedup compared to the standard pessimistic synchronization mechanism in Java.
+
+In the UnsafeExample constructor we are getting the address of the counter field, to be able to use it later in the increment() method. That field needs to be declared as the volatile, to be visible to all threads that are writing and reading this value. We are using the objectFieldOffset() method to get the memory address of the offset field.
+
+
+The most important part of this class is the increment() method. We're using the compareAndSwapLong() in the while loop to increment previously fetched value, checking if that previous value changed since we fetched it.
+
+If it did, then we are retrying that operation until we succeed. There is no blocking here, which is why this is called a lock-free algorithm.
+
+Access Modifiers in Java
+========================
+Modifier    Class   Package     Subclass    World
+
+public     Y   Y   Y   Y
+protected  Y   Y   Y   N
+default    Y   Y   N   N
+private    Y   N   N   N
+
+Iterable Vs iterator
+====================
+
+public interface Iterable<T> {
+Iterator<T> iterator();
+default void forEach(Consumer<? super T> action) {
+        Objects.requireNonNull(action);
+        for (T t : this) {
+            action.accept(t);
+        }
+    }
+default Spliterator<T> spliterator() {
+        return Spliterators.spliteratorUnknownSize(iterator(), 0);
+    }
+public interface Iterator<E> {
+    boolean hasNext();
+    E next();
+    default void remove() {
+        throw new UnsupportedOperationException("remove");
+    }
+    default void forEachRemaining(Consumer<? super E> action) {
+        Objects.requireNonNull(action);
+        while (hasNext())
+            action.accept(next());
+    }
+
+
+An Iterable is a simple representation of a series of elements that can be iterated over. It does not have any iteration state such as a "current element". Instead, it has one method that produces an Iterator.
+
+An Iterator is the object with iteration state. It lets you check if it has more elements using hasNext() and move to the next element (if any) using next().
+
+Typically, an Iterable should be able to produce any number of valid Iterators.
+
+All collections are extends Iterable interface
+public interface Collection<E> extends Iterable<E> { }
+
+public interface Map<K,V> { }
+public interface List<E> extends Collection<E> { }
+public interface Set<E> extends Collection<E> { }
+public interface Queue<E> extends Collection<E> { }
+class Stack<E> extends Vector<E> { }
+public interface Deque<E> extends Queue<E> { }
+
+Queue Vs LinkedHashSet
+======================
+FIFO vs Insert Order
+allow duplicate Vs not allow duplicate
+
+Queue methods
+-----
+boolean add(E e);
+boolean offer(E e);
+ E remove();
+ E poll();
+ E element();
+ E peek();
+
+How's ArrayDeque Implemented
+=============================
+ArrayDeque is backed by an array which doubles its size when it gets filled.
+
+ArrayDeque in Java provides a way to apply resizable-array in addition to the implementation of the Deque interface. It is also known as Array Double Ended Queue or Array Deck. This is a special kind of array that grows and allows users to add or remove an element from both the sides of the queue.
+
+Null elements are prohibited in the ArrayDeque.
+ArrayDeque class is likely to be faster than Stack when used as a stack.
+ArrayDeque class is likely to be faster than LinkedList when used as a queue.
+
+public class ArrayDeque<E> extends AbstractCollection<E>
+                           implements Deque<E>, Cloneable, Serializable
+{ }
+
+- Internally used circular Array
+remember those two bit operation are used for circular array
+head = (head - 1) & (elements.length - 1);
+tail = (tail + 1) & (elements.length - 1);
+/*
+head = 15
+[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1]
+tail = 0
+[16, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 1]
+head = 14
+[16, null, null, null, null, null, null, null, null, null, null, null, null, null, 2, 1]
+tail = 1
+[16, 15, null, null, null, null, null, null, null, null, null, null, null, null, 2, 1]
+head = 13
+[16, 15, null, null, null, null, null, null, null, null, null, null, null, 3, 2, 1]
+tail = 2
+[16, 15, 14, null, null, null, null, null, null, null, null, null, null, 3, 2, 1]
+head = 12
+[16, 15, 14, null, null, null, null, null, null, null, null, null, 4, 3, 2, 1]
+tail = 3
+[16, 15, 14, 13, null, null, null, null, null, null, null, null, 4, 3, 2, 1]
+head = 11
+[16, 15, 14, 13, null, null, null, null, null, null, null, 5, 4, 3, 2, 1]
+tail = 4
+[16, 15, 14, 13, 12, null, null, null, null, null, null, 5, 4, 3, 2, 1]
+head = 10
+[16, 15, 14, 13, 12, null, null, null, null, null, 6, 5, 4, 3, 2, 1]
+tail = 5
+[16, 15, 14, 13, 12, 11, null, null, null, null, 6, 5, 4, 3, 2, 1]
+head = 9
+[16, 15, 14, 13, 12, 11, null, null, null, 7, 6, 5, 4, 3, 2, 1]
+tail = 6
+[16, 15, 14, 13, 12, 11, 10, null, null, 7, 6, 5, 4, 3, 2, 1]
+head = 8
+[16, 15, 14, 13, 12, 11, 10, null, 8, 7, 6, 5, 4, 3, 2, 1]
+tail = 7
+[8, 7, 6, 5, 4, 3, 2, 1, 16, 15, 14, 13, 12, 11, 10, 9, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null]
+head = 31
+[8, 7, 6, 5, 4, 3, 2, 1, 16, 15, 14, 13, 12, 11, 10, 9, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 17]
+tail = 16
+[8, 7, 6, 5, 4, 3, 2, 1, 16, 15, 14, 13, 12, 11, 10, 9, 32, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 17]
+
+*/
+
+StampedLock
+===========
+StampedLock is introduced in Java 8. It also supports both read and write locks. However, lock acquisition methods return a stamp that is used to release a lock or to check if the lock is still valid:
+Another feature provided by StampedLock is optimistic locking. Most of the time read operations don't need to wait for write operation completion and as a result of this, the full-fledged read lock isn't required
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.StampedLock;
+
+public class StampedLockDemo {
+    Map<String,String> map = new HashMap<>();
+    private StampedLock lock = new StampedLock();
+ 
+    public void put(String key, String value){
+        long stamp = lock.writeLock();
+        System.out.println("inside put method "+stamp);
+        
+        try {
+            
+            map.put(key, value);
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlockWrite(stamp);
+        }
+    }
+
+    public String readWithOptimisticLock(String key) {
+        //@return a stamp, or zero if exclusively locked
+        long stamp = lock.tryOptimisticRead();
+        System.out.println(Thread.currentThread().getName()+"inside get method "+stamp);
+    String value = map.get(key);
+      //Returns true if the lock has not been exclusively acquired
+    
+    if(!lock.validate(stamp)) {
+        stamp = lock.readLock();
+        try {
+            return map.get(key);
+        } finally {
+            lock.unlock(stamp);               
+        }
+    }
+    return value;
+}
+    
+    public static void main(String[] args) {
+        StampedLockDemo sl=new StampedLockDemo();
+        
+        
+        new Thread(()->sl.put("james","ind"),"thread1").start();
+        new Thread(()->sl.readWithOptimisticLock("james"),"thread2").start();
+        new Thread(()->sl.readWithOptimisticLock("james"),"thread3").start();
+    }
+    
+}
+
+/* 
+ * inside put method 384
+thread2inside get method 0
+thread3inside get method 0
+*/
+ 
+ 
+LockSupport
+============
+More specifically, LockSupport provides an alternative for some of Thread's deprecated methods: suspend() and resume(). It uses a concept of permit and parking to detect if given thread should block or not. Permit is associated to each class using LockSupport and is manipulated through park-like methods as:
+park() - blocks the execution of the current thread.
+unpark(Thread) - unblocks given Thread, i.e. the permit is made available again.
+LockSupport works on the basis of permit which is handled by Semaphore. 
+
+import java.util.concurrent.locks.LockSupport;
+
+public class LockSupportExample {
+    
+
+    public static void main(String[] args) {
+
+        Thread t1=new Thread(()->{
+            LockSupport.park();
+            System.out.println("in side thread1");
+            
+        });
+        
+        t1.start();
+        
+        Thread t2=new Thread(()->{
+            System.out.println("in side thread2");
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            LockSupport.unpark(t1);
+            
+        });
+        t2.start();
+        
+        
+    }
+
+
+}
+ConcurrentLinkedQueue
+======================
+public class ConcurrentLinkedQueue<E> extends AbstractQueue<E>
+        implements Queue<E>, java.io.Serializable { }
+It is used to implement Queue with the help of LinkedList concurrently.
+This queue orders elements FIFO (first-in-first-out). The head of the queue is that element that has been on the queue the longest time. The tail of the queue is that element that has been on the queue the shortest time. 
+this class does not permit the use of null elements.
+terators are weakly consistent, returning elements reflecting the state of the queue at some point at or since the creation of the iterator. They do not throw ConcurrentModificationException, and may proceed concurrently with other operations. Elements contained in the queue since the creation of the iterator will be returned exactly once. 
+
+Beware that, unlike in most collections, the size method is NOT a constant-time operation. Because of the asynchronous nature of these queues, determining the current number of elements requires a traversal of the elements, and so may report inaccurate results if this collection is modified during traversal. Additionally, the bulk operations addAll, removeAll, retainAll, containsAll, equals, and toArray are not guaranteed to be performed atomically. For example, an iterator operating concurrently with an addAll operation might view only some of the added elements. 
+
+Memory consistency effects: As with other concurrent collections, actions in a thread prior to placing an object into a ConcurrentLinkedQueue happen-before actions subsequent to the access or removal of that element from the ConcurrentLinkedQueue in another thread. 
+
+ConcurrentLinkedDeque
+=====================
+public class ConcurrentLinkedDeque<E>
+extends AbstractCollection<E>
+implements Deque<E>, Serializable
+
+An unbounded concurrent deque based on linked nodes. Concurrent insertion, removal, and access operations execute safely across multiple threads. A ConcurrentLinkedDeque is an appropriate choice when many threads will share access to a common collection. Like most other concurrent collection implementations, this class does not permit the use of null elements. 
+
+Iterators and spliterators are weakly consistent. 
+Beware that, unlike in most collections, the size method is NOT a constant-time operation.
+This class and its iterator implement all of the optional methods of the Deque and Iterator interfaces.
+
+Memory consistency effects: As with other concurrent collections, actions in a thread prior to placing an object into a ConcurrentLinkedDeque happen-before actions subsequent to the access or removal of that element from the ConcurrentLinkedDeque in another thread.
+
+
+
+
+ConcurrentSkipListSet
+=====================
+public class ConcurrentSkipListSet<E>
+extends AbstractSet<E>
+implements NavigableSet<E>, Cloneable, Serializable
+
+A scalable concurrent NavigableSet implementation based on a ConcurrentSkipListMap. The elements of the set are kept sorted according to their natural ordering, or by a Comparator provided at set creation time, depending on which constructor is used.
+
+
+verage log(n) time cost for the contains, add, and remove operations and their variants. Insertion, removal, and access operations safely execute concurrently by multiple threads. 
+
+Iterators and spliterators are weakly consistent.
+
+Ascending ordered views and their iterators are faster than descending ones. 
+
+Beware that, unlike in most collections, the size method is not a constant-time operation.
+
+this class does not permit the use of null elements, because null arguments and return values cannot be reliably distinguished from the absence of elements.
+
+
+CopyOnWriteArraySet
+====================
+public class CopyOnWriteArraySet<E>
+extends AbstractSet<E>
+implements Serializable
+
+A Set that uses an internal CopyOnWriteArrayList for all of its operations. Thus, it shares the same basic properties:
+
+    It is best suited for applications in which set sizes generally stay small, read-only operations vastly outnumber mutative operations, and you need to prevent interference among threads during traversal.
+    It is thread-safe.
+    Mutative operations (add, set, remove, etc.) are expensive since they usually entail copying the entire underlying array.
+    Iterators do not support the mutative remove operation.
+    Traversal via iterators is fast and cannot encounter interference from other threads. Iterators rely on unchanging snapshots of the array at the time the iterators were constructed. 
+
+
+ExecutorCompletionService
+=========================
+
+public class ExecutorCompletionService<V>
+extends Object
+implements CompletionService<V>
+
+A CompletionService that uses a supplied Executor to execute tasks. This class arranges that submitted tasks are, upon completion, placed on a queue accessible using take. The class is lightweight enough to be suitable for transient use when processing groups of tasks.
+
+ExecutorService vs ExecutorCompletionService
+---------------------------------------------
+ExecutorService executorService = Executors.newFixedThreadPool(4);
+List<Future> futures = new ArrayList<Future<Integer>>();
+futures.add(executorService.submit(A));
+futures.add(executorService.submit(B));
+futures.add(executorService.submit(C));
+futures.add(executorService.submit(D));
+
+Then we can iterate over the list to get the computed result of each future:
+for (Future future:futures) {
+    Integer result = future.get();
+    // rest of the code here.
+}
+
+ExecutorService executorService = Executors.newFixedThreadPool(4);
+CompletionService executorCompletionService= new ExecutorCompletionService<>(executorService );
+Then again we can submit the tasks and get the result like:
+List<Future> futures = new ArrayList<Future<Integer>>();
+futures.add(executorCompletionService.submit(A));
+futures.add(executorCompletionService.submit(B));
+futures.add(executorCompletionService.submit(C));
+futures.add(executorCompletionService.submit(D));
+
+for (int i=0; i<futures.size(); i++) {
+    Integer result = executorCompletionService.take().get();
+    // Some processing here
+}
+
+Suppose task B finished first followed by task C. But task A was still going on. In that case when using ExecutorService the for loop would be waiting for the result of task A to be available. So in case of ExecutorService tasks will be processed in the same order in which they were submitted.
+
+But in later case the tasks will be processed in order the result becomes available, the order tasks are completed. 
+
+
+
+
+ForkJoinWorkerThread
+====================
+public class ForkJoinWorkerThread extends Thread {}
+
+A thread managed by a ForkJoinPool, which executes ForkJoinTasks. This class is subclassable solely for the sake of adding functionality -- there are no overridable methods dealing with scheduling or execution. However, you can override initialization and termination methods surrounding the main task processing loop. If you do create such a subclass, you will also need to supply a custom ForkJoinPool.ForkJoinWorkerThreadFactory to use it in a ForkJoinPool.
+
+class ARecursiveTask extends RecursiveTask<Integer> {
+    private static final long serialVersionUID = -4702976772011326493L;
+
+    // Array to be summed
+    private int[] intArray;
+
+    // Start and end positions of the part of the array to be summed by this task
+    private int start, end;
+
+    public ARecursiveTask(int[] array, int start, int end) {
+        this.intArray = array;
+        this.start    = start;
+        this.end      = end;
+        //System.out.println("start "+start+" end "+end);
+    }
+
+    @Override
+    protected Integer compute() {
+        Integer      ret;
+        WorkerThread thread = (WorkerThread) Thread.currentThread();
+
+        thread.addTask();
+
+        if (end - start > 100) {
+            int            mid   = (start + end) / 2;
+            ARecursiveTask task1 = new ARecursiveTask(intArray, start, mid);
+            ARecursiveTask task2 = new ARecursiveTask(intArray, mid, end);
+
+            invokeAll(task1, task2);
+            ret = addResults(task1, task2);
+        } else {
+            int add = 0;
+
+            for (int i = start; i < end; i++) {
+                add += intArray[i];
+            }
+
+            ret = new Integer(add);
+        }
+
+        try {
+            TimeUnit.MILLISECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
+
+    private Integer addResults(ARecursiveTask task1, ARecursiveTask task2) {
+        int value;
+
+        try {
+            value = task1.get().intValue() + task2.get().intValue();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            value = 0;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+            value = 0;
+        }
+
+        return new Integer(value);
+    }
+}
+
+
+
+class WorkerThreadFactory implements ForkJoinWorkerThreadFactory {
+    @Override
+    public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
+        return new WorkerThread(pool);
+    }
+}
+
+class WorkerThread extends ForkJoinWorkerThread {
+    private static ThreadLocal<Integer> taskCounter = new ThreadLocal<>();
+
+    public WorkerThread(ForkJoinPool pool) {
+        super(pool);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        System.out.printf("WorkThread %d: Initializing task counter.\n", this.getId());
+        taskCounter.set(0);
+    }
+
+    @Override
+    protected void onTermination(Throwable exception) {
+        System.out.printf("WorkerThread %d: %d\n", getId(), taskCounter.get());
+        super.onTermination(exception);
+    }
+
+    public void addTask() {
+        int counter = taskCounter.get().intValue();
+
+        counter++;
+        taskCounter.set(counter);
+    }
+}
+
+public class ForkJoinWorkerThreadExample {
+    
+    public static void main(String[] args) throws Exception {
+        WorkerThreadFactory factory = new WorkerThreadFactory();
+        ForkJoinPool        pool    = new ForkJoinPool(4, factory, null, false);
+
+        // Create and initializes the elements of the array
+        int array[] = new int[100000];
+
+        for (int i = 0; i < array.length; i++) {
+            array[i] = 1;
+        }
+ 
+        // Create a new Task to sum the elements of the array
+        ARecursiveTask task = new ARecursiveTask(array, 0, array.length);
+
+        // Send the task to the ForkJoinPool
+        pool.execute(task);
+
+        // Wait for the finalization of the task
+        task.join();
+
+        // Shutdown the pool
+        pool.shutdown();
+
+        // Wait for the finalization of the pool
+        pool.awaitTermination(1, TimeUnit.DAYS);
+
+        // Write the result of the task
+        System.out.printf("Main: Result: %d\n", task.get());
+
+        // Write a message indicating the end of the program
+        System.out.printf("Main: End of the program\n");
+    }
+
+}
+
+
+
+RecursiveAction
+================
+public abstract class RecursiveAction
+extends ForkJoinTask<Void>
+A recursive resultless ForkJoinTask. This class establishes conventions to parameterize resultless actions as Void ForkJoinTasks. Because null is the only valid value of type Void, methods such as join always return null upon completion. 
+
+RecursiveTask
+=============
+public abstract class RecursiveTask<V>
+extends ForkJoinTask<V>
+
+
+FutureTask
+===========
+A cancellable asynchronous computation. This class provides a base implementation of Future, with methods to start and cancel a computation, query to see if the computation is complete, and retrieve the result of the computation. The result can only be retrieved when the computation has completed; the get methods will block if the computation has not yet completed. Once the computation has completed, the computation cannot be restarted or cancelled (unless the computation is invoked using runAndReset()).
+
+A FutureTask can be used to wrap a Callable or Runnable object. Because FutureTask implements Runnable, a FutureTask can be submitted to an Executor for execution. 
+
+Future is a base interface and defines abstraction of an object which promises result to be available in future while FutureTask is an implementation of the Future
+
+ThreadLocalRandom
+=================
+public class ThreadLocalRandom extends Random
+
+A random number generator isolated to the current thread. Like the global Random generator used by the Math class, a ThreadLocalRandom is initialized with an internally generated seed that may not otherwise be modified. When applicable, use of ThreadLocalRandom rather than shared Random objects in concurrent programs will typically encounter much less overhead and contention. Use of ThreadLocalRandom is particularly appropriate when multiple tasks (for example, each a ForkJoinTask) use random numbers in parallel in thread pools.
+
+Usages of this class should typically be of the form: ThreadLocalRandom.current().nextX(...) (where X is Int, Long, etc). When all usages are of this form, it is never possible to accidently share a ThreadLocalRandom across multiple threads.
+
+This class also provides additional commonly used bounded random generation methods.
+
+Instances of ThreadLocalRandom are not cryptographically secure. Consider instead using SecureRandom in security-sensitive applications. Additionally, default-constructed instances do not use a cryptographically random seed unless the system property java.util.secureRandomSeed is set to true.
+
+Normally to generate Random numbers, we either do Create an instance of java.util.Random OR Math.random() - which internally creates an instance of java.util.Random on first invocation. However in a concurrent applications usage of above leads to contention issues
+
+Random is thread safe for use by multiple threads. But if multiple threads use the same instance of Random, the same seed is shared by multiple threads. It leads to contention between multiple threads and so to performance degradation.
+
+A thread managed by a ForkJoinPool, which executes ForkJoinTasks. This class is subclassable solely for the sake of adding functionality -- there are no overridable methods dealing with scheduling or execution. However, you can override initialization and termination methods surrounding the main task processing loop. If you do create such a subclass, you will also need to supply a custom ForkJoinPool.ForkJoinWorkerThreadFactory to use it in a ForkJoinPool.
+
+
+ExecutorService execute vs submit vs invokeAll
+==============================================
+As you see from the JavaDoc execute(Runnable) does not return anything. The difference is that execute simply starts the task without any further ado, whereas submit returns a Future object to manage the task. You can do the following things with the Future object: Cancel the task prematurely, with the cancel method.
+
+execute method
+--------------
+void execute(Runnable command);
+
+submit methods
+--------------
+<T> Future<T> submit(Callable<T> task);
+<T> Future<T> submit(Runnable task, T result);
+Future<?> submit(Runnable task);
+
+
+invoke methods
+--------------
+<T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
+        throws InterruptedException;
+
+<T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks,
+                                  long timeout, TimeUnit unit)
+        throws InterruptedException;
+
+<T> T invokeAny(Collection<? extends Callable<T>> tasks)
+        throws InterruptedException, ExecutionException;
+
+<T> T invokeAny(Collection<? extends Callable<T>> tasks,
+                    long timeout, TimeUnit unit)
+        throws InterruptedException, ExecutionException, TimeoutException;
+
+submit vs invokeAll 
+-------------------
+1) using submit(Callable)
+
+ExecutorService executorService = Executors.newFixedThreadPool(5);
+List<Future<String>> futures = new ArrayList<>();
+for(Callable callableItem: myCallableList){
+    futures.add(executorService.submit(callableItem));
+}
+
+2) using invokeAll(Collections of Callable)
+
+ExecutorService executorService = Executors.newFixedThreadPool(5);
+List<Future<String>> futures = executorService.invokeAll(myCallableList));
+
+Option 1 : You are submitting the tasks to ExecutorService and you are not waiting for the completion of all tasks, which have been submitted to ExecutorService
+
+Option 2 : You are waiting for completion of all tasks, which have been submitted to ExecutorService.
+
+    What should be the preferred way?
+
+Depending on application requirement, either of them is preferred.
+
+    If you don't want to wait after task submit() to ExecutorService, prefer Option 1.
+    If you need to wait for completion of all tasks, which have been submitted to ExecutorService, prefer Option 2.
+
+A CompletionService that uses a supplied Executor to execute tasks. This class arranges that submitted tasks are, upon completion, placed on a queue accessible using take. The class is lightweight enough to be suitable for transient use when processing groups of tasks.
+
+ForkJoinPool
+============
+It provides tools to help speed up parallel processing by attempting to use all available processor cores – which is accomplished through a divide and conquer approach.
+
+In practice, this means that the framework first “forks”, recursively breaking the task into smaller independent subtasks until they are simple enough to be executed asynchronously.
+
+After that, the “join” part begins, in which results of all subtasks are recursively joined into a single result, or in the case of a task which returns void, the program simply waits until every subtask is executed.
+
+manages worker threads of type ForkJoinWorkerThread.
+
+public class ForkJoinPool extends AbstractExecutorService { }
+
+Worker threads can execute only one task at a time, but the ForkJoinPool doesn’t create a separate thread for every single subtask. Instead, each thread in the pool has its own double-ended queue (or deque, pronounced deck) which stores tasks.
+
+Simply put – free threads try to “steal” work from deques of busy threads.
+By default, a worker thread gets tasks from the head of its own deque. When it is empty, the thread takes a task from the tail of the deque of another busy thread or from the global entry queue, since this is where the biggest pieces of work are likely to be located.
+
+on java 8
+ForkJoinPool commonPool = ForkJoinPool.commonPool();
+
+on java 7
+ForkJoinPool forkJoinPool = new ForkJoinPool();
+
+public ForkJoinPool() {
+        this(Math.min(MAX_CAP, Runtime.getRuntime().availableProcessors()),
+             defaultForkJoinWorkerThreadFactory, null, false);
+    }
+
+private ForkJoinPool(int parallelism,
+                         ForkJoinWorkerThreadFactory factory,
+                         UncaughtExceptionHandler handler,int mode,
+                         String workerNamePrefix) { }
+
+asyncMode ? FIFO_QUEUE : LIFO_QUEUE,"ForkJoinPool-" + nextPoolId() + "-worker-");
+
+ForkJoinPool commonPool = ForkJoinPool.commonPool();
+ForkJoinPool commonPool1 = ForkJoinPool.commonPool();
+
+ForkJoinPool forkJoinPool = new ForkJoinPool();
+ForkJoinPool forkJoinPool1 = new ForkJoinPool();
+
+System.out.println(commonPool==forkJoinPool);//false
+System.out.println(commonPool==commonPool1);//true
+System.out.println(forkJoinPool==forkJoinPool1);//false
+
+The submit() or execute() method (their use cases are the same):
+forkJoinPool.execute(customRecursiveTask);
+int result = customRecursiveTask.join();
+
+The invoke() method forks the task and waits for the result, and doesn’t need any manual joining:
+int result = forkJoinPool.invoke(customRecursiveTask);
+
+
+public void execute(ForkJoinTask<?> task) { }
+public void execute(Runnable task) { }
+public <T> ForkJoinTask<T> submit(ForkJoinTask<T> task) {}
+public <T> ForkJoinTask<T> submit(Callable<T> task) {}
+public <T> ForkJoinTask<T> submit(Runnable task, T result) { }
+public ForkJoinTask<?> submit(Runnable task) { }
+public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) {}
+public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks,
+                                         long timeout, TimeUnit unit){}
+public <T> T invokeAny(Collection<? extends Callable<T>> tasks) {}
+public <T> T invokeAny(Collection<? extends Callable<T>> tasks,
+                           long timeout, TimeUnit unit){}
+public <T> T invoke(ForkJoinTask<T> task) {
+        if (task == null)
+            throw new NullPointerException();
+        externalPush(task);
+        return task.join();
+    }
+
+fork and join methods
+---------------------
+CustomRecursiveTask customRecursiveTaskFirst = new CustomRecursiveTask(arr);
+CustomRecursiveTask customRecursiveTaskSecond = new CustomRecursiveTask(arr);
+CustomRecursiveTask customRecursiveTaskLast = new CustomRecursiveTask(arr);
+
+customRecursiveTaskFirst.fork();
+customRecursiveTaskSecond.fork();
+customRecursiveTaskLast.fork();
+int result = 0;
+result += customRecursiveTaskLast.join();
+result += customRecursiveTaskSecond.join();
+result += customRecursiveTaskFirst.join();
+
+ThreadLocal
+===========
+public class ThreadLocal<T> extends Object
+
+This class provides thread-local variables. These variables differ from their normal counterparts in that each thread that accesses one (via its get or set method) has its own, independently initialized copy of the variable. ThreadLocal instances are typically private static fields in classes that wish to associate state with a thread (e.g., a user ID or Transaction ID). 
+
+class Req implements Runnable {
+    
+    ThreadLocal<Integer> header;
+    
+    int localCounter=0;
+    
+    public Req(){
+        
+        header=ThreadLocal.withInitial(()->0);
+        
+    }
+
+    @Override
+    public void run() {
+        String name=Thread.currentThread().getName();
+        localCounter++;
+        header.set(header.get()+1);
+        System.out.println(name+" localCounter= "+localCounter+" threadlocal= "+header.get());
+            
+    }
+    
+}
+
+public class ThreadLocalExample {
+    
+    public static void main(String[] args) {
+        ThreadLocal<Integer> tl = new ThreadLocal<Integer>();
+        tl.set(44);
+        System.out.println(tl.get());
+        ThreadLocal<Integer> tl1 = ThreadLocal.withInitial(() -> 5);
+        System.out.println(tl1.get());
+
+        ThreadLocal<String> tl2 = new ThreadLocal<String>() {
+          
+             protected String initialValue() {return "james";};
+        };
+        System.out.println(tl2.get());
+        
+        Req req=new Req();
+        for(int i=1;i<=10;i++)
+        {
+            Thread t=new Thread(req,"Thread-"+i);
+            t.start();
+        }
+    }
+
+}
+
+/* 
+44
+5
+james
+Thread-2 localCounter= 2 threadlocal= 1
+Thread-1 localCounter= 2 threadlocal= 1
+Thread-3 localCounter= 3 threadlocal= 1
+Thread-4 localCounter= 4 threadlocal= 1
+Thread-5 localCounter= 5 threadlocal= 1
+Thread-6 localCounter= 6 threadlocal= 1
+Thread-7 localCounter= 7 threadlocal= 1
+Thread-8 localCounter= 8 threadlocal= 1
+Thread-9 localCounter= 9 threadlocal= 1
+Thread-10 localCounter= 10 threadlocal= 1
+ */
+
+ThreadLocal.ThreadLocalMap
+--------------------------
+static class ThreadLocalMap { }
+static class Entry extends WeakReference<ThreadLocal<?>> {
+            /** The value associated with this ThreadLocal. */
+            Object value;
+
+            Entry(ThreadLocal<?> k, Object v) {
+                super(k);
+                value = v;
+            }
+ThreadLocalMap is a customized hash map suitable only for maintaining thread local values. No operations are exported outside of the ThreadLocal class. The class is package private to allow declaration of fields in class Thread. To help deal with very large and long-lived usages, the hash table entries use WeakReferences for keys. However, since reference queues are not used, stale entries are guaranteed to be removed only when the table starts running out of space.
+
+In side Thread class
+--------------------
+class Thread implements Runnable {
+ThreadLocal.ThreadLocalMap threadLocals = null;// this map will store all active ThreadLocal objects as a key and threadlocal value is stored as value in this map.
+
+}
+
+CompletableFuture
+=================
+public class CompletableFuture<T> implements Future<T>, CompletionStage<T> { }
+
+public interface CompletionStage<T> { 
+  //all then methods are from this interface
+  thenApply,thenApplyAsync,thenApplyAsync,thenAccept,thenAcceptAsync,thenAcceptAsync,thenRun,thenRunAsync,thenRunAsync,thenRunAsync,thenCombineAsync,thenCombineAsync,thenAcceptBoth,thenAcceptBothAsync,thenAcceptBothAsync,
+  //runAfterBoth,runAfterBothAsync,runAfterBothAsync,
+  //applyToEither,applyToEitherAsync,applyToEitherAsync,
+  //acceptEither,acceptEitherAsync,acceptEitherAsync,
+  //runAfterEither,runAfterEitherAsync,runAfterEitherAsync,
+  //thenCompose,thenComposeAsync,thenComposeAsync,
+  //exceptionally
+  //whenComplete
+  //whenCompleteAsync
+  //handle,handleAsync,handleAsync
+  public CompletableFuture<T> toCompletableFuture();
+}
+public interface Future<V> {
+  boolean cancel(boolean mayInterruptIfRunning);
+  boolean isCancelled();
+  boolean isDone();
+V get() throws InterruptedException, ExecutionException;
+V get(long timeout, TimeUnit unit);
+}
+
+abstract static class Completion extends ForkJoinTask<Void>
+        implements Runnable, AsynchronousCompletionTask {
+        volatile Completion next; //task are store in the from of linkedlist 
+}
+
+Java Annotation
+===============
+https://www.baeldung.com/java-custom-annotation
 

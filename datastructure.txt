@@ -1098,9 +1098,488 @@ https://www.geeksforgeeks.org/gomory-hu-tree-introduction/
 TODO : it is related to max flow algorithms
 
 
+Arrays Questions
+================
+
+Find the Number Occurring Odd Number of Times
+Given an array of positive integers. All numbers occur even number of times except one number which occurs odd number of times. Find the number in O(n) time & constant space.
+Examples :
+Input : arr = {1, 2, 3, 2, 3, 1, 3}
+Output : 3
+Input : arr = {5, 7, 2, 7, 5, 2, 5}
+Output : 5
+
+
+Largest Sum Contiguous Subarray
+
+Write an efficient program to find the sum of contiguous subarray within a one-dimensional array of numbers which has the largest sum. 
+
+XOR operation useful
+
+
+Program for array rotation
+===========================
+Write a function rotate(ar[], d, n) that rotates arr[] of size n by d elements.
+ex : 1 2 3 4 5 6 7 , d=2 then output=3,4,5,6,7,1,2
+
+method 3 and 4 
+
+
+Count Inversions in an array | Set 1 (Using Merge Sort)
+=======================================================
+Inversion Count for an array indicates – how far (or close) the array is from being sorted. If array is already sorted then inversion count is 0. If array is sorted in reverse order that inversion count is the maximum.
+Formally speaking, two elements a[i] and a[j] form an inversion if a[i] > a[j] and i < j
+Example:
+Input: arr[] = {8, 4, 2, 1}
+Output: 6
+Explanation: Given array has six inversions:
+(8,4), (4,2),(8,2), (8,1), (4,1), (2,1).
+Input: arr[] = {3, 1, 2}
+Output: 2
+Explanation: Given array has two inversions:
+(3, 1), (3, 2) 
+
+https://www.geeksforgeeks.org/count-inversions-array-set-3-using-bit/
 
 
 
 
+Matrix
+======
+
+Search in a row wise and column wise sorted matrix
+-----------
+Given an n x n matrix and a number x, find the position of x in the matrix if it is present in it. Otherwise, print “Not Found”. In the given matrix, every row and column is sorted in increasing order. The designed algorithm should have linear time complexity. 
+
+
+A Boolean Matrix Question
+----------
+Given a boolean matrix mat[M][N] of size M X N, modify it such that if a matrix cell mat[i][j] is 1 (or true) then make all the cells of ith row and jth column as 1.
+
+Example 1
+The matrix
+1 0
+0 0
+should be changed to following
+1 1
+1 0
+
+Inplace (Fixed space) M x N size matrix transpose | Updated
+
+a b c       a d g j
+d e f  ==>  b e h k
+g h i       c f i l
+j k l
+
+Divide and Conquer | Set 5 (Strassen’s Matrix Multiplication)
+-----
+
+Print all elements in sorted order from row and column wise sorted matrix
+-----
+Given an n x n matrix, where every row and column is sorted in non-decreasing order. Print all elements of matrix in sorted order.
+
+Input: mat[][]  =  { {10, 20, 30, 40},
+                     {15, 25, 35, 45},
+                     {27, 29, 37, 48},
+                     {32, 33, 39, 50},
+                   };
+Output:
+Elements of matrix in sorted order
+10 15 20 25 27 29 30 32 33 35 37 39 40 45 48 50
+
+Count number of islands where every island is row-wise and column-wise separated
+-----------
+
+LinkedList
+===========
+Detect and Remove Loop in a Linked List
+-------
+https://www.geeksforgeeks.org/linked-list-set-2-inserting-a-node/
+
+Clone a linked list with next and random pointer
+
+
+stack
+=====
+Infix to Postfix
+ex: x ^ y / (5 * z) + 10 => x y ^ 5 z * / 10 +
+
+https://www.youtube.com/watch?v=OVFwgYrMShw
+
+Infix to Prefix
+https://www.youtube.com/watch?v=sJ0VhIbvCtc
+  A+B/C*(D-A)^F^H ==> +A/B*C^^-DAFH 
+
+Postfix to Prefix
+https://www.youtube.com/watch?v=u5B995eODQc
+
+Postfix to Infix 
+https://www.youtube.com/watch?v=SfhhPJeF_vE
+
+
+
+Reverse a stack using recursion
+
+Write a program to reverse a stack using recursion. You are not allowed to use loop constructs like while, for..etc, and you can only use the following ADT functions on Stack S:
+isEmpty(S)
+push(S)
+pop(S)
+
+
+Sort a stack using recursion
+
+Given a stack, sort it using recursion. Use of any loop constructs like while, for..etc is not allowed. We can only use the following ADT functions on Stack S:
+
+is_empty(S)  : Tests whether stack is empty or not.
+push(S)         : Adds new element to the stack.
+pop(S)         : Removes top element from the stack.
+top(S)         : Returns value of the top element. Note that this
+               function does not remove element
+
+Example:
+
+Input:  -3  <--- Top
+        14 
+        18 
+        -5 
+        30 
+
+Output: 30  <--- Top
+        18 
+        14 
+        -3 
+        -5 
+
+The Stock Span Problem
+
+The stock span problem is a financial problem where we have a series of n daily price quotes for a stock and we need to calculate span of stock’s price for all n days.
+The span Si of the stock’s price on a given day i is defined as the maximum number of consecutive days just before the given day, for which the price of the stock on the current day is less than or equal to its price on the given day.
+For example, if an array of 7 days prices is given as {100, 80, 60, 70, 60, 75, 85}, then the span values for corresponding 7 days are {1, 1, 1, 2, 1, 4, 6}
+
+Design a stack that supports getMin() in O(1) time and O(1) extra space
+------
+
+
+How to efficiently implement k stacks in a single array?
+
+We have discussed space efficient implementation of 2 stacks in a single array. In this post, a general solution for k stacks is discussed. Following is the detailed problem statement.
+
+
+Design a stack with operations on middle element
+------
+How to implement a stack which will support following operations in O(1) time complexity?
+1) push() which adds an element to the top of stack.
+2) pop() which removes an element from top of stack.
+3) findMiddle() which will return middle element of the stack.
+4) deleteMiddle() which will delete the middle element.
+
+
+Queue
+=====
+Implementation of Deque using circular array
+better go for java ArrayDeque Implementation
+
+
+
+Find the first circular tour that visits all petrol pumps
+--------
+Suppose there is a circle. There are n petrol pumps on that circle. You are given two sets of data.
+
+    The amount of petrol that every petrol pump has.
+    Distance from that petrol pump to the next petrol pump.
+
+Calculate the first point from where a truck will be able to complete the circle (The truck will stop at each petrol pump and it has infinite capacity). Expected time complexity is O(n). Assume for 1-litre petrol, the truck can go 1 unit of distance.
+
+For example, let there be 4 petrol pumps with amount of petrol and distance to next petrol pump value pairs as {4, 6}, {6, 5}, {7, 3} and {4, 5}. The first point from where the truck can make a circular tour is 2nd petrol pump. Output should be “start = 1” (index of 2nd petrol pump).
+
+
+An Interesting Method to Generate Binary Numbers from 1 to n
+----
+Given a number n, write a function that generates and prints all binary numbers with decimal values from 1 to n.
+
+Examples:
+
+Input: n = 2
+Output: 1, 10
+
+Input: n = 5
+Output: 1, 10, 11, 100, 101
+
+How to efficiently implement k Queues in a single array?
+
+Binary Tree
+============
+
+Inorder Tree Traversal without Recursion
+-------
+Inorder Tree Traversal without recursion and without stack!
+----
+
+Threaded Binary Tree
+--------
+Clone a Binary Tree with Random Pointers
+----
+
+
+Maximum width of a binary tree
+
+Given a binary tree, write a function to get the maximum width of the given tree. Width of a tree is maximum of widths of all levels.
+
+Let us consider the below example tree.
+
+         1
+        /  \
+       2    3
+     /  \     \
+    4    5     8 
+              /  \
+
+Method 3 (Using Preorder Traversal)
+
+
+BST:
+====
+
+Find a pair with given sum in a Balanced BST
+
+Given a Balanced Binary Search Tree and a target sum, write a function that returns true if there is a pair with sum equals to target sum, otherwise return false. Expected time complexity is O(n) and only O(Logn) extra space can be used. Any modification to Binary Search Tree is not allowed. Note that height of a Balanced BST is always O(Logn).
+
+
+Binary Tree to Binary Search Tree Conversion
+
+Given a Binary Tree, convert it to a Binary Search Tree. The conversion must be done in such a way that keeps the original structure of Binary Tree.
+
+Examples.
+
+Example 1
+Input:
+          10
+         /  \
+        2    7
+       / \
+      8   4
+Output:
+          8
+         /  \
+        4    10
+       / \
+      2   7
+
+
+Example 2
+Input:
+          10
+         /  \
+        30   15
+       /      \
+      20       5
+Output:
+          15
+         /  \
+       10    20
+       /      \
+      5        30
+
+
+
+Heap: 
+======
+Binary Heap
+-----------
+Applications of Heaps:
+1) Heap Sort: Heap Sort uses Binary Heap to sort an array in O(nLogn) time.
+
+2) Priority Queue: Priority queues can be efficiently implemented using Binary Heap because it supports insert(), delete() and extractmax(), decreaseKey() operations in O(logn) time.
+
+
+3) Graph Algorithms: The priority queues are especially used in Graph Algorithms like Dijkstra’s Shortest Path and Prim’s Minimum Spanning Tree.
+4) Many problems can be efficiently solved using Heaps. See following for example.
+a) K’th Largest Element in an array.
+b) Sort an almost sorted array/
+c) Merge K Sorted Arrays.
+Operations on Min Heap:
+1) getMini(): It returns the root element of Min Heap. Time Complexity of this operation is O(1).
+2) extractMin(): Removes the minimum element from MinHeap. Time Complexity of this Operation is O(Logn) as this operation needs to maintain the heap property (by calling heapify()) after removing root.
+3) decreaseKey(): Decreases value of key. The time complexity of this operation is O(Logn).
+4) insert(): Inserting a new key takes O(Logn) time. 
+5) delete(): Deleting a key also takes O(Logn) time.
+
+Why is Binary Heap Preferred over BST for Priority Queue?
+---------------------------------------------------------
+Finding minimum and maximum are not naturally O(1), but can be easily implemented in O(1) by keeping an extra pointer to minimum or maximum and updating the pointer with insertion and deletion if required. With deletion we can update by finding inorder predecessor or successor.
+    Since Binary Heap is implemented using arrays, there is always better locality of reference and operations are more cache friendly.
+    Although operations are of same time complexity, constants in Binary Search Tree are higher.
+    We can build a Binary Heap in O(n) time. Self Balancing BSTs require O(nLogn) time to construct.
+    Binary Heap doesn’t require extra space for pointers.
+    Binary Heap is easier to implement.
+    There are variations of Binary Heap like Fibonacci Heap that can support insert and decrease-key in Θ(1) time
+
+When will go BST over Binary Heap
+---------------------------------
+    Searching an element in self-balancing BST is O(Logn) which is O(n) in Binary Heap.
+    We can print all elements of BST in sorted order in O(n) time, but Binary Heap requires O(nLogn) time.
+    Floor and ceil can be found in O(Logn) time.
+    K’th largest/smallest element be found in O(Logn) time by augmenting tree with an additional field.
+class Node { 
+    int data; 
+    Node left, right; 
+    int lCount; 
+}
+
+
+Binomial Heap
+-------------
+The main application of Binary Heap is as implement priority queue. Binomial Heap is an extension of Binary Heap that provides faster union or merge operation together with other operations provided by Binary Heap.
+A Binomial Heap is a collection of Binomial Trees
+
+https://www.youtube.com/watch?v=JCpkcP-VeUQ
+https://www.youtube.com/watch?v=niUa5q1q3AI
+https://www.youtube.com/watch?v=6YrVi6um9Gg
+https://www.youtube.com/watch?v=YkX7aeETIbU
+https://www.youtube.com/watch?v=oI8BQ39WHSg
+
+What is a Binomial Tree?
+A Binomial Tree of order 0 has 1 node. A Binomial Tree of order k can be constructed by taking two binomial trees of order k-1 and making one as leftmost child or other.
+A Binomial Tree of order k has following properties.
+a) It has exactly 2k nodes.
+b) It has depth as k.
+c) There are exactly kCi nodes at depth i for i = 0, 1, . . . , k.
+d) The root has degree k and children of root are themselves Binomial Trees with order k-1, k-2,.. 0 from left to right.
+
+Binomial Heap:
+A Binomial Heap is a set of Binomial Trees where each Binomial Tree follows Min Heap property. And there can be at most one Binomial Tree of any degree.
+
+Examples Binomial Heap:
+
+12------------10--------------------20
+             /  \                 /  | \
+           15    50             70  50  40
+           |                  / |    |     
+           30               80  85  65 
+                            |
+                           100
+A Binomial Heap with 13 nodes. It is a collection of 3 
+Binomial Trees of orders 0, 2 and 3 from left to right. 
+
+    10--------------------20
+   /  \                 /  | \
+ 15    50             70  50  40
+ |                  / |    |     
+ 30               80  85  65 
+                  |
+                 100
+
+A Binomial Heap with 12 nodes. It is a collection of 2
+Binomial Trees of orders 2 and 3 from left to right.
+
+there are O(Logn) Binomial Trees in a Binomial Heap with ‘n’ nodes.
+
+1) getMin(H): A simple way to getMin() is to traverse the list of root of Binomial Trees and return the minimum key. This implementation requires O(Logn) time. It can be optimized to O(1) by maintaining a pointer to minimum key root.
+2)) insert(H, k):
+3) extractMin(H)
+4) delete(H)
+
+
+Union operation in Binomial Heap:
+-------
+Given two Binomial Heaps H1 and H2, union(H1, H2) creates a single Binomial Heap.
+1) The first step is to simply merge the two Heaps in non-decreasing order of degrees. In the following diagram, figure(b) shows the result after merging.
+
+2) After the simple merge, we need to make sure that there is at most one Binomial Tree of any order. To do this, we need to combine Binomial Trees of the same order. We traverse the list of merged roots, we keep track of three-pointers, prev, x and next-x. There can be following 4 cases when we traverse the list of roots.
+—–Case 1: Orders of x and next-x are not same, we simply move ahead.
+In following 3 cases orders of x and next-x are same.
+—–Case 2: If the order of next-next-x is also same, move ahead.
+—–Case 3: If the key of x is smaller than or equal to the key of next-x, then make next-x as a child of x by linking it with x.
+—–Case 4: If the key of x is greater, then make x as the child of next.
+
+Binomial Node Representation
+------
+struct Node 
+{ 
+    int data, degree; 
+    Node *leftmostchild, *sibling, *parent; 
+}; 
+  
+Node* newNode(int key) 
+{ 
+    Node *temp = new Node; 
+    temp->data = key; 
+    temp->degree = 0; 
+    temp->leftmostchild = temp->parent = temp->sibling = NULL; 
+    return temp; 
+} 
+
+
+Fibonacci Heap
+==============
+https://www.youtube.com/watch?v=Y4lGw4hkBnY
+https://www.youtube.com/watch?v=CcGvcF8SU7g
+https://www.youtube.com/watch?v=RrRm0HnRUMU
+https://www.youtube.com/watch?v=AYG6Yd1DYnY
+
+Below are amortized time complexities of Fibonacci Heap.
+
+1) Find Min:      Θ(1)     [Same as both Binary and Binomial]
+2) Delete Min:    O(Log n) [Θ(Log n) in both Binary and Binomial]
+3) Insert:        Θ(1)     [Θ(Log n) in Binary and Θ(1) in Binomial]
+4) Decrease-Key:  Θ(1)     [Θ(Log n) in both Binary and Binomial]
+5) Merge:         Θ(1)     [Θ(m Log n) or Θ(m+n) in Binary and
+                            Θ(Log n) in Binomial]
+
+Like Binomial Heap, Fibonacci Heap is a collection of trees with min-heap or max-heap property. In Fibonacci Heap, trees can can have any shape even all trees can be single nodes (This is unlike Binomial Heap where every tree has to be Binomial Tree).
+Fibonacci Heap maintains a pointer to minimum value (which is root of a tree). All tree roots are connected using circular doubly linked list, so all of them can be accessed using single ‘min’ pointer.
+
+The main idea is to execute operations in “lazy” way. For example merge operation simply links two heaps, insert operation simply adds a new tree with single node. The operation extract minimum is the most complicated operation. It does delayed work of consolidating trees. This makes delete also complicated as delete first decreases key to minus infinite, then calls extract minimum.
+
+Below are some interesting facts about Fibonacci Heap
+
+    The reduced time complexity of Decrease-Key has importance in Dijkstra and Prim algorithms. With Binary Heap, time complexity of these algorithms is O(VLogV + ELogV). If Fibonacci Heap is used, then time complexity is improved to O(VLogV + E)
+    Although Fibonacci Heap looks promising time complexity wise, it has been found slow in practice as hidden constants are high (Source Wiki).
+    Fibonacci heap are mainly called so because Fibonacci numbers are used in the running time analysis. Also, every node in Fibonacci Heap has degree at most O(log n) and the size of a subtree rooted in a node of degree k is at least Fk+2, where Fk is the kth Fibonacci number.
+
+
+Extract_min(): 
+-------------
+We create a function for deleting the minimum node and setting the min pointer to the minimum value in the remaining heap. The following algorithm is followed:
+
+    Delete the min node.
+    Set head to the next min node and add all the tree of the deleted node in root list.
+    Create an array of degree pointers of the size of the deleted node.
+    Set degree pointer to current node.
+    Move to the next node.
+        If degrees are different then set degree pointer to next node.
+        If degrees are same then join the Fibonacci trees by union operation.
+    Repeat steps 4 and 5 until the heap is completed.
+
+
+Decrease_key(): 
+--------------
+To decrease the value of any element in the heap, we follow the following algorithm:
+Decrease the value of the node ‘x’ to the new chosen value.
+CASE 1) If min heap property is not violated,
+
+    Update min pointer if necessary.
+
+CASE 2) If min heap property is violated and parent of ‘x’ is unmarked,
+
+    Cut off the link between ‘x’ and its parent.
+    Mark the parent of ‘x’.
+    Add tree rooted at ‘x’ to the root list and update min pointer if necessary.
+
+CASE 3)If min heap property is violated and parent of ‘x’ is marked,
+
+    Cut off the link between ‘x’ and its parent p[x].
+    Add ‘x’ to the root list, updating min pointer if necessary.
+    Cut off link between p[x] and p[p[x]].
+    Add p[x] to the root list, updating min pointer if necessary.
+    If p[p[x]] is unmarked, mark it.
+    Else, cut off p[p[x]] and repeat steps 4.2 to 4.5, taking p[p[x]] as ‘x’.
+
+
+Deletion(): To delete any element in a Fibonacci heap, the following algorithm is followed:
+-----------
+    Decrease the value of the node to be deleted ‘x’ to minimum by Decrease_key() function.
+    By using min heap property, heapify the heap containing ‘x’, bringing ‘x’ to the root list.
+    Apply Extract_min() algorithm to the Fibonacci heap.
 
 

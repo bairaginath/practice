@@ -3,6 +3,7 @@ class Input1 {
 
 }
 
+
 abstract class Service1 {
 	Input1 input;
 

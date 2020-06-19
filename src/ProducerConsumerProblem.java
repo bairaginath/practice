@@ -7,6 +7,7 @@ class Producer implements Runnable
     Producer(Queue<Integer> queue){
         this.queue=queue;
     }
+    
     @Override
     public void run() {
 
