@@ -2,17 +2,16 @@
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-enum Operator {
+enum LightOperator {
 	ADD, MULTI, DIVID, SUB,REMINDER;
 }
 
-class Expression {
+class LightExpression {
 
 	int left;
 	int right;
-	Operator operator;
+	LightOperator operator;
 	
 	
 
@@ -40,19 +39,19 @@ class Expression {
 
 
 
-	public Operator getOperator() {
+	public LightOperator getOperator() {
 		return operator;
 	}
 
 
 
-	public void setOperator(Operator operator) {
+	public void setOperator(LightOperator operator) {
 		this.operator = operator;
 	}
 
 
 
-	public Expression(int left, int right, Operator operator) {
+	public LightExpression(int left, int right, LightOperator operator) {
 		super();
 		this.left = left;
 		this.right = right;
@@ -62,14 +61,14 @@ class Expression {
 }
 
 interface Rules{
-	Integer evaluate(Expression e);
+	Integer evaluate(LightExpression e);
 }
 
 class AddRules implements Rules {
 
 	@Override
-	public Integer evaluate(Expression e) {
-		if(e.getOperator()==Operator.ADD)
+	public Integer evaluate(LightExpression e) {
+		if(e.getOperator()==LightOperator.ADD)
 		return e.getLeft()+e.getRight();
 		return null;
 	}
@@ -79,8 +78,8 @@ class AddRules implements Rules {
 class SubRules implements Rules {
 
 	@Override
-	public Integer evaluate(Expression e) {
-		if(e.getOperator()==Operator.SUB)
+	public Integer evaluate(LightExpression e) {
+		if(e.getOperator()==LightOperator.SUB)
 		return e.getLeft()-e.getRight();
 		return null;
 	}
@@ -90,8 +89,8 @@ class SubRules implements Rules {
 class MultiRules implements Rules {
 
 	@Override
-	public Integer evaluate(Expression e) {
-		if(e.getOperator()==Operator.MULTI)
+	public Integer evaluate(LightExpression e) {
+		if(e.getOperator()==LightOperator.MULTI)
 		return e.getLeft()*e.getRight();
 		return null;
 	}
@@ -101,8 +100,8 @@ class MultiRules implements Rules {
 class DivRules implements Rules {
 
 	@Override
-	public Integer evaluate(Expression e) {
-		if(e.getOperator()==Operator.DIVID)
+	public Integer evaluate(LightExpression e) {
+		if(e.getOperator()==LightOperator.DIVID)
 		return e.getLeft()/e.getRight();
 		return null;
 	}
@@ -120,7 +119,7 @@ public class RuleEngine {
 		rules.add(new MultiRules());
 	}
 	
-	static Integer process(Expression e) {
+	static Integer process(LightExpression e) {
 		Integer result=rules.parallelStream().filter(r->r.evaluate(e)!=null)
 				.map(r->r.evaluate(e))
 				.findFirst()
@@ -130,15 +129,15 @@ public class RuleEngine {
 	
 	public static void main(String[] args) {
 		
-		Expression e1=new Expression(6,3,Operator.ADD);
+		LightExpression e1=new LightExpression(6,3,LightOperator.ADD);
 		System.out.println(RuleEngine.process(e1));
-		e1=new Expression(6,3,Operator.SUB);
+		e1=new LightExpression(6,3,LightOperator.SUB);
 		System.out.println(RuleEngine.process(e1));
-		e1=new Expression(6,3,Operator.DIVID);
+		e1=new LightExpression(6,3,LightOperator.DIVID);
 		System.out.println(RuleEngine.process(e1));
-		e1=new Expression(6,3,Operator.MULTI);
+		e1=new LightExpression(6,3,LightOperator.MULTI);
 		System.out.println(RuleEngine.process(e1));
-		e1=new Expression(6,3,Operator.REMINDER);
+		e1=new LightExpression(6,3,LightOperator.REMINDER);
 		System.out.println(RuleEngine.process(e1));
 
 
